@@ -1,0 +1,2 @@
+Internship Notes: Christine Kwon
+
