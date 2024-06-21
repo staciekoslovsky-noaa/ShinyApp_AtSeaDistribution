@@ -1,0 +1,70 @@
+---
+title: "Look at sample at sea distributions"
+author: "Paul Conn"
+date: "2024-06-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Welcome, Christine!  I thought I'd put together several example data sets
+of the type we will be aiming to share via the Shiny App you are developing.
+Assuming you have successfully cloned the github repository Stacie put together \url{https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution}, you should have access to these data in the data directory.  Let's load the sample data into R and see what it includes:
+
+```{r, message=FALSE, warning=FALSE}
+load("../data/Sample_data_for_portal.RData")
+class(Sample_data)
+names(Sample_data)
+
+```
+As you can see, "Sample_data" is a list object in R, itself consisting of
+4 objects.  Let's take a look at the first of these - note that the double bracket syntax is one way to access elements of a list object.
+
+```{r, message=FALSE, warning=FALSE}
+class(Sample_data[["POP_hexagons_sf"]])
+```
+
+This object is an "sf" object, which is one of the ways of storing spatial objects in R.  There are a lot of tools we can use to manipulate sf objects, but we first need to load the sf package to get access to these.
+
+```{r, message=FALSE, warning=FALSE}
+library(sf)
+names(Sample_data[["POP_hexagons_sf"]])
+```
+
+The nice thing about sf objects is that they hold the underlying geometry, but can also hold data.  In this particular object the "CU" field gives some results for fur seals that Jay Ver Hoef produced using an analysis of ship-based platforms-of-opportunity (POP) data. I don't expect these to be the "final" data that are served, but it's likely that the underlying geometry (in the form of a grid of hexagons) will be a common layer we will use for multiple species.  Let's take a look at what this looks like when plotted.
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot()+geom_sf(data=Sample_data[["POP_hexagons_sf"]],aes(fill=CU))
+```
+
+You can clearly see the shape of Alaska here.  One issue is that the POP analyses only yield estimates of *relative* abundance, not absolute abundance, so if we were sharing these we'd probably want to make that clear and/or change the data into proportions (i.e., so they sum to one). 
+Let's take a look at another dataset.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot()+geom_sf(data=Sample_data[["BS_grid_sf"]],aes(fill=BS1))
+ggplot()+geom_sf(data=Sample_data[["BS_grid_sf"]],aes(fill=BS2))
+```
+These are estimates of bearded seal abundance (absolute abundance this time!) from a preliminary model fitted to multiple data sets.  I've actually included two layers here, "BS1" and "BS2" which are for two different years.  I doubt we'll want to share surfaces that are specific to different years, but what we *will* want to do for some of our species is to present results for multiple seasons.  So perhaps these data will be able to serve as a template for that.  Note also that we now extend further north into the Chukchi and Beaufort Seas.  It also includes estimates in Russian waters - not sure whether we'll want to include those or not.
+
+Finally, let's look at some Steller sea lion relative abundance estimates produced from POP data.  This was actually from an exercise that *did not* use the hexagonal scheme.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot()+geom_sf(data=Sample_data[["SSL_grid_sf"]],aes(fill=SSL_POP_ests))
+```
+Ok, you'll notice a couple of things here.  First I've already scaled these relative abundance estimates to sum to one by dividing by their sum.  Second, the color scheme is pretty awful here.  That's because there are just a few cells with estimated relative abundance that dominate the plot. There are probably better overall color schemes/palettes that might be chosen (e.g, using RColorBrewer), as well as algorithmic ways of choosing the "breaks" in the legend (perhaps using quantiles) so that any given dataset will still look good in a plot.  Consider that a challenge!
+
+The final data object that I included is something named "POP_SSL_fits".  This matrix is actually the results of some model fitting that Jay Ver Hoef did.  In this case it was a Bayesian analysis, where each row holds estimates for a given cell in the above plot, and each column gives a sampled prediction (via an algorithm called MCMC; there are 950 samples per cell, chosen judiciously to get us under github's 100MB data limit!).  The variability in each row indicates uncertainty in the overall relative abundance for that cell.  One thing we will want to allow is for the user of our portal to select the cells that they want estimates for (e.g., via uploading a shapefile or drawing a shape on the map), and for the portal to produce estimates, as well as confidence intervals.  The estimates I've already plotted can be used for the first task, but for confidence intervals we need extra information - that's where the POP_SSL_fits object comes in.  In general, there will probably be at least two different approaches used to do that depending on how the original data were analyzed.  For Jay's POP analyses, it may be easiest to just use his MCMC samples.  So for instance, if the user is only interested in the proportion of the population that is in the first 2000 cells, we could compute an estimate and CI, using the following:
+
+```{r, message=FALSE, warning=FALSE}
+sum(Sample_data[["SSL_grid_sf"]]$SSL_POP_ests[1:2000])
+pop_sum = sum(Sample_data[["POP_SSL_fits"]]/950) #to convert to proportion
+quantile(colSums(Sample_data[["POP_SSL_fits"]][1:2000,])/pop_sum,c(0.025,0.975))
+```
+So, about 11% of the population is thought to reside in the first 2000 cells of the plot, with a 95% credible interval of (0.087,0.142).
+
+The other way we will make this calculation is through an estimate and a variance-covariance matrix.  The issue there, though, is that for grids with a large number of cells, a variance-covariance matrix can get really big and take a lot of space to store (like for the Steller sea lion grid, with 13658 cells, the variance-covariance matrix has 13658^2 = 186,540,964 entries and takes >1 GB to store in memory).  We will need to sort out some strategies for dealing with this for some species (e.g., bearded seals).
