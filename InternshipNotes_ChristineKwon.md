@@ -21,3 +21,24 @@ Internship Notes: Christine Kwon
     - `mutate()`: add new or change variables
     - `ungroup()`,`filter()` recall scrnaseq soup cleanup, `select()`, `summarise()`, `inner_join()`
   - tidyr
+
+
+<span style="color:blue">06/25/24:</span>
+
+- Focused on working w/ spatial data -> [Leaflet](https://rstudio.github.io/leaflet/), [Prac](https://rpubs.com/velshnia/geospatial) and Projections
+- Basic leaflet map: `leaflet()` init map object, `addTiles()` adds map layers
+`leaflet(df) %>%` 
+  `addTiles() %>%` *default tiles v. polygons*
+  `addMarkers(lng = val, lat = val2, popup = "marker name")`
+  `addPolygons()` for specified regions/areas/boundaries etc
+  - or, given some custom crs, `leaflet(options = leafletOptions(crs = custom_crs)) %>%` ... with `custom_crs <- leafletCRS(crsClass, code, proj4def, resolutions)`
+- Projections
+  - `shapes <- st_read(shapefile)` vec data, check w `st_crs(shapes)`
+  - `data <- raster(rasterfile)`, check w `crs(data)` (vector data v. raster data)
+  - `projectRaster(exenvironmentdata, crs = CRS("+init=epsg:4326"))`
+  - WGS84 (4326), Albers Equal Areas projection (3338)
+    - WGS84 is gcs w lat and long, used in GPS/global datasets
+    - Albers (3338) is projected coord system good for high lat (ex: Alaska) 
+    - the actual computation - helped by sf package `result <- st_transform(vectordata, crs = 4326)`
+  - What projection to use, how to choose
+- [Projections in leaflet](https://rstudio.github.io/leaflet/articles/projections.html)
