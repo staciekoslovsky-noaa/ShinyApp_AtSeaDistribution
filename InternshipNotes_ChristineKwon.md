@@ -81,5 +81,5 @@ Internship Notes: Christine Kwon
 - making UI of shiny app (getting the actual shiny app up and running) - it's a little silly for now
 - Dropdowns (UI & server), map stuff in main panel (not accurate yet)
 - Currently trying to integrate the sample data into the map and work with the select species dropdown
-  - bit of trouble as it keeps just resulting in default OSM
+  - bit of trouble with wrapping, fitting data - also need legend to add for colors
   - others are mainly placeholders
