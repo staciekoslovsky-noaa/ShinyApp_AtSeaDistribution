@@ -91,3 +91,9 @@ Internship Notes: Christine Kwon
 - new map ea time vs. base map - efficiency
 - Shiny intern meet up - exchanged code info and possible ideas (tabs vs. dropdown/etc)
 
+
+<span style="color:blue">07/03/24:</span>
+
+- Rewrote some code accessing the data due to inefficiency
+- Partial working buttons/dropdowns (selecting species)
+

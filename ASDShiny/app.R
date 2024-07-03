@@ -6,16 +6,14 @@ library(tidyverse)
 load("../data/Sample_data_for_portal.RData")
 
 
-
-
 # UI
 ui <- fluidPage(
     # Theme: Morph CSS (bootswatch)
     tags$head(
       tags$link(rel = "stylesheet", href = "https://bootswatch.com/5/morph/bootstrap.min.css")
     ),
-    # Application title3
-    titlePanel("At Sea Densities of Marine Mammals"),
+    # Application title
+    titlePanel("NOAA   At Sea Densities of Marine Mammals"),
     selectInput("mapselect", "Select Marine Mammal", choices = c("Fur Seals", "Bearded Seals", "Steller Sea Lion"), downloadButton("downloadData")),
     
     # Sidebar (non functional buttons as of now)
@@ -32,50 +30,64 @@ ui <- fluidPage(
         )))
 
 # Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
+    #BS_grid_sf <- Sample_data[["BS_grid_sf"]]
 
-    BS_grid_sf <- Sample_data[["BS_grid_sf"]]
-  
-    if (!inherits(BS_grid_sf, "sf")) {
-      BS_grid_sf <- st_as_sf(BS_grid_sf)
+    specieslist <- list()
+    for (species in names(Sample_data)){
+      #print(species)
+      species_data <- Sample_data[[species]]
+      if (inherits(species_data, "matrix") || inherits(species_data, "array")){
+        next
+      }
+      if (!inherits(species_data, "sf")) #&& !(inherits(species_data, "matrix"))){
+        {species_data <- st_as_sf(species_data)
+      }
+      #print(st_crs(Sample_data[[species]]))
+      current_crs <- st_crs(species_data)
+      species_data <- st_transform(species_data, 4326)
+        
+    
+      if (!all(st_is_valid(species_data))) {
+          species_data <- st_make_valid(species_data)
+        }
+      assign(species, species_data)
     }
-    # Transform to 4326 
-    if (st_crs(BS_grid_sf)$epsg != 4326) {
-      BS_grid_sf <- st_transform(BS_grid_sf, 4326)
-    }
-    # valid geom
-    if (!all(st_is_valid(BS_grid_sf))) {
-      BS_grid_sf <- st_make_valid(BS_grid_sf)
       
     # Move BS_grid_sf polygons across dateline - did not work 
     #BS_grid_sf <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
     #BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
-    }
-    # print(str(BS_grid_sf))
-    # print(head(BS_grid_sf))
-  
-    BS_grid_sf <- st_wrap_dateline(BS_grid_sf, options = c("WRAPDATELINE=YES"), quiet = TRUE)
     
-    #BS_grid_sf$geom <- st_wrap_dateline(BS_grid_sf$geom, options = c("WRAPDATELINE=YES"), quiet = TRU
-     #should put not in server put somewhere else
-    
+    map_data <- reactive({
+      switch(input$mapselect, 
+             'Fur Seals' = list(data = st_wrap_dateline(POP_hexagons_sf), fillColor = ~colorNumeric('RdYlBu', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
+             'Bearded Seals' = list(data = st_wrap_dateline(BS_grid_sf), fillColor = ~colorNumeric('RdYlBu', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+             'Steller Sea Lion' = list(data = st_wrap_dateline(SSL_grid_sf), fillColor = ~colorNumeric('RdYlBu', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5))
+    })
     
     output$map <- renderLeaflet({
-      leaflet(options = leafletOptions(worldCopyJump = TRUE)) %>% #best i can do for now
-        addProviderTiles("CartoDB.Positron") %>%
-        addPolygons(
-          data = BS_grid_sf,
-          fillColor = ~colorNumeric('RdYlBu', BS2)(BS2),  # Basic color to ensure visibility
-          fillOpacity = 0.8,
-          color = "black",
-          weight = 1
-        ) %>%
+      map_info <- map_data()
+      leaflet(map_info$data) %>%
+        addTiles() %>%
+        addPolygons(fillColor = map_info$fillColor, fillOpacity = 0.8, opacity = 0, color = map_info$color, weight = 1) %>%
         flyToBounds(-179, 48, -140, 73)
-        #fitBounds(lng1 = bbox["xmin"], lat1 = bbox["ymin"], lng2 = bbox["xmax"], lat2 = bbox["ymax"])
-    })
-}
+    })}
+  
+    
+#     output$map <- renderLeaflet({ replaced
+#       leaflet(options = leafletOptions(worldCopyJump = TRUE)) %>% #best i can do for now
+#         addProviderTiles("CartoDB.Positron") %>%
+#         addPolygons(
+#           data = BS_grid_sf,
+#           fillColor = ~colorNumeric('RdYlBu', BS2)(BS2),  # Basic color to ensure visibility
+#           fillOpacity = 0.8,
+#           color = "black",
+#           weight = 1
+#         ) %>%
+#         flyToBounds(-179, 48, -140, 73)
+#     })
+# }
 
-  output
 
 # Run the application 
 shinyApp(ui = ui, server = server)
