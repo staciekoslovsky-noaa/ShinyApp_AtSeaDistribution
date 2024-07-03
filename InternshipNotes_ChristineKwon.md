@@ -83,3 +83,11 @@ Internship Notes: Christine Kwon
 - Currently trying to integrate the sample data into the map and work with the select species dropdown
   - bit of trouble with wrapping, fitting data - also need legend to add for colors
   - others are mainly placeholders
+  
+  
+<span style="color:blue">07/02/24:</span>
+
+- Dateline issue unresolved but left it for now - ` BS_grid_sf <- st_wrap_dateline(BS_grid_sf, options = c("WRAPDATELINE=YES"), quiet = TRUE)` / `BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)` 
+- new map ea time vs. base map - efficiency
+- Shiny intern meet up - exchanged code info and possible ideas (tabs vs. dropdown/etc)
+
