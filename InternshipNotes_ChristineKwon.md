@@ -55,7 +55,7 @@ Internship Notes: Christine Kwon
 <span style="color:blue">06/27/24:</span>
 
 - More code review
-- Meeting to go over plan [Notes](https://docs.google.com/document/d/1iHR3-h8GX_sweqCeaONkjA_zn6YmxNK4kmEumQZG4iA/edit#heading=h.tqnvddo6jyxx)
+- Meeting to go over plan
 - Leaflet vs. Mapbox GL
   - Mapbox has more visualization options, much more complex than simple Leaflet options
     - supports heatmaps, 3D extrusions, etc (Leaflet does not)
@@ -78,7 +78,7 @@ Internship Notes: Christine Kwon
 
 <span style="color:blue">07/01/24:</span>
 
-- making UI of shiny app (getting the actual shiny app up and running) - it's a little silly for now
+- making UI of shiny app (getting the actual shiny app up and running) with 
 - Dropdowns (UI & server), map stuff in main panel (not accurate yet)
 - Currently trying to integrate the sample data into the map and work with the select species dropdown
   - bit of trouble with wrapping, fitting data - also need legend to add for colors
@@ -95,5 +95,10 @@ Internship Notes: Christine Kwon
 <span style="color:blue">07/03/24:</span>
 
 - Rewrote some code accessing the data due to inefficiency
-- Partial working buttons/dropdowns (selecting species)
+- Dropdown button works for selecting species-specific map
+  - Some data will still likely need to be fixed afterwards (relative v. absolute abundance, etc)
+- Trying to add a collapsible sidebar; requires different UI style.
+  - `fluidPage()` is the basic layout, `dashboardPage` will provide a more accessible dashboard and more complex applications. *requires extra library - `shinydashboard`
+  - [Tool](https://rstudio.github.io/shinydashboard/structure.html)
+  - Finished elementary implementation
 
