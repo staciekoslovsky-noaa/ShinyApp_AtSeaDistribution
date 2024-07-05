@@ -4,36 +4,16 @@ library(leaflet)
 library(sf)
 library(tidyverse)
 library(shinydashboard)
+library(leaflet.extras)
 
 load("../data/Sample_data_for_portal.RData")
 
+clicks <- data.frame(lat = numeric(), lng = numeric(), .nonce = numeric())
 
 # UI
-# ui <- fluidPage(
-#     # Theme: Morph CSS (bootswatch)
-#     tags$head(
-#       tags$link(rel = "stylesheet", href = "https://bootswatch.com/5/morph/bootstrap.min.css")
-#     ),
-#     # Application title
-#     titlePanel("NOAA   At Sea Densities of Marine Mammals"),
-#     selectInput("mapselect", "Select Marine Mammal", choices = c("Fur Seals", "Bearded Seals", "Steller Sea Lion"), downloadButton("downloadData")),
-#     
-#     # Sidebar (non functional buttons as of now)
-#     sidebarLayout(
-#         sidebarPanel(
-#           selectInput("dataset", "Select Data to display", choices = c("scatterplot", "heatmap")),
-#           selectInput("basemap", "Select Base Map Style", choices = c("sample", "sample2")),
-#           actionButton("update", "Update Map") #some may have addtl optional buttons
-#          ),
-# 
-#         # Show generated map in main panel
-#         mainPanel(
-#            leafletOutput(outputId = "map", width="100%")
-#         )))
-
 ui <- dashboardPage(
   title = "At Sea Densities of Marine Mammals",
-  dashboardHeader(title = "Menu"),
+  dashboardHeader(title = "NOAA "),
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
@@ -41,7 +21,7 @@ ui <- dashboardPage(
     
     sidebarMenu(
       menuItem("About NOAA", tabName = "aboutpg", icon = icon("about")),
-      menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+      menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Datasets for Download", tabname = "dfd"),
       menuItem("Licenses", tabname = "lic")
@@ -49,12 +29,18 @@ ui <- dashboardPage(
     dashboardBody(
       tabItems(
         tabItem(tabName = 'aboutpg',
-          h2("About NOAA/Alaska Fisheries/This app"),
-          p("Well, let me write some cool things here.")
+            h2("About NOAA/Alaska Fisheries/This app"),
+            p("Well, let me write some cool things here.")
                 ),
+        tabItem(tabName = 'widgets',
+                h2("How to Use the Tool"),
+                p("To use this tool...")
+        ),
         tabItem(tabName = "specmap",
           selectInput("mapselect", "Select Marine Mammal", choices = c("Fur Seals", "Bearded Seals", "Steller Sea Lion"), downloadButton("downloadData")),
-          leafletOutput(outputId = "map", width="100%"))
+          leafletOutput(outputId = "map", width="100%"),
+          actionButton("use_clik_loc", "Check loc")        
+        )
     )))
   
 
@@ -85,13 +71,16 @@ server <- function(input, output, session) {
       
     # Move BS_grid_sf polygons across dateline - did not work 
     #BS_grid_sf <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
-    #BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+    BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+    POP_hexagons_sf$geometry <- (sf::st_geometry(POP_hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+    SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+
     
     map_data <- reactive({
       switch(input$mapselect, 
-             'Fur Seals' = list(data = st_wrap_dateline(POP_hexagons_sf), fillColor = ~colorNumeric('RdYlBu', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
-             'Bearded Seals' = list(data = st_wrap_dateline(BS_grid_sf), fillColor = ~colorNumeric('RdYlBu', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
-             'Steller Sea Lion' = list(data = st_wrap_dateline(SSL_grid_sf), fillColor = ~colorNumeric('RdYlBu', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5))
+             'Fur Seals' = list(data = POP_hexagons_sf, fillColor = ~colorNumeric('RdYlBu', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
+             'Bearded Seals' = list(data =BS_grid_sf, fillColor = ~colorNumeric('RdYlBu', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+             'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('RdYlBu', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5))
     })
     
     output$map <- renderLeaflet({
@@ -99,24 +88,28 @@ server <- function(input, output, session) {
       leaflet(map_info$data) %>%
         addTiles() %>%
         addPolygons(fillColor = map_info$fillColor, fillOpacity = 0.8, opacity = 0, color = map_info$color, weight = 1) %>%
-        flyToBounds(-179, 48, -140, 73)
-    })}
-  
-    
-#     output$map <- renderLeaflet({ replaced
-#       leaflet(options = leafletOptions(worldCopyJump = TRUE)) %>% #best i can do for now
-#         addProviderTiles("CartoDB.Positron") %>%
-#         addPolygons(
-#           data = BS_grid_sf,
-#           fillColor = ~colorNumeric('RdYlBu', BS2)(BS2),  # Basic color to ensure visibility
-#           fillOpacity = 0.8,
-#           color = "black",
-#           weight = 1
-#         ) %>%
-#         flyToBounds(-179, 48, -140, 73)
-#     })
-# }
+        addDrawToolbar(
+          polylineOptions = drawPolylineOptions(),
+          polygonOptions = drawPolygonOptions(),
+          circleOptions = drawCircleOptions(),
+          rectangleOptions = drawRectangleOptions(),
+          markerOptions = drawMarkerOptions(),
+          editOptions = editToolbarOptions()
+        ) %>%
+        addLayersControl(
+          overlayGroups = c("draw"),
+          options = layersControlOptions(collapsed = FALSE)
+        ) %>%
+        setView(208, 64, 3) #%>%
+        #fitBounds(-179, 48, -140, 73)
+    })
 
+    observeEvent(input$use_clik_loc, {
+      last_click <- isolate(as.data.frame(input$map_click))
+      clicks <<- clicks |>
+        bind_rows(last_click)
+      print(clicks)
+    })}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
