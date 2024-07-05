@@ -102,3 +102,13 @@ Internship Notes: Christine Kwon
   - [Tool](https://rstudio.github.io/shinydashboard/structure.html)
   - Finished elementary implementation
 
+
+<span style="color:blue">07/04/24:</span>
+
+- Changed mapview (Zoom vs. set view) -> can be changed later to be by data not by set size
+- Added buttons on maps of select regions (polygon/circle/etc), similar to demo; part of leaflet extras library
+- looked at new files uploaded on Git
+- Revisiting dateline issue
+  - https://github.com/rstudio/leaflet/issues/553, 
+  - Finally resolved; `st_wrap_dateline` ineffective
+- Next: Revisit longlat marker detail and the new data
