@@ -103,7 +103,7 @@ Internship Notes: Christine Kwon
   - Finished elementary implementation
 
 
-<span style="color:blue">07/04/24:</span>
+<span style="color:blue">07/05/24:</span>
 
 - Changed mapview (Zoom vs. set view) -> can be changed later to be by data not by set size
 - Added buttons on maps of select regions (polygon/circle/etc), similar to demo; part of leaflet extras library
@@ -112,3 +112,10 @@ Internship Notes: Christine Kwon
   - https://github.com/rstudio/leaflet/issues/553, 
   - Finally resolved; `st_wrap_dateline` ineffective
 - Next: Revisit longlat marker detail and the new data
+
+
+<span style="color:blue">07/08/24:</span>
+
+- Added legend, but need to create unified color palette for all graphs/have unique palette for specific graphs
+- Working on getting the polygons to output something (currently not download data, just simple output)
+- Still looking over new data
