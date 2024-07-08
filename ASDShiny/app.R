@@ -7,6 +7,7 @@ library(shinydashboard)
 library(leaflet.extras)
 
 load("../data/Sample_data_for_portal.RData")
+#load()
 
 clicks <- data.frame(lat = numeric(), lng = numeric(), .nonce = numeric())
 
@@ -30,7 +31,7 @@ ui <- dashboardPage(
       tabItems(
         tabItem(tabName = 'aboutpg',
             h2("About NOAA/Alaska Fisheries/This app"),
-            p("Well, let me write some cool things here.")
+            p("Cool things here.")
                 ),
         tabItem(tabName = 'widgets',
                 h2("How to Use the Tool"),
@@ -48,6 +49,19 @@ ui <- dashboardPage(
 # Define server logic
 server <- function(input, output, session) {
     #BS_grid_sf <- Sample_data[["BS_grid_sf"]]
+    
+    #lines below taken from harbor seal app
+    abund_bins <- c(0, 10, 100, 250, 500, 1000, 2500, 5000, 12000) 
+    pal <- colorBin(
+      palette = "inferno",
+      reverse = TRUE,
+      #domain = na.omit(survey_polygons$abund_est),
+      bins = abund_bins,
+      pretty = FALSE,
+      na.color = "#00000000"
+    )
+    #end of this code
+  
 
     specieslist <- list()
     for (species in names(Sample_data)){
@@ -94,14 +108,20 @@ server <- function(input, output, session) {
           circleOptions = drawCircleOptions(),
           rectangleOptions = drawRectangleOptions(),
           markerOptions = drawMarkerOptions(),
-          editOptions = editToolbarOptions()
+          editOptions = editToolbarOptions(edit = FALSE, 
+                                           selectedPathOptions = FALSE, 
+                                           remove = TRUE)
         ) %>%
         addLayersControl(
           overlayGroups = c("draw"),
           options = layersControlOptions(collapsed = FALSE)
         ) %>%
-        setView(208, 64, 3) #%>%
+        setView(208, 64, 3) %>%
         #fitBounds(-179, 48, -140, 73)
+        addLegend("bottomleft",
+                  pal = pal,
+                  values = abund_bins,
+                  title = "Abundance:") 
     })
 
     observeEvent(input$use_clik_loc, {
