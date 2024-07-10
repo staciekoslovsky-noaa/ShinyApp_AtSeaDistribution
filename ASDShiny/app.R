@@ -6,10 +6,12 @@ library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
 
-load("../data/Sample_data_for_portal.RData")
-#load()
+source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
+#load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 
 clicks <- data.frame(lat = numeric(), lng = numeric(), .nonce = numeric())
+
+
 
 # UI
 ui <- dashboardPage(
@@ -63,7 +65,6 @@ server <- function(input, output, session) {
     #end of this code
   
 
-    specieslist <- list()
     for (species in names(Sample_data)){
       #print(species)
       species_data <- Sample_data[[species]]
