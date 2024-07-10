@@ -5,13 +5,17 @@ library(sf)
 library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
+library(leaflet.mapboxgl)
+library(shinySearchbar)
 
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 #load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+#Below did not open as not .RData file in helper
+load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 
-clicks <- data.frame(lat = numeric(), lng = numeric(), .nonce = numeric())
-
-
+species_list <- c("Northern Minke Whale", "Fin Whale", "Northern Fur Seal", "Bearded Seal", "Steller Sea Lion", "Sea Otter", 
+                  "Gray Whale", "Pacific White-Sided Dolphin", "Humpback Whale", "Killer Whale", "Walrus", "Dall's Porpoise",
+                  "Sperm Whale", "Harbor Porpoise", "Harbor Seal")
 
 # UI
 ui <- dashboardPage(
@@ -23,6 +27,7 @@ ui <- dashboardPage(
       ),
     
     sidebarMenu(
+      sidebarSearchForm(textId = "searchbar", buttonId = "searchbtn", label = "Search..."),
       menuItem("About NOAA", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
@@ -40,13 +45,13 @@ ui <- dashboardPage(
                 p("To use this tool...")
         ),
         tabItem(tabName = "specmap",
-          selectInput("mapselect", "Select Marine Mammal", choices = c("Fur Seals", "Bearded Seals", "Steller Sea Lion"), downloadButton("downloadData")),
+          selectizeInput("mapselect", "Select Marine Mammal", choices = species_list, downloadButton("downloadData")),
+          
           leafletOutput(outputId = "map", width="100%"),
           actionButton("getshape", "Generate Shapes"),
           fileInput('drawfile', "Input Drawing CSV", accept = '.csv')
         )
     )))
-  
 
 
 # Define server logic
@@ -83,19 +88,32 @@ server <- function(input, output, session) {
       }
     assign(species, species_data)
   }
+  
+  POPhexagons_sf <- st_transform(POPhexagons_sf, 4326)
+    
     
   # Move BS_grid_sf polygons across dateline - did not work 
   #BS_grid_sf <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POP_hexagons_sf$geometry <- (sf::st_geometry(POP_hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
-
+  POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  
+  #Sample for one species - Northern Minke Whale
+  
   
   map_data <- reactive({
     switch(input$mapselect, 
-           'Fur Seals' = list(data = POP_hexagons_sf, fillColor = ~colorNumeric('inferno', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Bearded Seals' = list(data =BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
-           'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5))
+           'Northern Minke Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', BA)(BA), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Fin Whale' = list(),
+           'Northern Fur Seal' = list(data = POP_hexagons_sf, fillColor = ~colorNumeric('inferno', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Bearded Seal' = list(data =BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+           'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Sea Otter' = list(),
+           'Gray Whale' = list(),
+           'Pacific White-Sided Dolphin' = list(), 
+           
+           )
   })
   
   output$map <- renderLeaflet({
