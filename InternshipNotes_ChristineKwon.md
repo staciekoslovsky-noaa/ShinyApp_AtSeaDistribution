@@ -118,4 +118,12 @@ Internship Notes: Christine Kwon
 
 - Added legend, but need to create unified color palette for all graphs/have unique palette for specific graphs
 - Working on getting the polygons to output something (currently not download data, just simple output)
-- Still looking over new data
+
+
+<span style="color:blue">07/09/24:</span>
+
+- New data set to distinct appropriate var names - all matrices (11424) relative abundances
+- Bind each row in sf file (hexagons to rows) to one column (v1)
+  - Typically take means/standarddev, etc
+  - Just disregard other cols for now
+  - Use `cbind`
