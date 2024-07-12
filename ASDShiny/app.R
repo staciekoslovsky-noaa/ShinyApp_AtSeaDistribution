@@ -7,11 +7,15 @@ library(shinydashboard)
 library(leaflet.extras)
 library(leaflet.mapboxgl)
 library(shinySearchbar)
+library(fresh)
+library(shinyWidgets)
+library(htmltools)
 
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
-#load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 #Below did not open as not .RData file in helper
 load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+load("../data/Sample_data_for_portal.RData")
 
 species_list <- c("Northern Minke Whale", "Fin Whale", "Northern Fur Seal", "Bearded Seal", "Steller Sea Lion", "Sea Otter", 
                   "Gray Whale", "Pacific White-Sided Dolphin", "Humpback Whale", "Killer Whale", "Walrus", "Dall's Porpoise",
@@ -31,15 +35,16 @@ ui <- dashboardPage(
       menuItem("About NOAA", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
-      menuItem("Datasets for Download", tabname = "dfd"),
+      menuItem("Other", tabname = "othr"),
       menuItem("Licenses", tabname = "lic")
     )),
     dashboardBody(
       tabItems(
         tabItem(tabName = 'aboutpg',
             h2("About NOAA/Alaska Fisheries/This app"),
-            p("Cool things here.")
-                ),
+            wellPanel(
+                p("About NOAA/ other relevant info here.")
+                )),
         tabItem(tabName = 'widgets',
                 h2("How to Use the Tool"),
                 p("To use this tool...")
@@ -47,9 +52,24 @@ ui <- dashboardPage(
         tabItem(tabName = "specmap",
           selectizeInput("mapselect", "Select Marine Mammal", choices = species_list, downloadButton("downloadData")),
           
-          leafletOutput(outputId = "map", width="100%"),
-          actionButton("getshape", "Generate Shapes"),
-          fileInput('drawfile', "Input Drawing CSV", accept = '.csv')
+          fluidRow(
+            column(9, 
+                   leafletOutput(outputId = "map", width="100%")
+            ),
+            column(3,
+              wellPanel(
+                h3('Other Information (estimates, etc'),
+                sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
+              )
+            )
+          ),
+          fluidRow(
+            wellPanel(
+              h3('Download/Upload Shape Data'),
+              
+              downloadButton("getshape", "Generate Shapes"),
+              fileInput('drawfile', "Input Shapefile", accept = '.shp', multiple = TRUE)
+            ))
         )
     )))
 
@@ -99,15 +119,19 @@ server <- function(input, output, session) {
   SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   
-  #Sample for one species - Northern Minke Whale
+  #Sample for one species - Northern Minke Whale - hopefully a function can do this easily instead.
+  filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
   
-  
+  #Columns containing abundance of species ONLY. 
+  col_to_filter <- POPhexagons_sf[,5:18]
+  #filtered_list <- filter_by_col(col_to_filter)
+    
   map_data <- reactive({
     switch(input$mapselect, 
-           'Northern Minke Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', BA)(BA), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Fin Whale' = list(),
-           'Northern Fur Seal' = list(data = POP_hexagons_sf, fillColor = ~colorNumeric('inferno', CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Bearded Seal' = list(data =BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+           'Northern Minke Whale' = list(data = (filtered_sf), fillColor = ~colorNumeric('inferno', BA_MCMC[,1])(BA_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Fin Whale' = list(data = (POPhexagons_sf %>% filter(!is.na(BP))), fillColor = ~colorNumeric('inferno', BP_MCMC[,1])(BP_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Northern Fur Seal' = list(data = (POPhexagons_sf %>% filter(!is.na(CU))), fillColor = ~colorNumeric('inferno', CU_MCMC[,1])(CU_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
            'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Sea Otter' = list(),
            'Gray Whale' = list(),
@@ -159,6 +183,7 @@ server <- function(input, output, session) {
     }})
 
   # Eventually provides data for selected region, not yet(taken from Harbor Seal App)
+  drawn_poly_reac <- reactiveVal(NULL)
   observeEvent(input$getshape, {
     drawn <- input$map_draw_new_feature
     polygon_coordinates <- do.call(rbind, lapply(drawn$geometry$coordinates[[1]], function(x){c(x[[1]][1],x[[2]][1])}))
@@ -167,14 +192,20 @@ server <- function(input, output, session) {
       summarise(geometry = st_combine(geometry)) %>%
       st_cast("POLYGON")
     #found_in_bounds <- st_join(sf::st_set_crs(drawn_polygon, 4326), sf::st_set_crs(survey_polygons, 4326))
+
+   
     
-    #poly_filter <- found_in_bounds$polyid
+  output$downloadData <- downloadHandler(
+    st_write(drawn_poly_reac(), file)
+      )
+    
+    #polygon_write <- write.csv(drawn_polygon, paste0('Drawings','.csv'))
     print('blahblah')
-  })
+  
 
   observeEvent(input$drawfile, {
     drawfile <- input$drawfile
-    validate(need(ext == 'csv', 'Please upload a .csv file.'))
+    #validate(need(ext == 'shp', 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
   })
 }
 
