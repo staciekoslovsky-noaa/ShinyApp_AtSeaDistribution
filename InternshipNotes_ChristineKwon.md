@@ -118,12 +118,44 @@ Internship Notes: Christine Kwon
 
 - Added legend, but need to create unified color palette for all graphs/have unique palette for specific graphs
 - Working on getting the polygons to output something (currently not download data, just simple output)
+- Loading data [tools package](https://stackoverflow.com/questions/29113973/get-filename-without-extension-in-r)
 
 
 <span style="color:blue">07/09/24:</span>
 
+- Wrote a function to more efficiently load all the data and put into new helper functions file
 - New data set to distinct appropriate var names - all matrices (11424) relative abundances
 - Bind each row in sf file (hexagons to rows) to one column (v1)
   - Typically take means/standarddev, etc
   - Just disregard other cols for now
-  - Use `cbind`
+  - Use `cbind` (dplyr)
+  - Hexagonal vs. grid based data - all new data seems to be hexagonal layers
+  - `cu_mat_col <- CU_MCMC[,1]`
+  - `cu_df <- as.data.frame(cu_mat_col)`
+  - `combined_cu <- cbind(POP_hex_sf, cu_df)`
+  - `print(combined_cu)` check 
+  - `ggplot()+geom_sf(data=Sample_data[["POP_hexagons_sf"]],aes(fill=CU))`
+
+  
+<span style="color:blue">07/10/24:</span>
+
+- Source for generating shapelist, intaking shape csv [link](https://stackoverflow.com/questions/65347690/how-do-i-save-adddrawtoolbar-shapes-drawn-in-an-r-leaflet-shiny-map-so-i-can-re)
+- Adding marker now provides lat and long coordinates
+- Polygons now can output/print something, no data actually outputted yet
+- select vs selectize as number of species grows
+- Keep POPhexagons_sf as one file. Any modifications will be done to MCMC likely so do not create separate dataframes for each species in POPhex
+- column() and wellPanel() 
+
+
+<span style="color:blue">07/09/24:</span>
+
+- filtering by species where it is not NA and then filling based on the MCMC data
+- Graphed sample of few new species
+- [HTML Tools](https://unleash-shiny.rinterface.com/htmltools-overview)
+- Code review today 
+-   Consider log scale for the legend - assign define brightness - 
+-   Move the select species on the right 
+-   Do all survey areas, not just not NA
+-   reactive legend - playing with breaks in data
+-   zipped shapefile upload - .kml/.kmz 
+-   commenting file 
