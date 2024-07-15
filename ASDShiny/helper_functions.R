@@ -28,7 +28,7 @@ load_data <- function(filepath) {
 #class(RelAbund_MCMC)
 
 
-
+# DOES NOT INCLUDE POPhexagons_sf file!!!
 load_all_filest <- function(directory) {
   # Loads all files from data folder 
   
@@ -39,7 +39,7 @@ load_all_filest <- function(directory) {
   
   # List all .RData files in the directory
   files <- list.files(directory, pattern = "\\.RData$", full.names = TRUE)
-  print(files)
+  #print(files) debugging
   if (length(files) == 0) {
     stop("No .RData files found in the directory.")
   }
@@ -63,3 +63,41 @@ load_all_filest <- function(directory) {
   
   print("Finished loading.")
 }
+
+
+# Optional function for filtering only areas where species is not NA
+# Not used as to show areas that have all been surveyed and not found
+filter_by_col <- function(sffile, col_name){
+  sffile %>% filter(!is.na(.[[col_name]]))
+}
+
+
+
+# Text for the sidebar info pages - from Project Proposal 
+purp <- div('Integrating Diverse Datasets to Understand the Seasonal Distributions
+        and Densities of Marine Mammals', style = 'color: #03396c')
+
+information <- div('Understanding seasonal distributions and densities of marine mammals remains a high priority for
+NMFS science centers and regional offices. In addition to answering basic ecological questions, such
+information is frequently requested of science center staff to help in calculation of “takes” under the
+Marine Mammal Protection Act (MMPA) and the Endangered Species Act (ESA) (e.g., due to offshore
+energy development, naval exercises, aquaculture permitting, pier construction, or hazard remediation). 
+Calculation of at-sea densities remains challenging however, as many Arctic marine mammal surveys
+are timed to occur during spring or summer months when animals are the most accessible (and often on
+land in the case of many pinniped species). But the continuing need for such density estimates for
+management purposes has led to approximating distributions based on suboptimal approaches such as
+redistributing animals from haul-out and rookery locations, or applying spring and summer distributions
+to other seasons in order to calculate takes. However, we continue to believe that there are better
+approaches. In particular, there is a large amount of data that may be leveraged to provide more refined
+estimates of seasonal densities, including scientific surveys, satellite telemetry, acoustic detections,
+Alaska Native subsistence harvests, and platform-of-opportunity (POP) observations.', style = 'color: #005b96')
+
+toolinfo <- 'This tool was developed using Shiny, a package that facilitates web app development directly 
+from R and Python.'
+toolinfo2 <- 'To first access species density maps, click the Species button in the sidebar. Use the right panel
+to toggle between different marine mammal species, and (more options later). The toolbar on the left of the map
+contains various tools to work with select data shown on the map. The polyline, polygon and circle options on the toolbar 
+can be used to draw polygons or lines that can be downloaded as a shapefile. The marker can be used to obtain coordinates
+of the selected location. The bin will delete any shapes or lines that are no longer necessary.
+The bottom panel contains buttons to download a shapefile and upload own shape data for analysis in one of the following
+formats: zipped .kmz or .shp file.'
