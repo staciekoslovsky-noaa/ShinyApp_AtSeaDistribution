@@ -11,9 +11,10 @@ library(fresh)
 library(shinyWidgets)
 library(htmltools)
 
+#May need to change pathway, sorry!
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
-#Below did not open as not .RData file in helper
+
 load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 load("../data/Sample_data_for_portal.RData")
 
@@ -27,31 +28,43 @@ ui <- dashboardPage(
   dashboardHeader(title = "NOAA "),
   dashboardSidebar(
     tags$head(
-      tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+      tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
       ),
-    
     sidebarMenu(
-      sidebarSearchForm(textId = "searchbar", buttonId = "searchbtn", label = "Search..."),
-      menuItem("About NOAA", tabName = "aboutpg", icon = icon("about")),
+      menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
-      menuItem("Other", tabname = "othr"),
-      menuItem("Licenses", tabname = "lic")
+      menuItem("Other", tabName = "othr"),
+      menuItem("Licenses", tabName = "lic")
     )),
     dashboardBody(
       tabItems(
         tabItem(tabName = 'aboutpg',
-            h2("About NOAA/Alaska Fisheries/This app"),
             wellPanel(
-                p("About NOAA/ other relevant info here.")
+              h2(strong(div("About This Tool", style = 'color: #011f4b')))
+              ),
+            wellPanel(
+                h3(purp, width = "100%"),
+                p(information),
+                tags$figure(
+                  class = "centerFigure",
+                  tags$img(
+                    src = "sampleseal.jpg",
+                    width = '100%',
+                    alt = "Picture of a male ribbon seal"
+                  ),
+                  tags$figcaption("NOAA Fisheries/Josh M London")
+                )
+                
                 )),
         tabItem(tabName = 'widgets',
-                h2("How to Use the Tool"),
-                p("To use this tool...")
-        ),
+            wellPanel(
+              (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
+            wellPanel(
+              p(toolinfo),
+              p(toolinfo2)
+            )),
         tabItem(tabName = "specmap",
-          selectizeInput("mapselect", "Select Marine Mammal", choices = species_list, downloadButton("downloadData")),
-          
           fluidRow(
             column(9, 
                    leafletOutput(outputId = "map", width="100%")
@@ -59,20 +72,26 @@ ui <- dashboardPage(
             column(3,
               wellPanel(
                 h3('Other Information (estimates, etc'),
+                selectizeInput("mapselect", "Select Marine Mammal", choices = species_list),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               )
             )
           ),
           fluidRow(
             wellPanel(
-              h3('Download/Upload Shape Data'),
+              h3('Download or Upload Shape Data'),
               
-              downloadButton("getshape", "Generate Shapes"),
+              downloadButton(outputID = "downloadData", "Generate Shapes"),
               fileInput('drawfile', "Input Shapefile", accept = '.shp', multiple = TRUE)
-            ))
-        )
+            )
+          )
+        ),
+        tabItem(tabName = "othr",
+          wellPanel(
+            h2('For more information, contact: etc')
+          )
     )))
-
+)
 
 # Define server logic
 server <- function(input, output, session) {
@@ -135,7 +154,7 @@ server <- function(input, output, session) {
            'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Sea Otter' = list(),
            'Gray Whale' = list(),
-           'Pacific White-Sided Dolphin' = list(), 
+           'Pacific White-Sided Dolphin' = list()
            
            )
   })
@@ -167,9 +186,9 @@ server <- function(input, output, session) {
     addScaleBar(position = "bottomright",
                 options = scaleBarOptions(maxWidth = 250))
   })
-  
 
-  # Provides coordinates for markers when you place them on the map. 
+
+  # Provides coordinates for markers when you place them on the map. Currently does not delete together - FIX
   observeEvent(input$map_draw_new_feature, {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
@@ -182,27 +201,16 @@ server <- function(input, output, session) {
         )
     }})
 
-  # Eventually provides data for selected region, not yet(taken from Harbor Seal App)
-  drawn_poly_reac <- reactiveVal(NULL)
-  observeEvent(input$getshape, {
-    drawn <- input$map_draw_new_feature
-    polygon_coordinates <- do.call(rbind, lapply(drawn$geometry$coordinates[[1]], function(x){c(x[[1]][1],x[[2]][1])}))
-    drawn_polygon <- data.frame(lat = polygon_coordinates[, 2], long = polygon_coordinates[, 1]) %>%
-      st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-      summarise(geometry = st_combine(geometry)) %>%
-      st_cast("POLYGON")
-    #found_in_bounds <- st_join(sf::st_set_crs(drawn_polygon, 4326), sf::st_set_crs(survey_polygons, 4326))
-
-   
-    
+  data <- reactive({
+    map_data()$data
+  })
   output$downloadData <- downloadHandler(
-    st_write(drawn_poly_reac(), file)
-      )
-    
-    #polygon_write <- write.csv(drawn_polygon, paste0('Drawings','.csv'))
-    print('blahblah')
+    filename = 'map.png',
+    #content = function(file) {
+      
+    #}
+  )
   
-
   observeEvent(input$drawfile, {
     drawfile <- input$drawfile
     #validate(need(ext == 'shp', 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
