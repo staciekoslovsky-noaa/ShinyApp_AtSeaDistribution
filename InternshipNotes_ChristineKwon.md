@@ -144,10 +144,10 @@ Internship Notes: Christine Kwon
 - Polygons now can output/print something, no data actually outputted yet
 - select vs selectize as number of species grows
 - Keep POPhexagons_sf as one file. Any modifications will be done to MCMC likely so do not create separate dataframes for each species in POPhex
-- column() and wellPanel() 
+- `column()` and `wellPanel()`
 
 
-<span style="color:blue">07/09/24:</span>
+<span style="color:blue">07/11/24:</span>
 
 - filtering by species where it is not NA and then filling based on the MCMC data
 - Graphed sample of few new species
@@ -159,3 +159,17 @@ Internship Notes: Christine Kwon
 -   reactive legend - playing with breaks in data
 -   zipped shapefile upload - .kml/.kmz 
 -   commenting file 
+
+
+*no updates for 07/12/24 (minor changes reflected in 07/15)*
+
+
+<span style="color:blue">07/15/24:</span>
+
+- Adding informational text in sidebar using project proposal 
+  - [Color palette](https://www.color-hex.com/color-palette/1294)
+  - [More UI](https://algoritmaonline.com/advancing-your-shinyapp/#:~:text=Here's%20the%20detailed%20documentation%20on,Below%20is%20an%20example:)
+- More attempts on fixing download/upload shapefiles
+- Legend fixed, yet colorshading remains possibly something to be fixed
+  - Depends on how we want to modify data/new fillColor/etc
+- Code review tomorrow

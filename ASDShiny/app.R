@@ -18,9 +18,25 @@ load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribut
 load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 load("../data/Sample_data_for_portal.RData")
 
-species_list <- c("Northern Minke Whale", "Fin Whale", "Northern Fur Seal", "Bearded Seal", "Steller Sea Lion", "Sea Otter", 
-                  "Gray Whale", "Pacific White-Sided Dolphin", "Humpback Whale", "Killer Whale", "Walrus", "Dall's Porpoise",
-                  "Sperm Whale", "Harbor Porpoise", "Harbor Seal")
+# species_list <- c("Northern Minke Whale", "Fin Whale", "Northern Fur Seal", "Bearded Seal", "Steller Sea Lion", "Sea Otter", 
+#                    "Gray Whale", "Pacific White-Sided Dolphin", "Humpback Whale", "Killer Whale", "Walrus", "Dall's Porpoise",
+#                  "Sperm Whale", "Harbor Porpoise", "Harbor Seal")
+
+species_list <- list("Northern Minke Whale" = BA_MCMC,
+                  "Fin Whale" = BP_MCMC,
+                  "Northern Fur Seal" = CU_MCMC,
+                  #"Bearded Seal" = EB_MCMC,
+                  "Steller Sea Lion" = EJ_MCMC,
+                  "Sea Otter" = EL_MCMC,
+                  "Gray Whale" = ER_MCMC,
+                  "Pacific White-Sided Dolphin" = LO_MCMC,
+                  "Humpback Whale" = MN_MCMC,
+                  "Killer Whale" = OO_MCMC,
+                  "Walrus" = OR_MCMC,
+                  "Dall's Porpoise" = PD_MCMC,
+                  "Sperm Whale" = PM_MCMC,
+                  "Harbor Porpoise" = PP_MCMC,
+                  "Harbor Seal" = PV_MCMC)
 
 # UI
 ui <- dashboardPage(
@@ -72,7 +88,7 @@ ui <- dashboardPage(
             column(3,
               wellPanel(
                 h3('Other Information (estimates, etc'),
-                selectizeInput("mapselect", "Select Marine Mammal", choices = species_list),
+                selectizeInput("mapselect", "Select Marine Mammal", choices = names(species_list)),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               )
             )
@@ -95,19 +111,6 @@ ui <- dashboardPage(
 
 # Define server logic
 server <- function(input, output, session) {
-  
-  #lines below taken from harbor seal app
-  abund_bins <- c(0.1, 0.08, 0.06, 0.04, 0.02, 0.01, 0.001, 0) #not accurate, need to change later
-  pal <- colorBin(
-    palette = "inferno",
-    reverse = TRUE,
-    #domain = na.omit(survey_polygons$abund_est),
-    bins = abund_bins,
-    pretty = FALSE,
-    na.color = "#00000000"
-  )
-  #end of this code
-
 
   for (species in names(Sample_data)){
     #print(species)
@@ -148,11 +151,11 @@ server <- function(input, output, session) {
   map_data <- reactive({
     switch(input$mapselect, 
            'Northern Minke Whale' = list(data = (filtered_sf), fillColor = ~colorNumeric('inferno', BA_MCMC[,1])(BA_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Fin Whale' = list(data = (POPhexagons_sf %>% filter(!is.na(BP))), fillColor = ~colorNumeric('inferno', BP_MCMC[,1])(BP_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Northern Fur Seal' = list(data = (POPhexagons_sf %>% filter(!is.na(CU))), fillColor = ~colorNumeric('inferno', CU_MCMC[,1])(CU_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Fin Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', BP_MCMC[,1])(BP_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Northern Fur Seal' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', CU_MCMC[,1])(CU_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
            'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Sea Otter' = list(),
+           'Sea Otter' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', )),
            'Gray Whale' = list(),
            'Pacific White-Sided Dolphin' = list()
            
@@ -179,20 +182,44 @@ server <- function(input, output, session) {
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
       setView(208, 64, 3) %>%
-      addLegend("bottomright",
-                pal = pal,
-                values = abund_bins,
-                title = "Abundance:") %>%
+      # addLegend("bottomright",
+      #           pal = reactive_pal(),
+      #           values = reactive_species_data()$V1,
+      #           title = "Abundance:") %>%
     addScaleBar(position = "bottomright",
                 options = scaleBarOptions(maxWidth = 250))
   })
 
+  
+  observeEvent(input$mapselect, {
+    selected_species <- input$mapselect
+    species_data <- species_list[[selected_species]]
+    
+    # debugging for matrix.
+    if (is.null(species_data) || !is.matrix(species_data)) {
+      print("Not a matrix")
+    }
+    
+    pal <- colorBin(
+      palette = "inferno",
+      domain = species_data[,1],
+      bins = 7,
+      pretty = FALSE,
+      na.color = "#00000000"
+    )
+    
+    leafletProxy("map") %>%
+      clearControls() %>%
+      addLegend("bottomright", pal = pal, values = species_data[,1], title = selected_species)
+  })
 
-  # Provides coordinates for markers when you place them on the map. Currently does not delete together - FIX
+  # Provides coordinates for markers when you place them on the map. 
+  #Currently does not delete together - FIX
   observeEvent(input$map_draw_new_feature, {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
       leafletProxy("map") %>%
+        #clearControls() %>%
         addLabelOnlyMarkers(
           lng <- feature$geometry$coordinates[[1]],
           lat <- feature$geometry$coordinates[[2]],
@@ -204,6 +231,7 @@ server <- function(input, output, session) {
   data <- reactive({
     map_data()$data
   })
+  
   output$downloadData <- downloadHandler(
     filename = 'map.png',
     #content = function(file) {
