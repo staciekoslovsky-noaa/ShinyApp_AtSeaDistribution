@@ -5,11 +5,12 @@ library(sf)
 library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
-library(leaflet.mapboxgl)
-library(shinySearchbar)
-library(fresh)
+library(leaflet.mapboxgl) #mapbox extension 
+library(shinySearchbar) #nu
+library(fresh) 
 library(shinyWidgets)
 library(htmltools)
+library(mapview)
 
 #May need to change pathway, sorry!
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
@@ -25,7 +26,7 @@ load("../data/Sample_data_for_portal.RData")
 species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Fin Whale" = BP_MCMC,
                   "Northern Fur Seal" = CU_MCMC,
-                  #"Bearded Seal" = EB_MCMC,
+                  #"Bearded Seal" = EB_MCMC, #currently using grid data 
                   "Steller Sea Lion" = EJ_MCMC,
                   "Sea Otter" = EL_MCMC,
                   "Gray Whale" = ER_MCMC,
@@ -50,7 +51,7 @@ ui <- dashboardPage(
       menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
-      menuItem("Other", tabName = "othr"),
+      menuItem("Methods", tabName = "metd"),
       menuItem("Licenses", tabName = "lic")
     )),
     dashboardBody(
@@ -77,8 +78,8 @@ ui <- dashboardPage(
             wellPanel(
               (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
             wellPanel(
-              p(toolinfo),
-              p(toolinfo2)
+              p(tool_info),
+              p(tool_info2)
             )),
         tabItem(tabName = "specmap",
           fluidRow(
@@ -96,17 +97,26 @@ ui <- dashboardPage(
           fluidRow(
             wellPanel(
               h3('Download or Upload Shape Data'),
-              
-              downloadButton(outputID = "downloadData", "Generate Shapes"),
+              #textInput('downloadShp', 'Filename:', value = 'Shapes.zip'),
+              downloadButton(outputID = 'downloadData', "Generate Shapes"),
               fileInput('drawfile', "Input Shapefile", accept = '.shp', multiple = TRUE)
             )
           )
         ),
-        tabItem(tabName = "othr",
+        tabItem(tabName = "metd",
           wellPanel(
-            h2('For more information, contact: etc')
+            h2(strong(methods_title))
+          ),
+          wellPanel(
+            p(methods_info),
+            h3('For more information, contact: etc')
           )
-    )))
+        ),
+        tabItem(tabName = 'lic',
+          wellPanel(
+            h2('licenses')
+          ))
+    ))
 )
 
 # Define server logic
@@ -154,12 +164,12 @@ server <- function(input, output, session) {
            'Fin Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', BP_MCMC[,1])(BP_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Northern Fur Seal' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', CU_MCMC[,1])(CU_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
-           'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
+           #'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Steller Sea Lion' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', EJ_MCMC[,1])(EJ_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Sea Otter' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', )),
            'Gray Whale' = list(),
            'Pacific White-Sided Dolphin' = list()
-           
-           )
+    )
   })
   
   output$map <- renderLeaflet({
@@ -182,10 +192,6 @@ server <- function(input, output, session) {
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
       setView(208, 64, 3) %>%
-      # addLegend("bottomright",
-      #           pal = reactive_pal(),
-      #           values = reactive_species_data()$V1,
-      #           title = "Abundance:") %>%
     addScaleBar(position = "bottomright",
                 options = scaleBarOptions(maxWidth = 250))
   })
@@ -207,10 +213,9 @@ server <- function(input, output, session) {
       pretty = FALSE,
       na.color = "#00000000"
     )
-    
     leafletProxy("map") %>%
       clearControls() %>%
-      addLegend("bottomright", pal = pal, values = species_data[,1], title = selected_species)
+      addLegend("bottomright", pal = pal, values = species_data[,1], title = 'Abundance:')
   })
 
   # Provides coordinates for markers when you place them on the map. 
@@ -233,11 +238,7 @@ server <- function(input, output, session) {
   })
   
   output$downloadData <- downloadHandler(
-    filename = 'map.png',
-    #content = function(file) {
-      
-    #}
-  )
+    filename = 'shapes'
   
   observeEvent(input$drawfile, {
     drawfile <- input$drawfile
