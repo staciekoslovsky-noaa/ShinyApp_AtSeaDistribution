@@ -173,3 +173,12 @@ Internship Notes: Christine Kwon
 - Legend fixed, yet colorshading remains possibly something to be fixed
   - Depends on how we want to modify data/new fillColor/etc
 - Code review tomorrow
+
+
+<span style="color:blue">07/17/24:</span>
+
+- Addressing changes from code review
+  - Changed from local download to access via Git
+  - Improved documentation on code scripts
+  - Alphabetize selection on UI 
+  - Layer toggle option on map functional
