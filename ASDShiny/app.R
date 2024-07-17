@@ -1,4 +1,5 @@
-library(shiny) #add install.packages above later?
+# Load all library packages
+library(shiny)
 library(shinyjs)
 library(leaflet)
 library(sf)
@@ -12,17 +13,15 @@ library(shinyWidgets)
 library(htmltools)
 library(mapview)
 
-#May need to change pathway, sorry!
+#Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 
 load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 load("../data/Sample_data_for_portal.RData")
 
-# species_list <- c("Northern Minke Whale", "Fin Whale", "Northern Fur Seal", "Bearded Seal", "Steller Sea Lion", "Sea Otter", 
-#                    "Gray Whale", "Pacific White-Sided Dolphin", "Humpback Whale", "Killer Whale", "Walrus", "Dall's Porpoise",
-#                  "Sperm Whale", "Harbor Porpoise", "Harbor Seal")
 
+#Add default map POPhexagons_sf 
 species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Fin Whale" = BP_MCMC,
                   "Northern Fur Seal" = CU_MCMC,
@@ -40,9 +39,17 @@ species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Harbor Seal" = PV_MCMC)
 
 # UI
-ui <- dashboardPage(
-  title = "At Sea Densities of Marine Mammals",
-  dashboardHeader(title = "NOAA "),
+ui <- shinydashboard::dashboardPage(
+  #title = "At Sea Densities of Marine Mammals",
+  
+  # Hides warnings and errors in app
+  
+  htmltools::tags$style(type="text/css",
+             ".shiny-output-error { visibility: hidden; }",
+             ".shiny-output-error:before { visibility: hidden; }",),
+  
+  # Dashboard/sidebar visible on left side of screen. 
+  dashboardHeader(title = "At Sea Densities of Marine Mammals"),
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
@@ -56,6 +63,8 @@ ui <- dashboardPage(
     )),
     dashboardBody(
       tabItems(
+        
+        # About the tool tab 
         tabItem(tabName = 'aboutpg',
             wellPanel(
               h2(strong(div("About This Tool", style = 'color: #011f4b')))
@@ -72,8 +81,9 @@ ui <- dashboardPage(
                   ),
                   tags$figcaption("NOAA Fisheries/Josh M London")
                 )
-                
                 )),
+        
+        # How to use/instructional tab
         tabItem(tabName = 'widgets',
             wellPanel(
               (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
@@ -81,6 +91,8 @@ ui <- dashboardPage(
               p(tool_info),
               p(tool_info2)
             )),
+        
+        # Species density map
         tabItem(tabName = "specmap",
           fluidRow(
             column(9, 
@@ -88,7 +100,9 @@ ui <- dashboardPage(
             ),
             column(3,
               wellPanel(
-                h3('Other Information (estimates, etc'),
+                
+                # Customization features in map
+                h3('Customize Map'),
                 selectizeInput("mapselect", "Select Marine Mammal", choices = names(species_list)),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               )
@@ -96,10 +110,12 @@ ui <- dashboardPage(
           ),
           fluidRow(
             wellPanel(
-              h3('Download or Upload Shape Data'),
+              
+              #Shapefile upload/download UI 
+              h3('Download or Upload Shapefile'),
               #textInput('downloadShp', 'Filename:', value = 'Shapes.zip'),
-              downloadButton(outputID = 'downloadData', "Generate Shapes"),
-              fileInput('drawfile', "Input Shapefile", accept = '.shp', multiple = TRUE)
+              downloadButton('downloadData', "Download Shapefile"),
+              fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE)
             )
           )
         ),
@@ -122,6 +138,7 @@ ui <- dashboardPage(
 # Define server logic
 server <- function(input, output, session) {
 
+  #remove and change   
   for (species in names(Sample_data)){
     #print(species)
     species_data <- Sample_data[[species]]
@@ -141,26 +158,32 @@ server <- function(input, output, session) {
     assign(species, species_data)
   }
   
-  POPhexagons_sf <- st_transform(POPhexagons_sf, 4326)
+  # Converts starting projection to EPSG 4326 to be displayed onto base map.
+  POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
     
     
-  # Move BS_grid_sf polygons across dateline - did not work 
-  #BS_grid_sf <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  # As Alaska is split by the international dateline, the following lines move 
+  # the data across the dateline for a unified view. 
+  
   BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POP_hexagons_sf$geometry <- (sf::st_geometry(POP_hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   
-  #Sample for one species - Northern Minke Whale - hopefully a function can do this easily instead.
+  # Sample for one species (Northern Minke Whale) which filters the dataframe for
+  # areas in which data is available fpr the selected species
   filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
   
-  #Columns containing abundance of species ONLY. 
+  # Columns containing only abundance of species.
   col_to_filter <- POPhexagons_sf[,5:18]
   #filtered_list <- filter_by_col(col_to_filter)
     
-  map_data <- reactive({
+  # Reactive expression that updates map_data when a marine mammal species is
+  # selected from "selectize" dropdown/searchbar.
+  map_data <- shiny::reactive({
     switch(input$mapselect, 
            'Northern Minke Whale' = list(data = (filtered_sf), fillColor = ~colorNumeric('inferno', BA_MCMC[,1])(BA_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
+            #use the actual values in POPhexagons_sf 
            'Fin Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', BP_MCMC[,1])(BP_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Northern Fur Seal' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', CU_MCMC[,1])(CU_MCMC[,1]), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
@@ -172,16 +195,18 @@ server <- function(input, output, session) {
     )
   })
   
-  output$map <- renderLeaflet({
+  # Output leaflet map
+  output$map <- leaflet::renderLeaflet({
     map_info <- map_data()
+    
+    # Data layer obtained from selected species
     leaflet(map_info$data) %>%
       addTiles() %>%
       addPolygons(fillColor = map_info$fillColor, fillOpacity = 0.8, opacity = 0, color = map_info$color, weight = 1) %>%
       addDrawToolbar(
-        polylineOptions = drawPolylineOptions(),
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
-        rectangleOptions = FALSE,
+        rectangleOptions = drawRectangleOptions(),
         circleMarkerOptions = FALSE,
         editOptions = editToolbarOptions(edit = FALSE, 
                                          selectedPathOptions = FALSE, 
@@ -192,12 +217,12 @@ server <- function(input, output, session) {
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
       setView(208, 64, 3) %>%
-    addScaleBar(position = "bottomright",
+      addScaleBar(position = "bottomright",
                 options = scaleBarOptions(maxWidth = 250))
   })
 
-  
-  observeEvent(input$mapselect, {
+  # Obtain corresponding MCMC matrix for selected species 
+  shiny::observeEvent(input$mapselect, {
     selected_species <- input$mapselect
     species_data <- species_list[[selected_species]]
     
@@ -206,24 +231,27 @@ server <- function(input, output, session) {
       print("Not a matrix")
     }
     
-    pal <- colorBin(
+    # Color palette, bincount, and other customizations for reactive legend
+    pal <- leaflet::colorBin(
       palette = "inferno",
       domain = species_data[,1],
       bins = 7,
       pretty = FALSE,
       na.color = "#00000000"
     )
-    leafletProxy("map") %>%
+    
+    # Clear controls every time a new species is selected with updated legend
+    leaflet::leafletProxy("map") %>%
       clearControls() %>%
       addLegend("bottomright", pal = pal, values = species_data[,1], title = 'Abundance:')
   })
 
   # Provides coordinates for markers when you place them on the map. 
   #Currently does not delete together - FIX
-  observeEvent(input$map_draw_new_feature, {
+  shiny::observeEvent(input$map_draw_new_feature, {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
-      leafletProxy("map") %>%
+      leaflet::leafletProxy("map") %>%
         #clearControls() %>%
         addLabelOnlyMarkers(
           lng <- feature$geometry$coordinates[[1]],
@@ -232,20 +260,35 @@ server <- function(input, output, session) {
           labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10))
         )
     }})
-
-  data <- reactive({
-    map_data()$data
-  })
   
-  output$downloadData <- downloadHandler(
-    filename = 'shapes'
-  
-  observeEvent(input$drawfile, {
+  shiny::observeEvent(input$drawfile, {
     drawfile <- input$drawfile
-    #validate(need(ext == 'shp', 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
+    files <- unzip(drawfile, list = TRUE)
+    #zipped only
+    validate(need(ext == ('.shp' || '.kmz'), 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
+    print('upload succesful')
   })
+  
+  dl.y <- callModule(dlmodule, 'dlmodule1')
+
+  
+  data <- reactive({
+    get(input$mapselect)
+  })
+
 }
 
+
+dlmodule <- function(input, output, session){
+  output$downloadData <- shiny::downloadHandler(
+    filename = 'Shape.pdf',
+    content = function(file){
+      print('download triggered')
+      #line of code map_shot/st_write - neither succesful so far
+      print('file saved to', file)
+    }
+  )
+}
 
 # Run the application 
 #shinyApp(ui = ui, server = server)
