@@ -11,7 +11,9 @@ library(shinySearchbar) #nu
 library(fresh) 
 library(shinyWidgets)
 library(htmltools)
+library(htmlwidgets)
 library(mapview)
+
 
 #Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
@@ -44,10 +46,10 @@ ui <- shinydashboard::dashboardPage(
   
   # Hides warnings and errors in app
   
-  htmltools::tags$style(type="text/css",
-             ".shiny-output-error { visibility: hidden; }",
-             ".shiny-output-error:before { visibility: hidden; }",),
-  
+  # htmltools::tags$style(type="text/css",
+  #            ".shiny-output-error { visibility: hidden; }",
+  #            ".shiny-output-error:before { visibility: hidden; }",),
+  # 
   # Dashboard/sidebar visible on left side of screen. 
   dashboardHeader(title = "At Sea Densities of Marine Mammals"),
   dashboardSidebar(
@@ -88,8 +90,10 @@ ui <- shinydashboard::dashboardPage(
             wellPanel(
               (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
             wellPanel(
-              p(tool_info),
-              p(tool_info2)
+              p(tool_info), # Separated texts to allow for appropriate spacing.
+              p(tool_info2),
+              p(tool_info3),
+              p(tool_info4)
             )),
         
         # Species density map
@@ -103,11 +107,11 @@ ui <- shinydashboard::dashboardPage(
                 
                 # Customization features in map
                 h3('Customize Map'),
-                selectizeInput("mapselect", "Select Marine Mammal", choices = names(species_list)),
+                selectizeInput("mapselect", "Select Marine Mammal", choices = sort(names(species_list)),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               )
             )
-          ),
+          )),
           fluidRow(
             wellPanel(
               
@@ -210,10 +214,12 @@ server <- function(input, output, session) {
         circleMarkerOptions = FALSE,
         editOptions = editToolbarOptions(edit = FALSE, 
                                          selectedPathOptions = FALSE, 
-                                         remove = TRUE)
+                                         remove = TRUE),
+        targetGroup = "Shapes"
       ) %>%
       addLayersControl(
-        overlayGroups = c("draw"),
+        
+        overlayGroups = c("Shapes"),
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
       setView(208, 64, 3) %>%
@@ -247,7 +253,7 @@ server <- function(input, output, session) {
   })
 
   # Provides coordinates for markers when you place them on the map. 
-  #Currently does not delete together - FIX
+  # Currently does not delete together - FIX
   shiny::observeEvent(input$map_draw_new_feature, {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
