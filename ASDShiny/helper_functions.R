@@ -24,13 +24,8 @@ load_all_files <- function(directory_urls){
   for (url_input in directory_urls){
     # Get the name of the file (ex: BA_MCMC)
     file_base_name <- tools::file_path_sans_ext(basename(url_input))
-    
-    #temp file path
-    #temp_file <- tempfile(fileext = '.RData')
-    
-    # Download the file and load into a temporary environment
-    
-    #download.file(url_input, temp_file, mode = 'wb')
+
+    # Load into temporary environment
     temp_env <- new.env()
     load(url(url_input), envir = temp_env)
     
@@ -39,10 +34,6 @@ load_all_files <- function(directory_urls){
     
     # Assign object to the global environment (for easy access) with the file base name
     assign(file_base_name, get(obj_name, envir = temp_env), envir = .GlobalEnv)
-  
-    
-  # Clean temp file
-  #unlink(temp_file)
   }
    
   # Final check 
