@@ -13,14 +13,20 @@ library(shinyWidgets)
 library(htmltools)
 library(htmlwidgets)
 library(mapview)
+library(tools)
 
 
 #Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
-load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+#load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 
-load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+#load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 load("../data/Sample_data_for_portal.RData")
+load_all_files(urls)
+
+# Access via GitHub
+
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 
 
 #Add default map POPhexagons_sf 
@@ -91,7 +97,7 @@ ui <- shinydashboard::dashboardPage(
               (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
             wellPanel(
               p(tool_info), # Separated texts to allow for appropriate spacing.
-              p(tool_info2),
+              p(tool_info2), 
               p(tool_info3),
               p(tool_info4)
             )),
@@ -119,6 +125,9 @@ ui <- shinydashboard::dashboardPage(
               h3('Download or Upload Shapefile'),
               #textInput('downloadShp', 'Filename:', value = 'Shapes.zip'),
               downloadButton('downloadData', "Download Shapefile"),
+              # File input only accepts zipped files. 
+              # Server below contains further code on validating content within
+              # unzipped file
               fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE)
             )
           )
@@ -267,11 +276,16 @@ server <- function(input, output, session) {
         )
     }})
   
+  # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
     drawfile <- input$drawfile
-    files <- unzip(drawfile, list = TRUE)
-    #zipped only
+    # Create temp directory
+    temp_direc2 <- tempdir()
+    # Unzips the file
+    unzip(input$drawfile$datapath, exdir = temp_dir)
+    # Validates that the files are zipped
     validate(need(ext == ('.shp' || '.kmz'), 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
+    files <- st_transform(files, 4326)
     print('upload succesful')
   })
   
@@ -290,7 +304,7 @@ dlmodule <- function(input, output, session){
     filename = 'Shape.pdf',
     content = function(file){
       print('download triggered')
-      #line of code map_shot/st_write - neither succesful so far
+      #line of code map_shot/st_write - neither successful so far
       print('file saved to', file)
     }
   )
