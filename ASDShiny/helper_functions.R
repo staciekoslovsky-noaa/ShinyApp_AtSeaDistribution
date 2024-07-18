@@ -1,68 +1,54 @@
-load_all_files <- function(directory){
+urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData',
+          'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
+)
+
+
+load_all_files <- function(directory_urls){
   # Loads all files from data folder. 
   
-  # Inputs: directory[str]: pathway to files
+  # Inputs: directory_urls: vector of raw GitHub file links
   
   # Returns: None, just loads all files
-  files <- list.files(directory, pattern = "\\.RData$", full.names = TRUE)
-  
-  for (file in files) {
-    load(file, envir = .GlobalEnv) 
-  }
-}
-
-
-load_data <- function(filepath) {
-  # Loads the .RData file into distinct variables - otherwise all named "RelAbund_MCMC"
-  
-  # Inputs: filepath[str]
-  
-  # Returns: None, just laods all files 
-  loaded_objects <- load(filepath)
-  data <- get(loaded_objects[1])
-  
-  return(data)
-}
-
-#load_all_files("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
-#class(RelAbund_MCMC)
-
-
-# DOES NOT INCLUDE POPhexagons_sf file!!!
-load_all_filest <- function(directory) {
-  # Loads all files from data folder 
-  
-  # Inputs: directory[str]: pathway to files
-  
-  # Returns: None, sets file name to loaded data
-  
-  
-  # List all .RData files in the directory
-  files <- list.files(directory, pattern = "\\.RData$", full.names = TRUE)
-  #print(files) debugging
-  if (length(files) == 0) {
-    stop("No .RData files found in the directory.")
-  }
-  
-  for (file in files) {
-    # Get base name of the file (without directory and extension)
-    file_base_name <- tools::file_path_sans_ext(basename(file))
+  for (url_input in directory_urls){
+    # Get the name of the file (ex: BA_MCMC)
+    file_base_name <- tools::file_path_sans_ext(basename(url_input))
     
+    #temp file path
+    #temp_file <- tempfile(fileext = '.RData')
+    
+    # Download the file and load into a temporary environment
+    
+    #download.file(url_input, temp_file, mode = 'wb')
     temp_env <- new.env()
-    load(file, envir = temp_env)
+    load(url(url_input), envir = temp_env)
     
-    # Assuming the file contains only one object, get its name and data
-    # Explore further this globalenv/tempenv issue 
-    object_name <- ls(temp_env)[1]
-    data <- get(object_name, envir = temp_env)
+    # Get the names of objects
+    obj_name <- ls(temp_env)
     
-    # Assign the data to a variable named after the file
-    assign(file_base_name, data, envir = .GlobalEnv)
-    #print(file_base_name)
-  }
+    # Assign object to the global environment (for easy access) with the file base name
+    assign(file_base_name, get(obj_name, envir = temp_env), envir = .GlobalEnv)
   
-  print("Finished loading.")
+    
+  # Clean temp file
+  #unlink(temp_file)
+  }
+   
+  # Final check 
+  print('Done loading')
 }
+
 
 
 # Optional function for filtering only areas where species is not NA
@@ -94,15 +80,17 @@ Alaska Native subsistence harvests, and platform-of-opportunity (POP) observatio
 
 information2 <- div('Thus, this tool serves as a data portal to share species densities maps.')
 
-tool_info <- 'This tool was developed using Shiny, a package that facilitates web app development directly 
-from R and Python.'
-tool_info2 <- 'To first access species density maps, click the Species button in the sidebar. Use the right panel
+tool_info <- div('This tool was developed using Shiny, a package that facilitates web app development directly 
+from coding languages such as R.', style = 'color: #005b96')
+tool_info2 <- div('To first access species density maps, click the Species button in the sidebar. Use the right panel
 to toggle between different marine mammal species, and (more options later). The toolbar on the left of the map
-contains various tools to work with select data shown on the map. The polyline, polygon and circle options on the toolbar 
-can be used to draw polygons or lines that can be downloaded as a shapefile. The marker can be used to obtain coordinates
-of the selected location. The bin will delete any shapes or lines that are no longer necessary.
+contains various tools to work with select data shown on the map. The polygon, rectangle, and circle options on the toolbar 
+can be used to draw shapes that can be downloaded as a shapefile. The marker can be used to obtain coordinates
+of the selected location. The trash bin will delete any shapes or lines that are no longer necessary.
 The bottom panel contains buttons to download a shapefile and upload own shape data for analysis in one of the following
-formats: zipped .kmz or .shp file.'
+formats: zipped .kmz or .shp file.', style = 'color: #005b96')
+tool_info3 <- div('For any additional questions, contact ____.', style = 'color: #005b96')
+tool_info4 <- div('The code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
 
 methods_title <- div('Methods and Approaches', style = 'color: #03396c')
 
