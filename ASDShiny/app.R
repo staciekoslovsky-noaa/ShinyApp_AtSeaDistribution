@@ -18,16 +18,20 @@ library(tools)
 
 #Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
-#load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
-load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
-load("../data/Sample_data_for_portal.RData")
+source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
+# load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+# load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+# load("../data/Sample_data_for_portal.RData")
 
 # Access via GitHub
 #load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #load_all_files(urls)
 
+
+
+
 #Add default map POPhexagons_sf 
-species_list <- list("Northern Minke Whale" = c(BA_MCMC, POPhexagons_sf$BA),
+species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Fin Whale" = BP_MCMC,
                   "Northern Fur Seal" = CU_MCMC,
                   #"Bearded Seal" = EB_MCMC, #currently using grid data 
@@ -43,21 +47,13 @@ species_list <- list("Northern Minke Whale" = c(BA_MCMC, POPhexagons_sf$BA),
                   "Harbor Porpoise" = PP_MCMC,
                   "Harbor Seal" = PV_MCMC)
 
-updated_spec_list <- list("Northern Minke Whale" = POPhexagons_sf$BA,
-                          "Fin Whale" = POPhexagons_sf$BP,
-                          "Northern Fur Seal" = POPhexagons_sf$CU,
-                          #"Bearded Seal" = EB_MCMC, #currently using grid data 
-                          "Steller Sea Lion" = POPhexagons_sf$EJ,
-                          "Sea Otter" = POPhexagons_sf$EL,
-                          "Gray Whale" = POPhexagons_sf$ER,
-                          "Pacific White-Sided Dolphin" = POPhexagons_sf$LO,
-                          "Humpback Whale" = POPhexagons_sf$MN,
-                          "Killer Whale" = POPhexagons_sf$OO,
-                          "Walrus" = POPhexagons_sf$OR,
-                          "Dall's Porpoise" = POPhexagons_sf$PD,
-                          "Sperm Whale" = POPhexagons_sf$PM,
-                          "Harbor Porpoise" = POPhexagons_sf$PP,
-                          "Harbor Seal" = POPhexagons_sf$PV)
+POPhex_MCMC <- POPhexagons_sf
+
+for (name in names(species_list)) {
+  data <- species_list[[name]]
+  rel_abund <- rowMeans(data, na.rm = TRUE)
+  POPhex_MCMC <- cbind(POPhex_MCMC, setNames(data.frame(rel_abund), name))
+}
 
 # UI
 ui <- shinydashboard::dashboardPage(
@@ -163,26 +159,6 @@ ui <- shinydashboard::dashboardPage(
 
 # Define server logic
 server <- function(input, output, session) {
-
-  #remove and change   
-  for (species in names(Sample_data)){
-    #print(species)
-    species_data <- Sample_data[[species]]
-    if (inherits(species_data, "matrix") || inherits(species_data, "array")){
-      next
-    }
-    if (!inherits(species_data, "sf")) #&& !(inherits(species_data, "matrix"))){
-      {species_data <- sf::st_as_sf(species_data)
-    }
-    #print(st_crs(Sample_data[[species]]))
-    current_crs <- sf::st_crs(species_data)
-    species_data <- sf::st_transform(species_data, 4326)
-      
-    if (!all(st_is_valid(species_data))) {
-        species_data <- sf::st_make_valid(species_data)
-      }
-    assign(species, species_data)
-  }
   
   # Converts starting projection to EPSG 4326 to be displayed onto base map.
   POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
@@ -191,9 +167,6 @@ server <- function(input, output, session) {
   # As Alaska is split by the international dateline, the following lines move 
   # the data across the dateline for a unified view. 
   
-  BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
-  POP_hexagons_sf$geometry <- (sf::st_geometry(POP_hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
-  SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   
   # Sample for one species (Northern Minke Whale) which filters the dataframe for
@@ -206,14 +179,15 @@ server <- function(input, output, session) {
     
   # Reactive expression that updates map_data when a marine mammal species is
   # selected from "selectize" dropdown/searchbar.
+  # Finish
   map_data <- shiny::reactive({
     switch(input$mapselect,
-           'Select' = list(data = POPhexagons_sf, text = "Surveyed areas shown in Blue"),
-           'Northern Minke Whale' = list(data = (POPhexagons_sf), fillColor = ~colorNumeric('inferno', POPhexagons_sf$BA)(BA), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Select' = list(data = POPhex_MCMC, text = "Surveyed areas shown in Blue"),
+           'Northern Minke Whale' = list(data = (POPhex_MCMC), fillColor = ~colorNumeric('inferno', POPhex_MCMC$Northern.Minke.Whale)(Northern.Minke.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
             #use the actual values in POPhexagons_sf 
            'Fin Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$BP)(BP), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Northern Fur Seal' = list(data = filtered_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+           #'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
            #'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Steller Sea Lion' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EJ)(EJ), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Sea Otter' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EL)(EL), fillOpacity = 0.8, color = "black", weight = 0.5),
@@ -242,11 +216,14 @@ server <- function(input, output, session) {
                                          remove = TRUE),
         targetGroup = "Shapes"
       ) %>%
+      
+      # Adding layers to turn coordinates or shapes on and off.
       addLayersControl(
-        
-        overlayGroups = c("Shapes"),
+        overlayGroups = c("Shapes", "Coordinates"),
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
+      
+      # Static set view of Alaska 
       setView(208, 64, 3) %>%
       addScaleBar(position = "bottomright",
                 options = scaleBarOptions(maxWidth = 250))
@@ -255,7 +232,7 @@ server <- function(input, output, session) {
   # Obtain corresponding MCMC matrix for selected species 
   shiny::observeEvent(input$mapselect, {
     selected_species <- input$mapselect
-    species_data <- updated_spec_list[[selected_species]]
+    species_data <- species_list[[selected_species]]
     
     # debugging for matrix validation
     if (is.null(species_data) || !is.matrix(species_data)) {
@@ -288,7 +265,8 @@ server <- function(input, output, session) {
           lng <- feature$geometry$coordinates[[1]],
           lat <- feature$geometry$coordinates[[2]],
           label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
-          labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10))
+          labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10)),
+          group = "Coordinates"
         )
     }})
   
@@ -301,7 +279,7 @@ server <- function(input, output, session) {
     unzip(input$drawfile$datapath, exdir = temp_dir)
     # Validates that the files are zipped
     validate(need(ext == ('.shp' || '.kmz'), 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
-    files <- st_transform(files, 4326)
+    #files <- st_transform(files, 4326)
     print('upload succesful')
   })
   
