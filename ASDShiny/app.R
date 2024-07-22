@@ -20,8 +20,10 @@ library(tools)
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
 # load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
-# load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+POPhex_MCMC <- read.csv('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.csv')
 # load("../data/Sample_data_for_portal.RData")
+
 
 # Access via GitHub
 #load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
@@ -47,13 +49,6 @@ species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Harbor Porpoise" = PP_MCMC,
                   "Harbor Seal" = PV_MCMC)
 
-POPhex_MCMC <- POPhexagons_sf
-
-for (name in names(species_list)) {
-  data <- species_list[[name]]
-  rel_abund <- rowMeans(data, na.rm = TRUE)
-  POPhex_MCMC <- cbind(POPhex_MCMC, setNames(data.frame(rel_abund), name))
-}
 
 # UI
 ui <- shinydashboard::dashboardPage(
@@ -162,12 +157,13 @@ server <- function(input, output, session) {
   
   # Converts starting projection to EPSG 4326 to be displayed onto base map.
   POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
-    
+  POPhex_MCMC <- sf::st_transform(POPhex_MCMC, 4326)
     
   # As Alaska is split by the international dateline, the following lines move 
   # the data across the dateline for a unified view. 
-  
+
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  POPhex_MCMC$geometry <- (sf::st_geometry(POPhex_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
   
   # Sample for one species (Northern Minke Whale) which filters the dataframe for
   # areas in which data is available fpr the selected species
@@ -180,12 +176,15 @@ server <- function(input, output, session) {
   # Reactive expression that updates map_data when a marine mammal species is
   # selected from "selectize" dropdown/searchbar.
   # Finish
+  
+  print(POPhex_MCMC[1,])
+  
   map_data <- shiny::reactive({
     switch(input$mapselect,
            'Select' = list(data = POPhex_MCMC, text = "Surveyed areas shown in Blue"),
-           'Northern Minke Whale' = list(data = (POPhex_MCMC), fillColor = ~colorNumeric('inferno', POPhex_MCMC$Northern.Minke.Whale)(Northern.Minke.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Northern Minke Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Northern.Minke.Whale)(POPhex_MCMC$Northern.Minke.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
             #use the actual values in POPhexagons_sf 
-           'Fin Whale' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$BP)(BP), fillOpacity = 0.8, color = "black", weight = 0.5),
+           'Fin Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Fin.Whale)(POPhex_MCMC$Fin.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
            'Northern Fur Seal' = list(data = filtered_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
            #'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
            #'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
@@ -239,11 +238,18 @@ server <- function(input, output, session) {
       print("Not a matrix")
     }
     
+    
+    
+    abund_bins <- c(0, 0.00025, 0.0005, 0.001, 0.002, 0.003, 0.005, 1)
+    
+    #CHANGE TO POPHEX_MCMC 
+    quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+      
     # Color palette, bincount, and other customizations for reactive legend
     pal <- leaflet::colorBin(
       palette = "inferno",
       domain = species_data,
-      bins = 7,
+      bins = quartile_vals,
       pretty = FALSE,
       na.color = "#00000000"
     )
