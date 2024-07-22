@@ -175,10 +175,38 @@ Internship Notes: Christine Kwon
 - Code review tomorrow
 
 
-<span style="color:blue">07/17/24:</span>
+<span style="color:blue">07/16-17/24:</span>
 
 - Addressing changes from code review
-  - Changed from local download to access via Git
+  - Changed from local download to access via Git. 
+    - Issue - takes a considerable time to load - when timed, around 1.5min
+    - But once it's open and loaded, switching between maps is not a problem
+      - *Current solution*: do not load MCMC unless complex analysis is selected
+          - prevents lag/excessive load times for simple features (view, toggle, etc)
   - Improved documentation on code scripts
   - Alphabetize selection on UI 
   - Layer toggle option on map functional
+  
+
+<span style="color:blue">07/18/24:</span>
+
+- Added default selection button
+- Changed data from MCMC to POPhexagons
+    - modified legend to align with this - currently showing absolute abundance
+- Check-in today
+
+
+<span style="color:blue">07/19/24:</span>
+
+- Changes to be made post-meeting
+  - reverting some old changes
+  - Change back to MCMC data. This involves taking posterior mean (`rowMeans()`) and `cbind()`
+    - means of all the V columns, into new dataframe `POPhex_MCMC`
+  - store relative abundance separately so only one dataframe rather than many 
+- Adding the new dataframe into maps, modify legend and etc accordingly 
+
+
+<span style="color:blue">07/22/24:</span>
+- Making legend based off of quartiles to obtain a better color gradient
+- .csv file for `POPhex_MCMC` added to Git, trouble with reading on app
+- Working on map quality - zoom and NA cells 
