@@ -207,6 +207,28 @@ Internship Notes: Christine Kwon
 
 
 <span style="color:blue">07/22/24:</span>
+
 - Making legend based off of quartiles to obtain a better color gradient
 - .csv file for `POPhex_MCMC` added to Git, trouble with reading on app
 - Working on map quality - zoom and NA cells 
+
+
+<span style="color:blue">07/23/24:</span>
+
+- fillOpacity and Opacity, along with fillColor and color, using same palette
+  - change from previous static border opacity and color
+  - much improved view with changes
+- Opacity of 0.7 or so improves resolution; 0.4 or below makes it difficult
+- Previous bug found --> legend and data are disconnected;
+  - linked using `species_data` value succesfully
+  - [REFRESHER](https://stackoverflow.com/questions/53016404/advantages-of-reactive-vs-observe-vs-observeevent)
+    - reactive allows variables to be accessed OUTSIDE the "reactive"/isolated environment
+      - "lazy" v. observe - not "lazy", executes right away when dependencies are changed, even 
+        if it directly is not called whereas reactive waits until called
+    - in contrast, observeEvent does NOT; thus if you have an object defined
+      within the observed event, it will not show up
+- `fillOpacity = get_opacity(as.vector(survey_polygons$abund_est), abund_bins)` from Harbor Seal Ap
+- solution to resolution?? -> smoothfactor
+
+<span style="color:blue">07/24/24:</span>
+
