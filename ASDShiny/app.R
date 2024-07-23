@@ -19,16 +19,17 @@ library(tools)
 #Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
-# load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
-load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
-POPhex_MCMC <- read.csv('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.csv')
+load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+ # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+ # load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+
+
 # load("../data/Sample_data_for_portal.RData")
 
 
 # Access via GitHub
 #load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #load_all_files(urls)
-
 
 
 
@@ -49,6 +50,23 @@ species_list <- list("Northern Minke Whale" = BA_MCMC,
                   "Harbor Porpoise" = PP_MCMC,
                   "Harbor Seal" = PV_MCMC)
 
+species_list2 <- list(
+  "Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
+  "Fin Whale" = POPhex_MCMC$Fin.Whale,
+  "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
+  #"Bearded Seal" = EB_MCMC, #currently using grid data
+  "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
+  "Sea Otter" = POPhex_MCMC$Sea.Otter,
+  "Gray Whale" = POPhex_MCMC$Gray.Whale,
+  "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+  "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
+  "Killer Whale" = POPhex_MCMC$Killer.Whale,
+  "Walrus" = POPhex_MCMC$Walrus,
+  "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
+  "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
+  "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
+  "Harbor Seal" = POPhex_MCMC$Harbor.Seal
+)
 
 # UI
 ui <- shinydashboard::dashboardPage(
@@ -117,7 +135,7 @@ ui <- shinydashboard::dashboardPage(
                 
                 # Customization features in map
                 h3('Customize Map'),
-                selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list)))),
+                selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               
             )
@@ -161,7 +179,6 @@ server <- function(input, output, session) {
     
   # As Alaska is split by the international dateline, the following lines move 
   # the data across the dateline for a unified view. 
-
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
   POPhex_MCMC$geometry <- (sf::st_geometry(POPhex_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
   
@@ -169,15 +186,10 @@ server <- function(input, output, session) {
   # areas in which data is available fpr the selected species
   filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
   
-  # Columns containing only abundance of species.
-  col_to_filter <- POPhexagons_sf[,5:18]
-  #filtered_list <- filter_by_col(col_to_filter)
     
   # Reactive expression that updates map_data when a marine mammal species is
   # selected from "selectize" dropdown/searchbar.
   # Finish
-  
-  print(POPhex_MCMC[1,])
   
   map_data <- shiny::reactive({
     switch(input$mapselect,
@@ -196,15 +208,48 @@ server <- function(input, output, session) {
     )
   })
   
+  # Reactive value to hold palette data and calculate quartiles for legend
+  species_pal <- shiny::reactive({
+    selected_species <- input$mapselect
+    
+    #This accesses the POPhex_MCMC$species column of values
+    species_data <- species_list2[[selected_species]]
+    
+    quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+    
+    # Color palette, bincount, and other customizations for reactive legend
+    pal <- leaflet::colorBin(
+      palette = "inferno",
+      domain = species_data,
+      bins = quartile_vals,
+      pretty = FALSE,
+      na.color = "#FFFFFF80"
+    )
+    
+    list(
+      selected_species = selected_species,
+      data = POPhex_MCMC,
+      column = species_data,
+      quartile_vals = quartile_vals,
+      fillColor = ~pal(species_data),
+      pal = pal)
+  })
+  
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
     map_info <- map_data()
+    species_info <- species_pal()
     
     # Data layer obtained from selected species
-    leaflet(map_info$data) %>%
+    leaflet(species_info$data) %>%
       addTiles(
       ) %>%
-      addPolygons(fillColor = map_info$fillColor, fillOpacity = 0.8, opacity = 0, color = map_info$color, weight = 1) %>%
+      addPolygons(fillColor = ~species_info$pal(species_info$column),
+                  fillOpacity = 0.8,
+                  opacity = 0.7,
+                  color = ~species_info$pal(species_info$column),
+                  weight = 1,
+                  smoothFactor = 0.3) %>%
       addDrawToolbar(
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
@@ -218,47 +263,37 @@ server <- function(input, output, session) {
       
       # Adding layers to turn coordinates or shapes on and off.
       addLayersControl(
-        overlayGroups = c("Shapes", "Coordinates"),
-        options = layersControlOptions(collapsed = FALSE)
+        overlayGroups = c("Shapes", "Coordinates", "Legend"),
+        options = layersControlOptions(collapsed = TRUE)
       ) %>%
       
       # Static set view of Alaska 
       setView(208, 64, 3) %>%
       addScaleBar(position = "bottomright",
-                options = scaleBarOptions(maxWidth = 250))
+                options = scaleBarOptions(maxWidth = 250)) %>%
+      addLegend(
+        "bottomright",
+        pal = species_info$pal,
+        values = species_info$species_data,
+        title = 'Relative Abundance:',
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = 'Legend'
+                  )
   })
 
   # Obtain corresponding MCMC matrix for selected species 
-  shiny::observeEvent(input$mapselect, {
-    selected_species <- input$mapselect
-    species_data <- species_list[[selected_species]]
-    
-    # debugging for matrix validation
-    if (is.null(species_data) || !is.matrix(species_data)) {
-      print("Not a matrix")
-    }
-    
-    
-    
-    abund_bins <- c(0, 0.00025, 0.0005, 0.001, 0.002, 0.003, 0.005, 1)
-    
-    #CHANGE TO POPHEX_MCMC 
-    quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))
-      
-    # Color palette, bincount, and other customizations for reactive legend
-    pal <- leaflet::colorBin(
-      palette = "inferno",
-      domain = species_data,
-      bins = quartile_vals,
-      pretty = FALSE,
-      na.color = "#00000000"
-    )
-    
+  # Code moved upwards; leafletproxy substituted for legend within leafet output
+  
     # Clear controls every time a new species is selected with updated legend
-    leaflet::leafletProxy("map") %>%
-      clearControls() %>%
-      addLegend("bottomright", pal = pal, values = species_data, title = 'Abundance:')
-  })
+  #   leaflet::leafletProxy("map") %>%
+  #     clearControls() %>%
+  #     addLegend("bottomright",
+  #               pal = pal,
+  #               values = species_data,
+  #               title = 'Relative Abundance:',
+  #               labFormat = leaflet::labelFormat(digits = 6),
+  #               group = 'Legend')
+  # })
 
   # Provides coordinates for markers when you place them on the map. 
   # Currently does not delete together - FIX

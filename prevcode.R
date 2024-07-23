@@ -111,3 +111,63 @@ load_all_filest <- function(directory) {
   
   print("Finished loading.")
 }
+
+# BS_grid_sf$geom <- (sf::st_geometry(BS_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+# POP_hexagons_sf$geometry <- (sf::st_geometry(POP_hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+# SSL_grid_sf$x <- (sf::st_geometry(SSL_grid_sf) + c(360, 90)) %% c(360) - c(0, 90)
+
+#remove and change
+for (species in names(Sample_data)){
+  #print(species)
+  species_data <- Sample_data[[species]]
+  if (inherits(species_data, "matrix") || inherits(species_data, "array")){
+    next
+  }
+  if (!inherits(species_data, "sf")) #&& !(inherits(species_data, "matrix"))){
+  {species_data <- sf::st_as_sf(species_data)
+  }
+  #print(st_crs(Sample_data[[species]]))
+  current_crs <- sf::st_crs(species_data)
+  species_data <- sf::st_transform(species_data, 4326)
+  
+  if (!all(st_is_valid(species_data))) {
+    species_data <- sf::st_make_valid(species_data)
+  }
+  assign(species, species_data)
+}
+
+updated_spec_list <- list("Northern Minke Whale" = POPhexagons_sf$BA,
+                          "Fin Whale" = POPhexagons_sf$BP,
+                          "Northern Fur Seal" = POPhexagons_sf$CU,
+                          #"Bearded Seal" = EB_MCMC, #currently using grid data 
+                          "Steller Sea Lion" = POPhexagons_sf$EJ,
+                          "Sea Otter" = POPhexagons_sf$EL,
+                          "Gray Whale" = POPhexagons_sf$ER,
+                          "Pacific White-Sided Dolphin" = POPhexagons_sf$LO,
+                          "Humpback Whale" = POPhexagons_sf$MN,
+                          "Killer Whale" = POPhexagons_sf$OO,
+                          "Walrus" = POPhexagons_sf$OR,
+                          "Dall's Porpoise" = POPhexagons_sf$PD,
+                          "Sperm Whale" = POPhexagons_sf$PM,
+                          "Harbor Porpoise" = POPhexagons_sf$PP,
+                          "Harbor Seal" = POPhexagons_sf$PV)
+
+
+shiny::observeEvent(input$mapselect, {
+  selected_species <- input$mapselect
+  species_data <- species_list2[[selected_species]]
+  
+  map_info2 <- map_data()
+  #CHANGE TO POPHEX_MCMC 
+  quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+  
+  # Color palette, bincount, and other customizations for reactive legend
+  pal <- leaflet::colorBin(
+    palette = "inferno",
+    reverse = TRUE,
+    domain = species_data,
+    bins = quartile_vals,
+    pretty = FALSE,
+    na.color = "#FFFFFF80"
+  )
+})
