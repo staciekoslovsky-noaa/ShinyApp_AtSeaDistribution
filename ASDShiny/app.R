@@ -19,36 +19,36 @@ library(tools)
 #Currently local accessing files
 source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
-load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
- # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
- # load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+#load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
+# load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
+ load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
 
 
 # load("../data/Sample_data_for_portal.RData")
 
 
 # Access via GitHub
-#load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #load_all_files(urls)
 
 
 
 #Add default map POPhexagons_sf 
-species_list <- list("Northern Minke Whale" = BA_MCMC,
-                  "Fin Whale" = BP_MCMC,
-                  "Northern Fur Seal" = CU_MCMC,
-                  #"Bearded Seal" = EB_MCMC, #currently using grid data 
-                  "Steller Sea Lion" = EJ_MCMC,
-                  "Sea Otter" = EL_MCMC,
-                  "Gray Whale" = ER_MCMC,
-                  "Pacific White-Sided Dolphin" = LO_MCMC,
-                  "Humpback Whale" = MN_MCMC,
-                  "Killer Whale" = OO_MCMC,
-                  "Walrus" = OR_MCMC,
-                  "Dall's Porpoise" = PD_MCMC,
-                  "Sperm Whale" = PM_MCMC,
-                  "Harbor Porpoise" = PP_MCMC,
-                  "Harbor Seal" = PV_MCMC)
+# species_list <- list("Northern Minke Whale" = BA_MCMC,
+#                   "Fin Whale" = BP_MCMC,
+#                   "Northern Fur Seal" = CU_MCMC,
+#                   #"Bearded Seal" = EB_MCMC, #currently using grid data 
+#                   "Steller Sea Lion" = EJ_MCMC,
+#                   "Sea Otter" = EL_MCMC,
+#                   "Gray Whale" = ER_MCMC,
+#                   "Pacific White-Sided Dolphin" = LO_MCMC,
+#                   "Humpback Whale" = MN_MCMC,
+#                   "Killer Whale" = OO_MCMC,
+#                   "Walrus" = OR_MCMC,
+#                   "Dall's Porpoise" = PD_MCMC,
+#                   "Sperm Whale" = PM_MCMC,
+#                   "Harbor Porpoise" = PP_MCMC,
+#                   "Harbor Seal" = PV_MCMC)
 
 species_list2 <- list(
   "Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
@@ -215,11 +215,26 @@ server <- function(input, output, session) {
     #This accesses the POPhex_MCMC$species column of values
     species_data <- species_list2[[selected_species]]
     
-    quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))
+    #quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))  #1
+    # quartile_vals <- quantile(species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)) #2
+    
+    #max palette for YlGnBu is 9 so this is it with max count
+    #Realizing it's pretty smooth, so if we wanted a more clear graph displaying the highest values
+    quartile_vals <- quantile(species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)) #3
+    
+    # quartile_vals <- quantile(species_data, probs = c(0, 0.05, 0.25, 0.75, 0.95, 1)) 
+    # quartile_vals <- quantile(species_data, probs = c(0, 0.1, 0.2, 0.8, 0.9, 1))
+    
+    # This better emphasizes the top, without maintaining the same continuity
+    #quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)) #Emphasis on high
+    # quartile_vals <- quantile(species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)) #Emphasis on low
+    
+    #another option is I could create a button or smth where we can offer different divisions to select from
     
     # Color palette, bincount, and other customizations for reactive legend
     pal <- leaflet::colorBin(
-      palette = "inferno",
+      palette = "YlGnBu", #BuPu
+      reverse = TRUE,
       domain = species_data,
       bins = quartile_vals,
       pretty = FALSE,
@@ -249,7 +264,12 @@ server <- function(input, output, session) {
                   opacity = 0.7,
                   color = ~species_info$pal(species_info$column),
                   weight = 1,
-                  smoothFactor = 0.3) %>%
+                  # smoothFactor helps control the level of smoothing
+                  # In practice, this setting lowers resolution at a smaller
+                  # zoom and returns to better resolution with larger zoom levels.
+                  smoothFactor = 0.5,
+                  options = pathOptions(zIndex = 5000),
+                  group = 'Hexagons') %>%
       addDrawToolbar(
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
@@ -263,7 +283,7 @@ server <- function(input, output, session) {
       
       # Adding layers to turn coordinates or shapes on and off.
       addLayersControl(
-        overlayGroups = c("Shapes", "Coordinates", "Legend"),
+        overlayGroups = c("Shapes", "Coordinates", "Legend", "Hexagons", "shp"),
         options = layersControlOptions(collapsed = TRUE)
       ) %>%
       
@@ -301,7 +321,6 @@ server <- function(input, output, session) {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
       leaflet::leafletProxy("map") %>%
-        #clearControls() %>%
         addLabelOnlyMarkers(
           lng <- feature$geometry$coordinates[[1]],
           lat <- feature$geometry$coordinates[[2]],
@@ -316,13 +335,33 @@ server <- function(input, output, session) {
     drawfile <- input$drawfile
     # Create temp directory
     temp_direc2 <- tempdir()
+    
     # Unzips the file
-    unzip(input$drawfile$datapath, exdir = temp_dir)
-    # Validates that the files are zipped
-    validate(need(ext == ('.shp' || '.kmz'), 'Please upload a valid shapefile in one of the following formats: .shp, ...etc.'))
-    #files <- st_transform(files, 4326)
+    unzip(input$drawfile$datapath, exdir = temp_direc2)
+    all_files <- list.files(temp_direc2, full.names = TRUE)
+    shp_file <- all_files[grepl("\\.shp$", all_files)]
     print('upload succesful')
+   
+    if (length(shp_file) > 0) {
+      # Read the shapefile
+      shapefile_data <- sf::st_read(shp_file)
+      
+      # Transform the projection to EPSG 4326 in case it is different
+      shapefile_data <- sf::st_transform(shapefile_data, 4326)
+      shifted_geometry <- (st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+      st_geometry(shapefile_data) <- shifted_geometry
+      
+      # Display the shapefile on the map
+      leaflet::leafletProxy("map", session) %>%
+        addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
+      print("shown on map")
+
+    } 
+    else {
+      showNotification("No .shp file found in the uploaded zip file.", type = "error")
+    }
   })
+  
   
   dl.y <- callModule(dlmodule, 'dlmodule1')
 
