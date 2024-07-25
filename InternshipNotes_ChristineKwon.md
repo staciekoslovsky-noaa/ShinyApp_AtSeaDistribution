@@ -230,5 +230,11 @@ Internship Notes: Christine Kwon
 - `fillOpacity = get_opacity(as.vector(survey_polygons$abund_est), abund_bins)` from Harbor Seal Ap
 - solution to resolution?? -> smoothfactor
 
-<span style="color:blue">07/24/24:</span>
 
+<span style="color:blue">07/25/24:</span>
+
+- Finally uploads shapefile
+  - Takes zipped file and shows onto map 
+- Changed color theme to be more natural/toned down - previously inferno
+- Offering various breaks in non-linear legend to choose from
+- Meeting check-in today
