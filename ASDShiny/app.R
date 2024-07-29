@@ -31,42 +31,22 @@ source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDis
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #load_all_files(urls)
 
-
-
-#Add default map POPhexagons_sf 
-# species_list <- list("Northern Minke Whale" = BA_MCMC,
-#                   "Fin Whale" = BP_MCMC,
-#                   "Northern Fur Seal" = CU_MCMC,
-#                   #"Bearded Seal" = EB_MCMC, #currently using grid data 
-#                   "Steller Sea Lion" = EJ_MCMC,
-#                   "Sea Otter" = EL_MCMC,
-#                   "Gray Whale" = ER_MCMC,
-#                   "Pacific White-Sided Dolphin" = LO_MCMC,
-#                   "Humpback Whale" = MN_MCMC,
-#                   "Killer Whale" = OO_MCMC,
-#                   "Walrus" = OR_MCMC,
-#                   "Dall's Porpoise" = PD_MCMC,
-#                   "Sperm Whale" = PM_MCMC,
-#                   "Harbor Porpoise" = PP_MCMC,
-#                   "Harbor Seal" = PV_MCMC)
-
-species_list2 <- list(
-  "Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
-  "Fin Whale" = POPhex_MCMC$Fin.Whale,
-  "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
-  #"Bearded Seal" = EB_MCMC, #currently using grid data
-  "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
-  "Sea Otter" = POPhex_MCMC$Sea.Otter,
-  "Gray Whale" = POPhex_MCMC$Gray.Whale,
-  "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-  "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
-  "Killer Whale" = POPhex_MCMC$Killer.Whale,
-  "Walrus" = POPhex_MCMC$Walrus,
-  "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
-  "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
-  "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
-  "Harbor Seal" = POPhex_MCMC$Harbor.Seal
-)
+species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
+                      "Fin Whale" = POPhex_MCMC$Fin.Whale,
+                      "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
+                      #"Bearded Seal" = EB_MCMC, #currently using grid data
+                      "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
+                      "Sea Otter" = POPhex_MCMC$Sea.Otter,
+                      "Gray Whale" = POPhex_MCMC$Gray.Whale,
+                      "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+                      "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
+                      "Killer Whale" = POPhex_MCMC$Killer.Whale,
+                      "Walrus" = POPhex_MCMC$Walrus,
+                      "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
+                      "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
+                      "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
+                      "Harbor Seal" = POPhex_MCMC$Harbor.Seal
+                )
 
 # UI
 ui <- shinydashboard::dashboardPage(
@@ -136,16 +116,20 @@ ui <- shinydashboard::dashboardPage(
                 # Customization features in map
                 h3('Customize Map'),
                 selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
+                selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
+                                                                           "Low and High Density Emphasis 1",
+                                                                           "Low and High Density Emphasis 2", 
+                                                                           "Low Density Emphasis",
+                                                                           "High Density Emphasis")),
+                textInput("abs_abund", "Abundance Estimate", width = NULL, placeholder = "e.g. 5,000"),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               
             )
           )),
           fluidRow(
             wellPanel(
-              
               #Shapefile upload/download UI 
               h3('Download or Upload Shapefile'),
-              #textInput('downloadShp', 'Filename:', value = 'Shapes.zip'),
               downloadButton('downloadData', "Download Shapefile"),
               # File input only accepts zipped files. 
               # Server below contains further code on validating content within
@@ -186,48 +170,29 @@ server <- function(input, output, session) {
   # areas in which data is available fpr the selected species
   filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
   
-    
-  # Reactive expression that updates map_data when a marine mammal species is
-  # selected from "selectize" dropdown/searchbar.
-  # Finish
   
-  map_data <- shiny::reactive({
-    switch(input$mapselect,
-           'Select' = list(data = POPhex_MCMC, text = "Surveyed areas shown in Blue"),
-           'Northern Minke Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Northern.Minke.Whale)(POPhex_MCMC$Northern.Minke.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
-            #use the actual values in POPhexagons_sf 
-           'Fin Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Fin.Whale)(POPhex_MCMC$Fin.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Northern Fur Seal' = list(data = filtered_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
-           #'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
-           #'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Steller Sea Lion' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EJ)(EJ), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Sea Otter' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EL)(EL), fillOpacity = 0.8, color = "black", weight = 0.5),
-           'Gray Whale' = list(),
-           'Pacific White-Sided Dolphin' = list(),
-           "Dall's Porpoise" = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$PV)(PV), fillOpacity = 0.8, color = "black", weight = 0.5)
-    )
-  })
   
   # Reactive value to hold palette data and calculate quartiles for legend
   species_pal <- shiny::reactive({
     selected_species <- input$mapselect
+    selected_abund <- as.numeric(input$abs_abund)
+    
+    if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
     
     #This accesses the POPhex_MCMC$species column of values
     species_data <- species_list2[[selected_species]]
+  
+    scaled_species_data <- species_data * selected_abund
     
-    #quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1))  #1
-    # quartile_vals <- quantile(species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)) #2
-    
-    #max palette for YlGnBu is 9 so this is it with max count
-    #Realizing it's pretty smooth, so if we wanted a more clear graph displaying the highest values
-    quartile_vals <- quantile(species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)) #3
-    
-    # quartile_vals <- quantile(species_data, probs = c(0, 0.05, 0.25, 0.75, 0.95, 1)) 
-    # quartile_vals <- quantile(species_data, probs = c(0, 0.1, 0.2, 0.8, 0.9, 1))
-    
-    # This better emphasizes the top, without maintaining the same continuity
-    #quartile_vals <- quantile(species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)) #Emphasis on high
-    # quartile_vals <- quantile(species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)) #Emphasis on low
+    quartile_vals <- shiny::reactive({
+      switch(input$legendselect,
+               "Quintiles" = quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+                  "Low and High Density Emphasis 1" = quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+                  "Low and High Density Emphasis 2" = quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+                  "Low Density Emphasis" = quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+                  "High Density Emphasis" = quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
+      })
+    quartile_opt <- quartile_vals()
     
     #another option is I could create a button or smth where we can offer different divisions to select from
     
@@ -235,8 +200,8 @@ server <- function(input, output, session) {
     pal <- leaflet::colorBin(
       palette = "YlGnBu", #BuPu
       reverse = TRUE,
-      domain = species_data,
-      bins = quartile_vals,
+      domain = scaled_species_data,
+      bins = quartile_opt,
       pretty = FALSE,
       na.color = "#FFFFFF80"
     )
@@ -244,15 +209,16 @@ server <- function(input, output, session) {
     list(
       selected_species = selected_species,
       data = POPhex_MCMC,
-      column = species_data,
-      quartile_vals = quartile_vals,
+      column = scaled_species_data,
+      quartile_opt = quartile_opt,
       fillColor = ~pal(species_data),
-      pal = pal)
+      pal = pal,
+      selected_abund = selected_abund)#ifelse(is.na(selected_abund), 1, selected_abund))
   })
   
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    map_info <- map_data()
+    #map_info <- map_data()
     species_info <- species_pal()
     
     # Data layer obtained from selected species
@@ -294,26 +260,13 @@ server <- function(input, output, session) {
       addLegend(
         "bottomright",
         pal = species_info$pal,
-        values = species_info$species_data,
+        values = species_info$column,
         title = 'Relative Abundance:',
         labFormat = leaflet::labelFormat(digits = 6),
         group = 'Legend'
                   )
   })
 
-  # Obtain corresponding MCMC matrix for selected species 
-  # Code moved upwards; leafletproxy substituted for legend within leafet output
-  
-    # Clear controls every time a new species is selected with updated legend
-  #   leaflet::leafletProxy("map") %>%
-  #     clearControls() %>%
-  #     addLegend("bottomright",
-  #               pal = pal,
-  #               values = species_data,
-  #               title = 'Relative Abundance:',
-  #               labFormat = leaflet::labelFormat(digits = 6),
-  #               group = 'Legend')
-  # })
 
   # Provides coordinates for markers when you place them on the map. 
   # Currently does not delete together - FIX
