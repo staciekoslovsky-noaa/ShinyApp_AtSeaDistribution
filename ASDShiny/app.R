@@ -121,7 +121,7 @@ ui <- shinydashboard::dashboardPage(
                                                                            "Low and High Density Emphasis 2", 
                                                                            "Low Density Emphasis",
                                                                            "High Density Emphasis")),
-                textInput("abs_abund", "Abundance Estimate", width = NULL, placeholder = "e.g. 5,000"),
+                textInput("abs_abund", "Sample Size", width = NULL, placeholder = "e.g. 5,000"),
                 sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               
             )
@@ -261,7 +261,7 @@ server <- function(input, output, session) {
         "bottomright",
         pal = species_info$pal,
         values = species_info$column,
-        title = 'Relative Abundance:',
+        title = ifelse(species_info$selected_abund == 1, 'Relative Abundance:', 'Abundance Estimate'),
         labFormat = leaflet::labelFormat(digits = 6),
         group = 'Legend'
                   )
