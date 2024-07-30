@@ -14,6 +14,7 @@ library(htmltools)
 library(htmlwidgets)
 library(mapview)
 library(tools)
+library(raster)
 
 
 #Currently local accessing files
@@ -67,12 +68,12 @@ ui <- shinydashboard::dashboardPage(
     sidebarMenu(
       menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
-      menuItem("Species", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
+      menuItem("Species Maps", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Methods", tabName = "metd"),
       menuItem("Licenses", tabName = "lic")
     )),
     dashboardBody(
-      tabItems(
+      shinydashboard::tabItems(
         
         # About the tool tab 
         tabItem(tabName = 'aboutpg',
@@ -121,8 +122,19 @@ ui <- shinydashboard::dashboardPage(
                                                                            "Low and High Density Emphasis 2", 
                                                                            "Low Density Emphasis",
                                                                            "High Density Emphasis")),
-                textInput("abs_abund", "Sample Size", width = NULL, placeholder = "e.g. 5,000"),
-                sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
+                selectizeInput("palselect", "Select Palette", choices =  c("Blue-Purple",
+                                                                           "Yellow-Green-Blue",
+                                                                           "Blue-Green",
+                                                                           "Green-Blue",
+                                                                           "Red-Purple",
+                                                                           'Yellow-Orange-Brown',
+                                                                           "Greyscale",
+                                                                           "Purple",
+                                                                           "Red",
+                                                                           "Orange")),
+                textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
+                textInput("std_er", "Standard Error", width = NULL),
+                #sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
               
             )
           )),
@@ -184,13 +196,29 @@ server <- function(input, output, session) {
   
     scaled_species_data <- species_data * selected_abund
     
+    palette_choices <- shiny::reactive({
+      switch(input$palselect,
+             "Blue-Purple" = "BuPu",
+             "Yellow-Green-Blue" = "YlGnBu",
+             "Blue-Green" = "BuGn",
+             "Green-Blue" = "GnBu",
+             "Red-Purple" = "RdPu",
+             'Yellow-Orange-Brown' = "YlOrBr",
+             "Greyscale" = "Greys",
+             "Purple" = "Purples",
+             "Red" = "Reds",
+             "Orange" = "Orange"
+             )
+    })
+    selected_pal <- palette_choices()
+    
     quartile_vals <- shiny::reactive({
       switch(input$legendselect,
-               "Quintiles" = quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-                  "Low and High Density Emphasis 1" = quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-                  "Low and High Density Emphasis 2" = quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-                  "Low Density Emphasis" = quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-                  "High Density Emphasis" = quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
+              "Quintiles" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+              "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+              "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+              "Low Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+              "High Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
       })
     quartile_opt <- quartile_vals()
     
@@ -198,7 +226,7 @@ server <- function(input, output, session) {
     
     # Color palette, bincount, and other customizations for reactive legend
     pal <- leaflet::colorBin(
-      palette = "YlGnBu", #BuPu
+      palette = selected_pal, 
       reverse = TRUE,
       domain = scaled_species_data,
       bins = quartile_opt,
@@ -213,11 +241,11 @@ server <- function(input, output, session) {
       quartile_opt = quartile_opt,
       fillColor = ~pal(species_data),
       pal = pal,
-      selected_abund = selected_abund)#ifelse(is.na(selected_abund), 1, selected_abund))
+      selected_abund = selected_abund)
   })
   
   # Output leaflet map
-  output$map <- leaflet::renderLeaflet({
+  output$map <- renderLeaflet({
     #map_info <- map_data()
     species_info <- species_pal()
     
@@ -236,7 +264,7 @@ server <- function(input, output, session) {
                   smoothFactor = 0.5,
                   options = pathOptions(zIndex = 5000),
                   group = 'Hexagons') %>%
-      addDrawToolbar(
+      leaflet.extras::addDrawToolbar(
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
         rectangleOptions = drawRectangleOptions(),
@@ -274,7 +302,7 @@ server <- function(input, output, session) {
     feature <- input$map_draw_new_feature
     if (feature$properties$feature_type == "marker") {
       leaflet::leafletProxy("map") %>%
-        addLabelOnlyMarkers(
+        leaflet::addLabelOnlyMarkers(
           lng <- feature$geometry$coordinates[[1]],
           lat <- feature$geometry$coordinates[[2]],
           label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
@@ -290,7 +318,7 @@ server <- function(input, output, session) {
     temp_direc2 <- tempdir()
     
     # Unzips the file
-    unzip(input$drawfile$datapath, exdir = temp_direc2)
+    utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
     all_files <- list.files(temp_direc2, full.names = TRUE)
     shp_file <- all_files[grepl("\\.shp$", all_files)]
     print('upload succesful')
@@ -301,41 +329,68 @@ server <- function(input, output, session) {
       
       # Transform the projection to EPSG 4326 in case it is different
       shapefile_data <- sf::st_transform(shapefile_data, 4326)
-      shifted_geometry <- (st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
-      st_geometry(shapefile_data) <- shifted_geometry
+      shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+      sf::st_geometry(shapefile_data) <- shifted_geometry
       
       # Display the shapefile on the map
       leaflet::leafletProxy("map", session) %>%
-        addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
+        leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
       print("shown on map")
 
     } 
     else {
-      showNotification("No .shp file found in the uploaded zip file.", type = "error")
+      shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
     }
   })
   
+  drawn_shapes <- reactiveVal(NULL)
   
-  dl.y <- callModule(dlmodule, 'dlmodule1')
-
-  
-  data <- reactive({
-    get(input$mapselect)
+  # Update reactive value when a new shape is drawn
+  observeEvent(input$map_draw_new_feature, {
+    new_shape <- input$map_draw_new_feature
+    new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
+    
+    # set/update new shape to reactive value
+    existing_shapes <- drawn_shapes()
+    if (is.null(existing_shapes)) {
+      drawn_shapes(new_shape_sf)
+    } else {
+      drawn_shapes(rbind(existing_shapes, new_shape_sf))
+    }
   })
-
-}
-
-
-dlmodule <- function(input, output, session){
-  output$downloadData <- shiny::downloadHandler(
-    filename = 'Shape.pdf',
-    content = function(file){
-      print('download triggered')
-      #line of code map_shot/st_write - neither successful so far
-      print('file saved to', file)
+  
+  # Download handler for shapefiles
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste0(input$mapselect,"drawn_shapes_", Sys.Date(), ".zip")
+    },
+    content = function(file) {
+      temp_dir <- tempdir()
+      shp_file <- file.path(temp_dir, "drawn_shapes.shp")
+      
+      
+      unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
+      st_write(drawn_shapes(), shp_file)
+      
+      zip_file <- file
+      zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
     }
   )
+  
+  
 }
+
+
+# dlmodule <- function(input, output, session){
+#   output$downloadData <- shiny::downloadHandler(
+#     filename = 'Shape.pdf',
+#     content = function(file){
+#       print('download triggered')
+#       #line of code map_shot/st_write - neither successful so far
+#       print('file saved to', file)
+#     }
+#   )
+# }
 
 # Run the application 
 #shinyApp(ui = ui, server = server)
