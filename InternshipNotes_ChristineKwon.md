@@ -238,3 +238,25 @@ Internship Notes: Christine Kwon
 - Changed color theme to be more natural/toned down - previously inferno
 - Offering various breaks in non-linear legend to choose from
 - Meeting check-in today
+
+
+<span style="color:blue">07/26-29/24:</span>
+
+- Plan for now -> adding the abundance estimate option
+  - Successfully accomplished
+- Working on download button. 
+
+
+<span style="color:blue">07/30/24:</span>
+
+- Downloading shapefile works - `st_write` does heavylifting 
+- Updating certain aesthetic components in UI
+  - Adding selection option for palettes to explore variety of palettes in 
+    showing the map data accurately
+  - Changing name of certain tabs
+  - Adding description of how to use the tool in the How to Use tab
+  - Adding extra button for standard error (does not do anything yet)
+- Note timing of each
+  - Switch species: Ranges between 7- 11 seconds
+  - Switch legend: Ranges between 6-9 seconds
+  - 
