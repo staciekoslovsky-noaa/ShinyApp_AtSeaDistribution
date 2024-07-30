@@ -41,13 +41,6 @@ load_all_files <- function(directory_urls){
 }
 
 
-
-# for (matrix in species_list){
-#   matrixrelabund <- row
-# }
-# #POPhex_MCMC
-
-
 # Optional function for filtering only areas where species is not NA
 # Not used as to show areas that have all been surveyed and not found
 filter_by_col <- function(sffile, col_name){
@@ -56,7 +49,7 @@ filter_by_col <- function(sffile, col_name){
 
 
 
-# Text for the sidebar info pages - from Project Proposal 
+# Text for the sidebar info pages - from Project Proposal /metadata?
 purp <- div('Integrating Diverse Datasets to Understand the Seasonal Distributions
         and Densities of Marine Mammals', style = 'color: #03396c')
 
