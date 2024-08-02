@@ -15,6 +15,7 @@ library(htmlwidgets)
 library(mapview)
 library(tools)
 library(raster)
+library(RColorBrewer)
 
 
 #Currently local accessing files
@@ -22,7 +23,7 @@ source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDSh
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
 #load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
- load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
 
 
 # load("../data/Sample_data_for_portal.RData")
@@ -47,7 +48,20 @@ species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
                       "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
                       "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
-                )
+)
+
+palettes <- list(
+  "Blue-Purple" = "BuPu",
+  "Yellow-Green-Blue" = "YlGnBu",
+  "Blue-Green" = "BuGn",
+  "Green-Blue" = "GnBu",
+  "Red-Purple" = "RdPu",
+  'Yellow-Orange-Brown' = "YlOrBr",
+  "Greyscale" = "Greys",
+  "Purple" = "Purples",
+  "Red" = "Reds",
+  "Orange" = "Oranges"
+)
 
 # UI
 ui <- shinydashboard::dashboardPage(
@@ -64,7 +78,7 @@ ui <- shinydashboard::dashboardPage(
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
-      ),
+    ),
     sidebarMenu(
       menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
@@ -72,107 +86,131 @@ ui <- shinydashboard::dashboardPage(
       menuItem("Methods", tabName = "metd"),
       menuItem("Licenses", tabName = "lic")
     )),
-    dashboardBody(
-      shinydashboard::tabItems(
-        
-        # About the tool tab 
-        tabItem(tabName = 'aboutpg',
-            wellPanel(
-              h2(strong(div("About This Tool", style = 'color: #011f4b')))
+  dashboardBody(
+    shinydashboard::tabItems(
+      
+      # About the tool tab 
+      tabItem(tabName = 'aboutpg',
+              wellPanel(
+                h2(strong(div("About This Tool", style = 'color: #011f4b')))
               ),
-            wellPanel(
+              wellPanel(
                 h3(purp, width = "100%"),
                 p(information),
                 tags$figure(
                   class = "centerFigure",
                   tags$img(
                     src = "sampleseal.jpg",
-                    width = '100%',
+                    width = '50%',
+                    align = "center",
                     alt = "Picture of a male ribbon seal"
                   ),
-                  tags$figcaption("NOAA Fisheries/Josh M London")
+                  tags$figcaption("NOAA Fisheries/Josh M London"),
+                  p(info_two)
                 )
-                )),
-        
-        # How to use/instructional tab
-        tabItem(tabName = 'widgets',
-            wellPanel(
-              (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
-            wellPanel(
-              p(tool_info), # Separated texts to allow for appropriate spacing.
-              p(tool_info2), 
-              p(tool_info3),
-              p(tool_info4)
-            )),
-        
-        # Species density map
-        tabItem(tabName = "specmap",
-          fluidRow(
-            column(9, 
-                   leafletOutput(outputId = "map", width="100%")
-            ),
-            column(3,
+              )),
+      
+      # How to use/instructional tab
+      tabItem(tabName = 'widgets',
               wellPanel(
-                
-                # Customization features in map
-                h3('Customize Map'),
-                selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
-                selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
-                                                                           "Low and High Density Emphasis 1",
-                                                                           "Low and High Density Emphasis 2", 
-                                                                           "Low Density Emphasis",
-                                                                           "High Density Emphasis")),
-                selectizeInput("palselect", "Select Palette", choices =  c("Blue-Purple",
-                                                                           "Yellow-Green-Blue",
-                                                                           "Blue-Green",
-                                                                           "Green-Blue",
-                                                                           "Red-Purple",
-                                                                           'Yellow-Orange-Brown',
-                                                                           "Greyscale",
-                                                                           "Purple",
-                                                                           "Red",
-                                                                           "Orange")),
-                textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
-                textInput("std_er", "Standard Error", width = NULL),
-                #sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
-              
-            )
-          )),
-          fluidRow(
-            wellPanel(
-              #Shapefile upload/download UI 
-              h3('Download or Upload Shapefile'),
-              downloadButton('downloadData', "Download Shapefile"),
-              # File input only accepts zipped files. 
-              # Server below contains further code on validating content within
-              # unzipped file
-              fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE)
-            )
-          )
-        ),
-        tabItem(tabName = "metd",
-          wellPanel(
-            h2(strong(methods_title))
-          ),
-          wellPanel(
-            p(methods_info),
-            h3('For more information, contact: etc')
-          )
-        ),
-        tabItem(tabName = 'lic',
-          wellPanel(
-            h2('licenses')
-          ))
+                (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
+              wellPanel(
+                p(tool_info),
+                p(tool_info1),# Separated texts to allow for appropriate spacing.
+                p(tool_description),
+                uiOutput("palettePlots"),
+                p(tool_info3),
+                p(tool_info4)
+              )),
+      
+      # Species density map
+      tabItem(tabName = "specmap",
+              fluidRow(
+                column(9, 
+                       leafletOutput(outputId = "map", width="100%")
+                ),
+                column(3,
+                       wellPanel(
+                         
+                         # Customization features in map
+                         h3('Customize Map'),
+                         selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
+                         selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
+                                                                                     "Low and High Density Emphasis 1",
+                                                                                     "Low and High Density Emphasis 2", 
+                                                                                     "Low Density Emphasis",
+                                                                                     "High Density Emphasis")),
+                         selectizeInput("palselect", "Select Palette", choices =  c("Blue-Purple",
+                                                                                    "Yellow-Green-Blue",
+                                                                                    "Blue-Green",
+                                                                                    "Green-Blue",
+                                                                                    "Red-Purple",
+                                                                                    'Yellow-Orange-Brown',
+                                                                                    "Greyscale",
+                                                                                    "Purple",
+                                                                                    "Red",
+                                                                                    "Orange")),
+                         textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
+                         textInput("std_er", "Standard Error", width = NULL),
+                         #sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
+                         
+                       )
+                )),
+              fluidRow(
+                wellPanel(
+                  #Shapefile upload/download UI 
+                  h3('Download or Upload Shapefile'),
+                  downloadButton('downloadData', "Download Shapefile"),
+                  # File input only accepts zipped files. 
+                  # Server below contains further code on validating content within
+                  # unzipped file
+                  fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE)
+                )
+              )
+      ),
+      tabItem(tabName = "metd",
+              wellPanel(
+                h2(strong(methods_title))
+              ),
+              wellPanel(
+                p(methods_info),
+                h3('For more information, contact: etc')
+              )
+      ),
+      tabItem(tabName = 'lic',
+              wellPanel(
+                h2('licenses')
+              ))
     ))
 )
 
 # Define server logic
 server <- function(input, output, session) {
   
+  output$palettePlots <- renderUI({
+    plot_list <- lapply(names(palettes), function(palette_name) {
+      plotOutput(outputId = paste0("plot_", palette_name), height = "100px", width = "100%")
+    })
+    do.call(tagList, plot_list)
+  })
+  
+  lapply(names(palettes), function(palette_name) {
+    output[[paste0("plot_", palette_name)]] <- renderPlot({
+      palette_colors <- brewer.pal(9, palettes[[palette_name]])
+      ggplot(data.frame(x = 1:9, y = 1, fill = factor(1:9)), aes(x, y, fill = fill)) +
+        geom_tile() +
+        scale_fill_manual(values = palette_colors) +
+        theme_void() +
+        theme(legend.position = "none",
+              plot.title = element_text(size = 10, hjust = 0.5, family = "Helvetica Neue")) +
+        ggtitle(palette_name)
+    })
+  })
+  
   # Converts starting projection to EPSG 4326 to be displayed onto base map.
   POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
   POPhex_MCMC <- sf::st_transform(POPhex_MCMC, 4326)
-    
+  
   # As Alaska is split by the international dateline, the following lines move 
   # the data across the dateline for a unified view. 
   POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
@@ -193,7 +231,7 @@ server <- function(input, output, session) {
     
     #This accesses the POPhex_MCMC$species column of values
     species_data <- species_list2[[selected_species]]
-  
+    
     scaled_species_data <- species_data * selected_abund
     
     palette_choices <- shiny::reactive({
@@ -208,18 +246,18 @@ server <- function(input, output, session) {
              "Purple" = "Purples",
              "Red" = "Reds",
              "Orange" = "Orange"
-             )
+      )
     })
     selected_pal <- palette_choices()
     
     quartile_vals <- shiny::reactive({
       switch(input$legendselect,
-              "Quintiles" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-              "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-              "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-              "Low Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-              "High Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
-      })
+             "Quintiles" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+             "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+             "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+             "Low Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+             "High Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
+    })
     quartile_opt <- quartile_vals()
     
     #another option is I could create a button or smth where we can offer different divisions to select from
@@ -284,7 +322,7 @@ server <- function(input, output, session) {
       # Static set view of Alaska 
       setView(208, 64, 3) %>%
       addScaleBar(position = "bottomright",
-                options = scaleBarOptions(maxWidth = 250)) %>%
+                  options = scaleBarOptions(maxWidth = 250)) %>%
       addLegend(
         "bottomright",
         pal = species_info$pal,
@@ -292,10 +330,10 @@ server <- function(input, output, session) {
         title = ifelse(species_info$selected_abund == 1, 'Relative Abundance:', 'Abundance Estimate'),
         labFormat = leaflet::labelFormat(digits = 6),
         group = 'Legend'
-                  )
+      )
   })
-
-
+  
+  
   # Provides coordinates for markers when you place them on the map. 
   # Currently does not delete together - FIX
   shiny::observeEvent(input$map_draw_new_feature, {
@@ -311,36 +349,51 @@ server <- function(input, output, session) {
         )
     }})
   
+  uploaded_shapes <- reactiveVal(NULL)
   # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
     drawfile <- input$drawfile
     # Create temp directory
     temp_direc2 <- tempdir()
+    uploaded_shapes(NULL)
+    # unlink(temp_direc2, recursive = TRUE)
+    # dir.create(temp_direc2)
+    
+    all_shapefiles <- list()
     
     # Unzips the file
+    for (i in 1:nrow(drawfile)) {
     utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
     all_files <- list.files(temp_direc2, full.names = TRUE)
-    shp_file <- all_files[grepl("\\.shp$", all_files)]
+    shape_file <- all_files[grepl("\\.shp$", all_files)]
     print('upload succesful')
-   
-    if (length(shp_file) > 0) {
+    
+    if (length(shape_file) > 0) {
       # Read the shapefile
-      shapefile_data <- sf::st_read(shp_file)
+      shapefile_data <- sf::st_read(shape_file)
       
       # Transform the projection to EPSG 4326 in case it is different
       shapefile_data <- sf::st_transform(shapefile_data, 4326)
       shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
       sf::st_geometry(shapefile_data) <- shifted_geometry
       
+      # existing_shapes <- drawn_shapes()
+      # if (is.null(existing_shapes)) {
+      #   drawn_shapes(shapefile_data)
+      # } else {
+      #   drawn_shapes(rbind(existing_shapes, shapefile_data))
+      # }
+      all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
+      combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
       leaflet::leafletProxy("map", session) %>%
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
       print("shown on map")
-
+       
     } 
     else {
       shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
-    }
+    }}
   })
   
   drawn_shapes <- reactiveVal(NULL)
@@ -370,7 +423,7 @@ server <- function(input, output, session) {
       
       
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
-      st_write(drawn_shapes(), shp_file)
+      sf::st_write(drawn_shapes(), shp_file)
       
       zip_file <- file
       zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
@@ -381,16 +434,6 @@ server <- function(input, output, session) {
 }
 
 
-# dlmodule <- function(input, output, session){
-#   output$downloadData <- shiny::downloadHandler(
-#     filename = 'Shape.pdf',
-#     content = function(file){
-#       print('download triggered')
-#       #line of code map_shot/st_write - neither successful so far
-#       print('file saved to', file)
-#     }
-#   )
-# }
 
 # Run the application 
 #shinyApp(ui = ui, server = server)
