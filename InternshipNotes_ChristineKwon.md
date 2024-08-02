@@ -259,4 +259,11 @@ Internship Notes: Christine Kwon
 - Note timing of each
   - Switch species: Ranges between 7- 11 seconds
   - Switch legend: Ranges between 6-9 seconds
-  - 
+  - Switch total abundance value: Depends on size of value
+    - 10,000 - 10 sec
+    - 50,000 - 
+  
+
+<span style="color:blue">07/31/24:</span>
+
+- Adding informational text to the tabs to make the map tool accessible
