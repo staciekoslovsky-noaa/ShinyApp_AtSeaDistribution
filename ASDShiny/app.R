@@ -2,13 +2,12 @@
 library(shiny)
 library(shinyjs)
 library(leaflet)
+library(shinyBS)
 library(sf)
 library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
 library(leaflet.mapboxgl) #mapbox extension 
-library(shinySearchbar) #nu
-library(fresh) 
 library(shinyWidgets)
 library(htmltools)
 library(htmlwidgets)
@@ -17,9 +16,7 @@ library(tools)
 library(raster)
 library(RColorBrewer)
 
-
-#Currently local accessing files
-source("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/ASDShiny/helper_functions.R")
+#Access files
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
 #load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
@@ -51,16 +48,11 @@ species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
 )
 
 palettes <- list(
+  "Viridis" = "viridis",
+  "Plasma" = "plasma",
   "Blue-Purple" = "BuPu",
   "Yellow-Green-Blue" = "YlGnBu",
-  "Blue-Green" = "BuGn",
-  "Green-Blue" = "GnBu",
-  "Red-Purple" = "RdPu",
-  'Yellow-Orange-Brown' = "YlOrBr",
-  "Greyscale" = "Greys",
-  "Purple" = "Purples",
-  "Red" = "Reds",
-  "Orange" = "Oranges"
+  "Greyscale" = "Greys"
 )
 
 # UI
@@ -126,10 +118,10 @@ ui <- shinydashboard::dashboardPage(
       # Species density map
       tabItem(tabName = "specmap",
               fluidRow(
-                column(9, 
+                column(8, 
                        leafletOutput(outputId = "map", width="100%")
                 ),
-                column(3,
+                column(4,
                        wellPanel(
                          
                          # Customization features in map
@@ -140,20 +132,32 @@ ui <- shinydashboard::dashboardPage(
                                                                                      "Low and High Density Emphasis 2", 
                                                                                      "Low Density Emphasis",
                                                                                      "High Density Emphasis")),
-                         selectizeInput("palselect", "Select Palette", choices =  c("Blue-Purple",
+                         fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
+                                                                                    "Plasma",
+                                                                                    "Blue-Purple",
                                                                                     "Yellow-Green-Blue",
-                                                                                    "Blue-Green",
-                                                                                    "Green-Blue",
-                                                                                    "Red-Purple",
-                                                                                    'Yellow-Orange-Brown',
-                                                                                    "Greyscale",
-                                                                                    "Purple",
-                                                                                    "Red",
-                                                                                    "Orange")),
-                         textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
+                                                                                    "Greyscale"
+                                                                                    ), width = NULL)),
+                                  column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
+                         # textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
                          textInput("std_er", "Standard Error", width = NULL),
-                         #sliderInput('ci', 'Cells of Interest', min = 1, max = 200, value = 1)
-                         
+                         shinyBS::bsCollapse(id = "collapse_1", open = "Panel 1",
+                           shinyBS::bsCollapsePanel("Additional Options", style = 'success',
+                           bsCollapse(id = "collapseExample", open = "Panel 2",
+                                      bsCollapsePanel("Abundance Estimate", 
+                                                      textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
+                                                      "Enter total abundance to get an updated abundance estimate.",
+                                                      style = "info"),
+                                      bsCollapsePanel("Custom Area Analysis",
+                                                      fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
+                                                      "Upload a shapefile for custom area analysis.",
+                                                      "Only zipped files will be accepted.",
+                                                      br(),
+                                                      br(),
+                                                      actionButton("do", "Generate"),
+                                                      style = "primary")
+                           ))
+                         )
                        )
                 )),
               fluidRow(
@@ -164,7 +168,7 @@ ui <- shinydashboard::dashboardPage(
                   # File input only accepts zipped files. 
                   # Server below contains further code on validating content within
                   # unzipped file
-                  fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE)
+                  
                 )
               )
       ),
@@ -225,6 +229,7 @@ server <- function(input, output, session) {
   # Reactive value to hold palette data and calculate quartiles for legend
   species_pal <- shiny::reactive({
     selected_species <- input$mapselect
+    rev_selection <- input$rev_pal
     selected_abund <- as.numeric(input$abs_abund)
     
     if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
@@ -236,16 +241,11 @@ server <- function(input, output, session) {
     
     palette_choices <- shiny::reactive({
       switch(input$palselect,
+             "Viridis" = "viridis",
+             "Plasma" = "plasma",
              "Blue-Purple" = "BuPu",
              "Yellow-Green-Blue" = "YlGnBu",
-             "Blue-Green" = "BuGn",
-             "Green-Blue" = "GnBu",
-             "Red-Purple" = "RdPu",
-             'Yellow-Orange-Brown' = "YlOrBr",
-             "Greyscale" = "Greys",
-             "Purple" = "Purples",
-             "Red" = "Reds",
-             "Orange" = "Orange"
+             "Greyscale" = "Greys"
       )
     })
     selected_pal <- palette_choices()
@@ -265,7 +265,7 @@ server <- function(input, output, session) {
     # Color palette, bincount, and other customizations for reactive legend
     pal <- leaflet::colorBin(
       palette = selected_pal, 
-      reverse = TRUE,
+      reverse = rev_selection,
       domain = scaled_species_data,
       bins = quartile_opt,
       pretty = FALSE,

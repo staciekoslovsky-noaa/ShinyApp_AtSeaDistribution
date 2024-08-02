@@ -15,6 +15,24 @@ urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSea
 )
 
 
+species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
+                      "Fin Whale" = POPhex_MCMC$Fin.Whale,
+                      "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
+                      #"Bearded Seal" = EB_MCMC, #currently using grid data
+                      "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
+                      "Sea Otter" = POPhex_MCMC$Sea.Otter,
+                      "Gray Whale" = POPhex_MCMC$Gray.Whale,
+                      "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+                      "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
+                      "Killer Whale" = POPhex_MCMC$Killer.Whale,
+                      "Walrus" = POPhex_MCMC$Walrus,
+                      "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
+                      "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
+                      "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
+                      "Harbor Seal" = POPhex_MCMC$Harbor.Seal
+)
+
+
 load_all_files <- function(directory_urls){
   # Loads all files from data folder. 
   
@@ -34,6 +52,7 @@ load_all_files <- function(directory_urls){
     
     # Assign object to the global environment (for easy access) with the file base name
     assign(file_base_name, get(obj_name, envir = temp_env), envir = .GlobalEnv)
+    
   }
    
   # Final check 

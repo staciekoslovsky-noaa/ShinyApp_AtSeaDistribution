@@ -261,9 +261,18 @@ Internship Notes: Christine Kwon
   - Switch legend: Ranges between 6-9 seconds
   - Switch total abundance value: Depends on size of value
     - 10,000 - 10 sec
-    - 50,000 - 
+    - 50,000 - 11 sec
   
 
 <span style="color:blue">07/31/24:</span>
 
 - Adding informational text to the tabs to make the map tool accessible
+
+
+<span style="color:blue">08/02/24:</span>
+
+- Uninstalled and reinstalled R--seemed to fix load time issue
+- Modified palette options and provided reverse option
+- Trying to find ways to organize the additional features
+  - `library(shinyBS)` for collapsible panels 
+- New script (custom_area_analysis.R) added for calculations
