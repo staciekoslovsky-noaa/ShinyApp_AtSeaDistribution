@@ -40,7 +40,6 @@ load_all_files <- function(directory_urls){
   print('Done loading')
 }
 
-
 # Optional function for filtering only areas where species is not NA
 # Not used as to show areas that have all been surveyed and not found
 filter_by_col <- function(sffile, col_name){
@@ -53,6 +52,7 @@ filter_by_col <- function(sffile, col_name){
 purp <- div('Integrating Diverse Datasets to Understand the Seasonal Distributions
         and Densities of Marine Mammals', style = 'color: #03396c')
 
+# About tab 
 information <- div('Understanding seasonal distributions and densities of marine mammals remains a high priority for
                     NMFS science centers and regional offices. In addition to answering basic ecological questions, such
                     information is frequently requested of science center staff to help in calculation of “takes” under the
@@ -68,34 +68,73 @@ information <- div('Understanding seasonal distributions and densities of marine
                     estimates of seasonal densities, including scientific surveys, satellite telemetry, acoustic detections,
                     Alaska Native subsistence harvests, and platform-of-opportunity (POP) observations.', style = 'color: #005b96')
 
-information2 <- div('Thus, this tool serves as a data portal to share species densities maps.')
+info_two <- div(p('Thus, this tool serves as a data portal to share species densities maps.'), 
+                    p("Marine spatial planning requires knowledge of the timing and location of marine mammal distribution,
+                      migrations, density in local areas, and movements to mitigate anthropogenic impacts on protected
+                      species. The ability to combine data from surveys, POP, telemetry, and passive acoustic recorders will
+                      shrink spatial-temporal data gaps and provide managers with a product that represents the best scientific
+                      information available. This more complete information can then be used to assist in NEPA analyses,
+                      ESA Section 7 consultations, MMPA Incidental Harassment Authorizations, and other permit and
+                      management needs. Further, because the gaps present in the data proposed for development of this
+                      toolbox are not unique to the Alaska Region, the framework developed here will have broad
+                      applicability beyond Arctic ecosystems and for all NMFS science centers and regional offices.
+                      The potential benefits of these analytical approaches are expected to reach well beyond just NMFS.
+                      Other federal and state agencies, tribal governments and Alaska Native organizations, non-governmental
+                      organizations, and a variety of industry and community stakeholders seek the type of information
+                      products that this project is targeting. Information about seasonal patterns of marine mammal density
+                      distributions and habitat use will help these groups to better assess potential impacts, implement
+                      mitigation actions where appropriate, and develop plans that are more fully informed by science.
+                      Examples of specific federal agencies that have expressed a desire for access to better information on the
+                      seasonal locations and densities of marine mammals include BOEM and the U.S. Navy."), style = 'color: #005b96')
 
+
+# How to Use Tab 
 tool_info <- div('This tool was developed using Shiny, a package that facilitates web app development directly 
-from coding languages such as R.', style = 'color: #005b96')
-tool_info2 <- div(paste('To first access species density maps, click the Species button in the sidebar. 
-                  Use the right panel to toggle between different marine mammal species, and (more options later). 
-                  The toolbar on the left of the map contains various tools to work with select data shown on the map. 
-                  The polygon, rectangle, and circle options on the toolbar can be used to draw shapes
-                  that can be downloaded as a shapefile. 
-                  The marker can be used to obtain coordinates of the selected location. 
-                  The trash bin will delete any shapes or lines that are no longer necessary.
-                  The bottom panel contains buttons to download a shapefile and upload own shape data
-                  for analysis in one of the following formats: zipped .kmz or .shp file.'), style = 'color: #005b96')
-tool_info3 <- div('For any additional questions, contact ____.', style = 'color: #005b96')
-tool_info4 <- div('The code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
+                  from coding languages such as R.', style = 'color: #005b96')
+tool_info1 <- div(p("To first access species density maps, click the Species button in the sidebar. 
+                  Use the right panel to toggle between different marine mammal species."), style = 'color: #005b96')
+                  
+tool_description <- div(h3("Using the Draw Toolbar"),
+                      p("The toolbar on the left of the map contains various tools to work with select data shown on the map. 
+                        The polygon, rectangle, and circle options on the toolbar can be used to draw shapes
+                        that can be downloaded as a shapefile. 
+                        The marker can be used to obtain coordinates of the selected location. 
+                        The trash bin will delete any shapes or lines that are no longer necessary.
+                        The bottom panel contains buttons to download a shapefile of the drawn polygons and upload the user's own shape data
+                        for analysis in one of the following formats: zipped .kmz or .shp file."),
+  
+                    h3("Customizing the Legend"),
+                      'The legend in the map can be customized using the "Select Legend" option in the sidebar.
+                       The options are named:',
+                      tags$ul(
+                              tags$li('"Quintiles" divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 1'),
+                              tags$li('"Low and High Density Emphasis 1" divides them into the following: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1'),
+                              tags$li('"Low and High Density Emphasis 2" divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1'),
+                              tags$li('"Low Density Emphasis" divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1'),
+                              tags$li('"High Density Emphasis" divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1')), 
+                      h3("Customizing the Color Palette"),
+                      p('There are also additional options for viewing the map with various color palettes. 
+                             Possible palettes to select between include Blue-Purple, Yellow-Green-Blue, Blue-Green, Green-Blue, Red-Purple,
+                              Yellow-Orange-Brown, Greyscale, Purple, Red, and Orange.'),
+                      style = 'color: #005b96')
+tool_info3 <- div('For any additional questions on code maintenance, contact Stacie Koslovsky. For additional questions
+                  on the the statistical analysis, contact ___.', style = 'color: #005b96')
+tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
 
+
+# Methods tab
 methods_title <- div('Methods and Approaches', style = 'color: #03396c')
 
 methods_info <- div('The statistical approaches for different data integration sub-projects differ depending on species and the
-                types of data available. For select cetacean species, POP provide the only data available and
-                existing models developed with previous Toolbox funding can be applied directly to estimate species
-                distributions (Ver Hoef et al., 2021). For species with more data sources (e.g., bearded seals, Cook Inlet
-                beluga whales), partially or fully integrated species distribution models are needed, as described in Conn
-                et al. (In prep) and presented at the 2023 PSAW conference. These models work similarly to fisheries
-                stock-assessment models with inference conducted using a product log-likelihood, assuming that each
-                data source is attempting to “sample” the underlying species distribution. These models will use
-                existing data (i.e., no new data collection is anticipated, only processing and analysis of existing data).',
-                style = 'color: #005b96')
+                    types of data available. For select cetacean species, POP provide the only data available and
+                    existing models developed with previous Toolbox funding can be applied directly to estimate species
+                    distributions (Ver Hoef et al., 2021). For species with more data sources (e.g., bearded seals, Cook Inlet
+                    beluga whales), partially or fully integrated species distribution models are needed, as described in Conn
+                    et al. (In prep) and presented at the 2023 PSAW conference. These models work similarly to fisheries
+                    stock-assessment models with inference conducted using a product log-likelihood, assuming that each
+                    data source is attempting to “sample” the underlying species distribution. These models will use
+                    existing data (i.e., no new data collection is anticipated, only processing and analysis of existing data).',
+                    style = 'color: #005b96')
   
 
 load_all_filest <- function(directory) {
