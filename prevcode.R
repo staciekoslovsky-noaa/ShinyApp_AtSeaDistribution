@@ -171,3 +171,38 @@ shiny::observeEvent(input$mapselect, {
     na.color = "#FFFFFF80"
   )
 })
+
+
+map_data <- shiny::reactive({
+  switch(input$mapselect,
+         'Select' = list(data = POPhex_MCMC, text = "Surveyed areas shown in Blue"),
+         'Northern Minke Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Northern.Minke.Whale)(POPhex_MCMC$Northern.Minke.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
+         #use the actual values in POPhexagons_sf 
+         'Fin Whale' = list(data = POPhex_MCMC, fillColor = ~colorNumeric('inferno', POPhex_MCMC$Fin.Whale)(POPhex_MCMC$Fin.Whale), fillOpacity = 0.8, color = "black", weight = 0.5),
+         'Northern Fur Seal' = list(data = filtered_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$CU)(CU), fillOpacity = 0.8, color = "black", weight = 0.5),
+         #'Bearded Seal' = list(data = BS_grid_sf, fillColor = ~colorNumeric('inferno', BS2)(BS2), fillOpacity = 0.8, color = "black", weight = 1), # Basic color to ensure visibility
+         #'Steller Sea Lion' = list(data = SSL_grid_sf, fillColor = ~colorNumeric('inferno', SSL_POP_ests)(SSL_POP_ests), fillOpacity = 0.8, color = "black", weight = 0.5),
+         'Steller Sea Lion' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EJ)(EJ), fillOpacity = 0.8, color = "black", weight = 0.5),
+         'Sea Otter' = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$EL)(EL), fillOpacity = 0.8, color = "black", weight = 0.5),
+         'Gray Whale' = list(),
+         'Pacific White-Sided Dolphin' = list(),
+         "Dall's Porpoise" = list(data = POPhexagons_sf, fillColor = ~colorNumeric('inferno', POPhexagons_sf$PV)(PV), fillOpacity = 0.8, color = "black", weight = 0.5)
+  )
+})
+
+#Add default map POPhexagons_sf 
+# species_list <- list("Northern Minke Whale" = BA_MCMC,
+#                   "Fin Whale" = BP_MCMC,
+#                   "Northern Fur Seal" = CU_MCMC,
+#                   #"Bearded Seal" = EB_MCMC, #currently using grid data 
+#                   "Steller Sea Lion" = EJ_MCMC,
+#                   "Sea Otter" = EL_MCMC,
+#                   "Gray Whale" = ER_MCMC,
+#                   "Pacific White-Sided Dolphin" = LO_MCMC,
+#                   "Humpback Whale" = MN_MCMC,
+#                   "Killer Whale" = OO_MCMC,
+#                   "Walrus" = OR_MCMC,
+#                   "Dall's Porpoise" = PD_MCMC,
+#                   "Sperm Whale" = PM_MCMC,
+#                   "Harbor Porpoise" = PP_MCMC,
+#                   "Harbor Seal" = PV_MCMC)
