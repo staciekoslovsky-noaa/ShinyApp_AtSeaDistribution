@@ -1,6 +1,8 @@
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
+# source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/app.R')
 
-load_all_files(urls)
+
+#load_all_files(urls)
 
 species_links <- list(
   "Northern Minke Whale" = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData',
@@ -19,8 +21,19 @@ species_links <- list(
   "Harbor Seal" = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
 )
 
+# New dataframe containing the selected MCMC data (abundance calculations source)
+# with the POPhexagons data (spatial data source) 
 POPdata_with_MCMC <- cbind(POPhexagons_sf, RelAbund_MCMC)
 
-POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
-POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
+# Move across dateline
+POPdata_with_MCMC$geometry <- (sf::st_geometry(POPdata_with_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
+
+# # Set centroid values
+# POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
+# POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
+# 
+# # Get
+# POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
+# POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
+
 

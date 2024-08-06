@@ -165,6 +165,7 @@ ui <- shinydashboard::dashboardPage(
                   #Shapefile upload/download UI 
                   h3('Download or Upload Shapefile'),
                   downloadButton('downloadData', "Download Shapefile"),
+                  tableOutput('coords_table')
                   # File input only accepts zipped files. 
                   # Server below contains further code on validating content within
                   # unzipped file
@@ -383,6 +384,13 @@ server <- function(input, output, session) {
       # } else {
       #   drawn_shapes(rbind(existing_shapes, shapefile_data))
       # }
+      
+      coords <- st_coordinates(shapefile_data)
+      coords_df <- data.frame(coords)
+      
+      output$coords_table <- renderTable({
+        coords_df})
+      
       all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
       combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
