@@ -271,8 +271,17 @@ Internship Notes: Christine Kwon
 
 <span style="color:blue">08/02/24:</span>
 
-- Uninstalled and reinstalled R--seemed to fix load time issue
-- Modified palette options and provided reverse option
-- Trying to find ways to organize the additional features
+- Changing the organization of the website
+  - Additional options no longer all listed and visible on sidebar (clutter)
   - `library(shinyBS)` for collapsible panels 
-- New script (custom_area_analysis.R) added for calculations
+  - Now moved to collapsible panels with one larger panels (additional options)
+  - Modified palette options and provided reverse option (color-blind friendly)
+- Planning out abundance calculations work
+  - New script (custom_area_analysis.R) added for calculations
+- Uninstalled and reinstalled R--seemed to fix load time issue
+  
+  
+<span style="color:blue">08/5-7/24:</span>
+
+- `POPdata_with_MCMC` for data with MCMC (avoiding rewriting data)
+- 

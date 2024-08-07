@@ -18,6 +18,7 @@ library(RColorBrewer)
 
 #Access files
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
+source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/custom_area_analysis.R')
 #load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
@@ -165,7 +166,9 @@ ui <- shinydashboard::dashboardPage(
                   #Shapefile upload/download UI 
                   h3('Download or Upload Shapefile'),
                   downloadButton('downloadData', "Download Shapefile"),
-                  tableOutput('coords_table')
+                  tableOutput('coords_table'),
+                  textOutput('small_area_abund')
+                  
                   # File input only accepts zipped files. 
                   # Server below contains further code on validating content within
                   # unzipped file
@@ -391,6 +394,28 @@ server <- function(input, output, session) {
       output$coords_table <- renderTable({
         coords_df})
       
+      print(coords_df)
+      max_x <- max(coords_df$X)
+      max_y <- max(coords_df$Y)
+      min_x <- min(coords_df$X)
+      min_y <- min(coords_df$Y)
+      
+      # Filter only those in the shapefile coordinates
+      POPdata_with_MCMC <- POPdata_with_MCMC %>%
+        dplyr::filter(x >= min_x & x <= max_x & y >= min_y & y <= max_y)
+        
+      selected_abund <- as.numeric(input$abs_abund)
+      
+      if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
+      
+
+      if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
+        output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area:", sum(species_info$column))})
+      }
+      else{
+        output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area:", sum(species_info$column))})
+      }
+      
       all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
       combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
@@ -437,6 +462,8 @@ server <- function(input, output, session) {
       zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
     }
   )
+  
+  #POPdata_with_MCMC
   
   
 }

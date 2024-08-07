@@ -23,7 +23,7 @@ species_links <- list(
 
 # New dataframe containing the selected MCMC data (abundance calculations source)
 # with the POPhexagons data (spatial data source) 
-POPdata_with_MCMC <- cbind(POPhexagons_sf, RelAbund_MCMC)
+POPdata_with_MCMC <- cbind(POPhex_MCMC, RelAbund_MCMC)
 
 # Move across dateline
 POPdata_with_MCMC$geometry <- (sf::st_geometry(POPdata_with_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
@@ -35,5 +35,4 @@ POPdata_with_MCMC$geometry <- (sf::st_geometry(POPdata_with_MCMC) + c(360, 90)) 
 # # Get
 # POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
 # POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
-
 
