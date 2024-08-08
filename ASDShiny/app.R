@@ -353,6 +353,42 @@ server <- function(input, output, session) {
         )
     }})
   
+  
+  #will change to observeEvent later if not used globally
+  generate_analysis <- shiny::observeEvent(input$do, {
+    shapefile_data <- uploaded_shapes()
+    species_info <- species_pal()
+    coords <- st_coordinates(shapefile_data)
+    coords_df <- data.frame(coords)
+    
+    output$coords_table <- renderTable({
+      coords_df})
+    
+    print(coords_df)
+    max_x <- max(coords_df$X)
+    max_y <- max(coords_df$Y)
+    min_x <- min(coords_df$X)
+    min_y <- min(coords_df$Y)
+    
+    # Filter only those in the shapefile coordinates
+    POPdata_with_MCMC <- POPdata_with_MCMC %>%
+      dplyr::filter(x >= min_x & x <= max_x & y >= min_y & y <= max_y)
+    
+    selected_abund <- as.numeric(input$abs_abund)
+    
+    if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
+    
+    if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
+      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area:", sum(species_info$column))})
+    }
+    else{
+      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area:", sum(species_info$column))})
+    }
+    
+    })
+  
+  
+  
   uploaded_shapes <- reactiveVal(NULL)
   # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
@@ -381,40 +417,13 @@ server <- function(input, output, session) {
       shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
       sf::st_geometry(shapefile_data) <- shifted_geometry
       
+      uploaded_shapes(shapefile_data)
       # existing_shapes <- drawn_shapes()
       # if (is.null(existing_shapes)) {
       #   drawn_shapes(shapefile_data)
       # } else {
       #   drawn_shapes(rbind(existing_shapes, shapefile_data))
       # }
-      
-      coords <- st_coordinates(shapefile_data)
-      coords_df <- data.frame(coords)
-      
-      output$coords_table <- renderTable({
-        coords_df})
-      
-      print(coords_df)
-      max_x <- max(coords_df$X)
-      max_y <- max(coords_df$Y)
-      min_x <- min(coords_df$X)
-      min_y <- min(coords_df$Y)
-      
-      # Filter only those in the shapefile coordinates
-      POPdata_with_MCMC <- POPdata_with_MCMC %>%
-        dplyr::filter(x >= min_x & x <= max_x & y >= min_y & y <= max_y)
-        
-      selected_abund <- as.numeric(input$abs_abund)
-      
-      if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
-      
-
-      if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-        output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area:", sum(species_info$column))})
-      }
-      else{
-        output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area:", sum(species_info$column))})
-      }
       
       all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
       combined_shapefiles <- do.call(rbind, all_shapefiles)
@@ -473,5 +482,6 @@ server <- function(input, output, session) {
 # Run the application 
 #shinyApp(ui = ui, server = server)
 #temporary due to bug
-shinyApp(ui = ui, server = server,options=c(launch.browser = .rs.invokeShinyPaneViewer))
+shinyApp(ui = ui, server = server)
+#options=c(launch.browser = .rs.invokeShinyPaneViewer)
 
