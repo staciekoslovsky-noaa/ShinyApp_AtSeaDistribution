@@ -16,19 +16,21 @@ library(tools)
 library(raster)
 library(RColorBrewer)
 
+
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #Access files
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/custom_area_analysis.R')
 #load_all_filest("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data")
 # load("/Users/christinekwon/NOAAproject-CK-s24/ShinyApp_AtSeaDistribution/data/POPhexagons_sf.rda")
-load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+
 
 
 # load("../data/Sample_data_for_portal.RData")
 
-
 # Access via GitHub
-load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
+
 #load_all_files(urls)
 
 species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
@@ -48,6 +50,9 @@ species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
 )
 
+
+
+
 palettes <- list(
   "Viridis" = "viridis",
   "Plasma" = "plasma",
@@ -58,15 +63,6 @@ palettes <- list(
 
 # UI
 ui <- shinydashboard::dashboardPage(
-  #title = "At Sea Densities of Marine Mammals",
-  
-  # Hides warnings and errors in app
-  
-  # htmltools::tags$style(type="text/css",
-  #            ".shiny-output-error { visibility: hidden; }",
-  #            ".shiny-output-error:before { visibility: hidden; }",),
-  # 
-  # Dashboard/sidebar visible on left side of screen. 
   dashboardHeader(title = "At Sea Densities of Marine Mammals"),
   dashboardSidebar(
     tags$head(
@@ -163,11 +159,22 @@ ui <- shinydashboard::dashboardPage(
                 )),
               fluidRow(
                 wellPanel(
+                  bsCollapse(id = "collapseanalysis", open = "Panel 3",
+                             bsCollapsePanel("Generated Custom Area Analysis", 
+                                             'Small Area Analysis will be provided once a shapefile is uploaded
+                                              and the button "Generate Shapes" is pressed in the Custom Area Analysis
+                                              section within Additional Options.',
+                                             tableOutput('coords_table'),
+                                             textOutput('small_area_abund'),
+                                             plotOutput('small_area_hist'),
+                                             style = "primary")
+                )
+              )),
+              fluidRow(
+                wellPanel(
                   #Shapefile upload/download UI 
                   h3('Download or Upload Shapefile'),
                   downloadButton('downloadData', "Download Shapefile"),
-                  tableOutput('coords_table'),
-                  textOutput('small_area_abund')
                   
                   # File input only accepts zipped files. 
                   # Server below contains further code on validating content within
@@ -264,8 +271,6 @@ server <- function(input, output, session) {
     })
     quartile_opt <- quartile_vals()
     
-    #another option is I could create a button or smth where we can offer different divisions to select from
-    
     # Color palette, bincount, and other customizations for reactive legend
     pal <- leaflet::colorBin(
       palette = selected_pal, 
@@ -356,8 +361,16 @@ server <- function(input, output, session) {
   
   #will change to observeEvent later if not used globally
   generate_analysis <- shiny::observeEvent(input$do, {
+    
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
+    if (is.na(st_crs(shapefile_data))) {
+      st_crs(shapefile_data) <- 4326 # Assign a default CRS (EPSG:4326)
+    }
+    shapefile_data <- sf::st_transform(shapefile_data, 4326)
+    shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    sf::st_geometry(shapefile_data) <- shifted_geometry
+    
     coords <- st_coordinates(shapefile_data)
     coords_df <- data.frame(coords)
     
@@ -370,19 +383,55 @@ server <- function(input, output, session) {
     min_x <- min(coords_df$X)
     min_y <- min(coords_df$Y)
     
+    print(paste("Max X:", max_x, "Min X:", min_x))
+    print(paste("Max Y:", max_y, "Min Y:", min_y))
+    
+    row_variances <- apply(RelAbund_MCMC, 1, var)
+    
+    POPdata_with_MCMC <- cbind(POPhex_MCMC, RelAbund_MCMC, row_variances)
+    
+    POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
+    POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
+    # 
+    
     # Filter only those in the shapefile coordinates
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
-      dplyr::filter(x >= min_x & x <= max_x & y >= min_y & y <= max_y)
+      dplyr::filter(centroid.x >= min_x & centroid.x <= max_x & centroid.y >= min_y & centroid.y <= max_y)
+    #print(POPdata_with_MCMC$Fin.Whale)
+    print(sum(POPdata_with_MCMC$Fin.Whale))
     
-    selected_abund <- as.numeric(input$abs_abund)
+    #incorrect given hexagons are dependent, works if independent 
+    overall_variance_sum <- sum(POPdata_with_MCMC$row_variances)
+    print(overall_variance_sum)
+    n_hexagons <- nrow(POPdata_with_MCMC)
+    overall_variance_mean <- overall_variance_sum / (n_hexagons^2)
+    print(overall_variance_mean)
+  
+    selected_abund <- species_info$selected_abund
     
-    if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
+    if (is.na(selected_abund) || selected_abund <= 0) { 
+      selected_abund <- 1 }
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area:", sum(species_info$column))})
+      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
     }
     else{
-      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area:", sum(species_info$column))})
+      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
+      
+      p <- ggplot(data = data.frame(value = selected_abund*POPdata_with_MCMC$Fin.Whale), aes(x = value)) +
+        geom_histogram(binwidth = 3, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
+        ggtitle("Histogram of Fin Whale Abundance") +
+        hrbrthemes::theme_ipsum() +
+        theme(
+          plot.title = element_text(size = 20, hjust = 0.5, family = "Helvetica Neue"), # Centered and bigger title
+          axis.title.x = element_text(size = 15, family = "Helvetica Neue", margin = margin(t = 10)), # Larger x-axis title
+          axis.title.y = element_text(size = 15, family = "Helvetica Neue", margin = margin(r = 10)), # Larger y-axis title
+          axis.text = element_text(size = 14, family = "Helvetica Neue") # Increase size of axis text (ticks)
+        
+        ) +
+        xlab("Total Abundance") +
+        ylab("Frequency")
+      output$small_area_hist <- renderPlot({p})
     }
     
     })
@@ -408,7 +457,7 @@ server <- function(input, output, session) {
     shape_file <- all_files[grepl("\\.shp$", all_files)]
     print('upload succesful')
     
-    if (length(shape_file) > 0) {
+    # if (length(shape_file) > 1) {
       # Read the shapefile
       shapefile_data <- sf::st_read(shape_file)
       
@@ -432,10 +481,11 @@ server <- function(input, output, session) {
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
       print("shown on map")
        
-    } 
-    else {
-      shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
-    }}
+    # } 
+    # else {
+    #   shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
+    # }
+    }
   })
   
   drawn_shapes <- reactiveVal(NULL)
