@@ -551,16 +551,18 @@ server <- function(input, output, session) {
     total_abundance_sums <- total_abundance_sums*selected_abund
     #print(total_abundance_sums)
     
-    output$medmode <- renderText({paste0('Median Abundance Estimate: ', median(total_abundance_sums))})
+    #Posterior indicates bayesian approach
+    output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', median(total_abundance_sums))})
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
+      output$small_area_abund <- renderText({paste0("Relative Posterior Mean Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
     }
       
     
     else{
       #name <- as.character(species_list2[[selected_species]]$popdata)
-      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
+      
+      output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
       
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
         geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
