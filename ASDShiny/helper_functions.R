@@ -15,6 +15,9 @@ urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSea
 )
 
 
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
+
 species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
                       "Fin Whale" = POPhex_MCMC$Fin.Whale,
                       "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
@@ -32,6 +35,7 @@ species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
 )
 
+analysis_title <- reactiveVal(NULL)
 
 load_all_files <- function(directory_urls){
   # Loads all files from data folder. 
