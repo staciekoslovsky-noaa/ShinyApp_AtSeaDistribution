@@ -7,7 +7,7 @@ library(sf)
 library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
-library(leaflet.mapboxgl) #mapbox extension 
+#library(leaflet.mapboxgl) #mapbox extension 
 library(shinyWidgets)
 library(htmltools)
 library(htmlwidgets)
@@ -48,64 +48,82 @@ source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDis
 #                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
 # )
 
+POPdata_with_MCMC <- POPhex_MCMC
+
 species_list2 <- list(
   "Northern Minke Whale" = list(
     data = POPhex_MCMC$Northern.Minke.Whale,
+    popdata = "Northern.Minke.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData'
   ),
   "Fin Whale" = list(
     data = POPhex_MCMC$Fin.Whale,
+    popdata = "Fin.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData'
   ),
   "Northern Fur Seal" = list(
     data = POPhex_MCMC$Northern.Fur.Seal,
+    popdata = "Northern.Fur.Seal",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData'
   ),
   "Steller Sea Lion" = list(
     data = POPhex_MCMC$Steller.Sea.Lion,
+    popdata = "Steller.Sea.Lion",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData'
   ),
   "Sea Otter" = list(
     data = POPhex_MCMC$Sea.Otter,
+    popdata = "Sea.Otter",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData'
   ),
   "Gray Whale" = list(
     data = POPhex_MCMC$Gray.Whale,
+    popdata = "Gray.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData'
   ),
   "Pacific White-Sided Dolphin" = list(
     data = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+    popdata = "Pacific.White.Sided.Dolphin",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData'
   ),
   "Humpback Whale" = list(
     data = POPhex_MCMC$Humpback.Whale,
+    popdata = "Humpback.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData'
   ),
   "Killer Whale" = list(
     data = POPhex_MCMC$Killer.Whale,
+    popdata = "Killer.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData'
   ),
   "Walrus" = list(
     data = POPhex_MCMC$Walrus,
+    popdata = "Walrus",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData'
   ),
   "Dall's Porpoise" = list(
     data = POPhex_MCMC$Dall.s.Porpoise,
+    popdata = "Dall.s.Porpoise",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData'
   ),
   "Sperm Whale" = list(
     data = POPhex_MCMC$Sperm.Whale,
+    popdata = "Sperm.Whale",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData'
   ),
   "Harbor Porpoise" = list(
     data = POPhex_MCMC$Harbor.Porpoise,
+    popdata = "Harbor.Porpoise",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData'
   ),
   "Harbor Seal" = list(
     data = POPhex_MCMC$Harbor.Seal,
+    popdata = "Harbor.Seal",
     url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
   )
 )
+
+
 
 RelAbund_MCMC <- NULL
 
@@ -175,27 +193,46 @@ ui <- shinydashboard::dashboardPage(
                        leafletOutput(outputId = "map", width="100%")
                 ),
                 column(4,
-                       wellPanel(
-                         
-                         # Customization features in map
-                         h3('Customize Map'),
-                         selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
-                         selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
-                                                                                     "Low and High Density Emphasis 1",
-                                                                                     "Low and High Density Emphasis 2", 
-                                                                                     "Low Density Emphasis",
-                                                                                     "High Density Emphasis")),
-                         fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
-                                                                                    "Plasma",
-                                                                                    "Blue-Purple",
-                                                                                    "Yellow-Green-Blue",
-                                                                                    "Greyscale"
-                                                                                    ), width = NULL)),
-                                  column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
+                       # wellPanel(
+                       #   
+                       #   # Customization features in map
+                       #   #h3('Customize Map'),
+                       #   selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
+                       #   selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
+                       #                                                               "Low and High Density Emphasis 1",
+                       #                                                               "Low and High Density Emphasis 2", 
+                       #                                                               "Low Density Emphasis",
+                       #                                                               "High Density Emphasis")),
+                       #   fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
+                       #                                                              "Plasma",
+                       #                                                              "Blue-Purple",
+                       #                                                              "Yellow-Green-Blue",
+                       #                                                              "Greyscale"
+                       #                                                              ), width = NULL)),
+                       #            column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
                          # textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
-                         shinyBS::bsCollapse(id = "collapse_1", open = "Panel 1",
-                           shinyBS::bsCollapsePanel("Additional Options", style = 'success',
-                           bsCollapse(id = "collapseExample", open = "Panel 2",
+                         shinyBS::bsCollapse(id = "collapse_1", open = "Customize Map",
+                           shinyBS::bsCollapsePanel("Customize Map", style = 'success',
+                           bsCollapse(id = "collapseExample", open = "Basic Options", 
+                                      bsCollapsePanel("Basic Options",
+                                                      wellPanel(
+                                                        
+                                                        # Customization features in map
+                                                        #h3('Customize Map'),
+                                                        selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
+                                                        selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
+                                                                                                                    "Low and High Density Emphasis 1",
+                                                                                                                    "Low and High Density Emphasis 2", 
+                                                                                                                    "Low Density Emphasis",
+                                                                                                                    "High Density Emphasis")),
+                                                        fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
+                                                                                                                                      "Plasma",
+                                                                                                                                      "Blue-Purple",
+                                                                                                                                      "Yellow-Green-Blue",
+                                                                                                                                      "Greyscale"
+                                                        ), width = NULL)),
+                                                        column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
+                                                      )),
                                       bsCollapsePanel("Abundance Estimate", 
                                                       textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
                                                       "Enter total abundance to get an updated abundance estimate.",
@@ -210,7 +247,7 @@ ui <- shinydashboard::dashboardPage(
                                                       br(),
                                                       actionButton("do", "Generate"),
                                                       style = "primary")
-                           ))
+                           )
                          )
                        )
                 )),
@@ -425,9 +462,14 @@ server <- function(input, output, session) {
   
   #will change to observeEvent later if not used globally
   generate_analysis <- shiny::observeEvent(input$do, {
+    #browser()
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
     selected_species <- input$mapselect
+    if (is.null(selected_species)) {
+      print("selected_species is NULL")
+    }
+    
     load(url(species_list2[[selected_species]]$url))
     
     if (is.na(st_crs(shapefile_data))) {
@@ -465,7 +507,7 @@ server <- function(input, output, session) {
     
     # Filter only those in the shapefile coordinates
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
-      dplyr::filter(centroid.x >= min_x & centroid.x <= max_x & centroid.y >= min_y & centroid.y <= max_y)
+       dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
     #print(POPdata_with_MCMC$Fin.Whale)
   
     # POPdata_with_MCMC$t_value <- POPdata_with_MCMC$Fin.Whale / POPdata_with_MCMC$row_stdev
@@ -493,31 +535,32 @@ server <- function(input, output, session) {
     overall_variance <- var(total_abundance_sums)
     
     print(overall_variance)
-    output$overall_variance_sum <- renderText("Variance for Selected Area: ", overall_variance)
+    output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", overall_variance)})
   
     # Mean Variance for potential use later 
     n_hexagons <- nrow(POPdata_with_MCMC)
     var_mean <- overall_variance / (n_hexagons^2)
     print(var_mean)
-    output$overall_variance_mean <- renderText("Mean Variance per Hexagon: ", var_mean)
+    output$overall_variance_mean <- renderText({paste0("Mean Variance per Hexagon: ", var_mean)})
   
     selected_abund <- species_info$selected_abund
     
     if (is.na(selected_abund) || selected_abund <= 0) { 
       selected_abund <- 1 }
     
-    total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)*selected_abund
-    print(total_abundance_sums)
+    total_abundance_sums <- total_abundance_sums*selected_abund
+    #print(total_abundance_sums)
     
     output$medmode <- renderText({paste0('Median Abundance Estimate: ', median(total_abundance_sums))})
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(species_list2[[selected_species]]$data))})
+      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
     }
       
     
     else{
-      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(species_list2[[selected_species]]$data))})
+      #name <- as.character(species_list2[[selected_species]]$popdata)
+      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
       
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
         geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
