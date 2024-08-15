@@ -164,8 +164,14 @@ ui <- shinydashboard::dashboardPage(
                                              'Small Area Analysis will be provided once a shapefile is uploaded
                                               and the button "Generate Shapes" is pressed in the Custom Area Analysis
                                               section within Additional Options.',
-                                             tableOutput('coords_table'),
-                                             textOutput('small_area_abund'),
+                                             #tableOutput('coords_table'),
+                                             br(),
+                                             h4(textOutput('small_area_abund')),
+                                             h4(textOutput('medmode')),
+                                             h4('Sum of Variances: ', textOutput('overall_variance_sum')),
+                                             h4('Mean of Variances: ', textOutput('overall_variance_mean')),
+                                             br(),
+                                             br(),
                                              plotOutput('small_area_hist'),
                                              style = "primary")
                 )
@@ -398,39 +404,46 @@ server <- function(input, output, session) {
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
       dplyr::filter(centroid.x >= min_x & centroid.x <= max_x & centroid.y >= min_y & centroid.y <= max_y)
     #print(POPdata_with_MCMC$Fin.Whale)
-    print(sum(POPdata_with_MCMC$Fin.Whale))
+  
     
     #incorrect given hexagons are dependent, works if independent 
-    overall_variance_sum <- sum(POPdata_with_MCMC$row_variances)
-    print(overall_variance_sum)
+    var_sum <- sum(POPdata_with_MCMC$row_variances)
+    print(var_sum)
+    output$overall_variance_sum <- renderText(var_sum)
+    
     n_hexagons <- nrow(POPdata_with_MCMC)
-    overall_variance_mean <- overall_variance_sum / (n_hexagons^2)
-    print(overall_variance_mean)
+    var_mean <- var_sum / (n_hexagons^2)
+    print(var_mean)
+    output$overall_variance_mean <- renderText(var_mean)
   
     selected_abund <- species_info$selected_abund
     
     if (is.na(selected_abund) || selected_abund <= 0) { 
       selected_abund <- 1 }
     
+    total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)*selected_abund
+    print(total_abundance_sums)
+    
+    output$medmode <- renderText({paste0('Median: ', median(total_abundance_sums))})
+    
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
       output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
     }
+      
+    
     else{
       output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
       
-      p <- ggplot(data = data.frame(value = selected_abund*POPdata_with_MCMC$Fin.Whale), aes(x = value)) +
-        geom_histogram(binwidth = 3, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
-        ggtitle("Histogram of Fin Whale Abundance") +
-        hrbrthemes::theme_ipsum() +
-        theme(
-          plot.title = element_text(size = 20, hjust = 0.5, family = "Helvetica Neue"), # Centered and bigger title
-          axis.title.x = element_text(size = 15, family = "Helvetica Neue", margin = margin(t = 10)), # Larger x-axis title
-          axis.title.y = element_text(size = 15, family = "Helvetica Neue", margin = margin(r = 10)), # Larger y-axis title
-          axis.text = element_text(size = 14, family = "Helvetica Neue") # Increase size of axis text (ticks)
-        
-        ) +
+      p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
+        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
+        ggtitle("Histogram of MCMC Samples for Total Abundance") +
         xlab("Total Abundance") +
-        ylab("Frequency")
+        ylab("Frequency") +
+        theme_minimal() +
+        theme(plot.title = element_text(size = 15, hjust = 0.5),
+              axis.title.x = element_text(size = 12),
+              axis.title.y = element_text(size = 12))
+      
       output$small_area_hist <- renderPlot({p})
     }
     
