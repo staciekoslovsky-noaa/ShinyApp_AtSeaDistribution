@@ -17,8 +17,6 @@ library(raster)
 library(RColorBrewer)
 
 
-load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
-load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 #Access files
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
 source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/custom_area_analysis.R')
@@ -33,25 +31,83 @@ source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDis
 
 #load_all_files(urls)
 
-species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
-                      "Fin Whale" = POPhex_MCMC$Fin.Whale,
-                      "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
-                      #"Bearded Seal" = EB_MCMC, #currently using grid data
-                      "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
-                      "Sea Otter" = POPhex_MCMC$Sea.Otter,
-                      "Gray Whale" = POPhex_MCMC$Gray.Whale,
-                      "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-                      "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
-                      "Killer Whale" = POPhex_MCMC$Killer.Whale,
-                      "Walrus" = POPhex_MCMC$Walrus,
-                      "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
-                      "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
-                      "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
-                      "Harbor Seal" = POPhex_MCMC$Harbor.Seal
+# species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
+#                       "Fin Whale" = POPhex_MCMC$Fin.Whale,
+#                       "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
+#                       #"Bearded Seal" = EB_MCMC, #currently using grid data
+#                       "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
+#                       "Sea Otter" = POPhex_MCMC$Sea.Otter,
+#                       "Gray Whale" = POPhex_MCMC$Gray.Whale,
+#                       "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+#                       "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
+#                       "Killer Whale" = POPhex_MCMC$Killer.Whale,
+#                       "Walrus" = POPhex_MCMC$Walrus,
+#                       "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
+#                       "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
+#                       "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
+#                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
+# )
+
+species_list2 <- list(
+  "Northern Minke Whale" = list(
+    data = POPhex_MCMC$Northern.Minke.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData'
+  ),
+  "Fin Whale" = list(
+    data = POPhex_MCMC$Fin.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData'
+  ),
+  "Northern Fur Seal" = list(
+    data = POPhex_MCMC$Northern.Fur.Seal,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData'
+  ),
+  "Steller Sea Lion" = list(
+    data = POPhex_MCMC$Steller.Sea.Lion,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData'
+  ),
+  "Sea Otter" = list(
+    data = POPhex_MCMC$Sea.Otter,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData'
+  ),
+  "Gray Whale" = list(
+    data = POPhex_MCMC$Gray.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData'
+  ),
+  "Pacific White-Sided Dolphin" = list(
+    data = POPhex_MCMC$Pacific.White.Sided.Dolphin,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData'
+  ),
+  "Humpback Whale" = list(
+    data = POPhex_MCMC$Humpback.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData'
+  ),
+  "Killer Whale" = list(
+    data = POPhex_MCMC$Killer.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData'
+  ),
+  "Walrus" = list(
+    data = POPhex_MCMC$Walrus,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData'
+  ),
+  "Dall's Porpoise" = list(
+    data = POPhex_MCMC$Dall.s.Porpoise,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData'
+  ),
+  "Sperm Whale" = list(
+    data = POPhex_MCMC$Sperm.Whale,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData'
+  ),
+  "Harbor Porpoise" = list(
+    data = POPhex_MCMC$Harbor.Porpoise,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData'
+  ),
+  "Harbor Seal" = list(
+    data = POPhex_MCMC$Harbor.Seal,
+    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
+  )
 )
 
-
-
+RelAbund_MCMC <- NULL
 
 palettes <- list(
   "Viridis" = "viridis",
@@ -137,7 +193,6 @@ ui <- shinydashboard::dashboardPage(
                                                                                     ), width = NULL)),
                                   column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
                          # textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
-                         textInput("std_er", "Standard Error", width = NULL),
                          shinyBS::bsCollapse(id = "collapse_1", open = "Panel 1",
                            shinyBS::bsCollapsePanel("Additional Options", style = 'success',
                            bsCollapse(id = "collapseExample", open = "Panel 2",
@@ -146,10 +201,12 @@ ui <- shinydashboard::dashboardPage(
                                                       "Enter total abundance to get an updated abundance estimate.",
                                                       style = "info"),
                                       bsCollapsePanel("Custom Area Analysis",
-                                                      fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
                                                       "Upload a shapefile for custom area analysis.",
                                                       "Only zipped files will be accepted.",
                                                       br(),
+                                                      br(),
+                                                      fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
+                                                      textInput("std_er", "Standard Error", placeholder = "Optional?", width = NULL),
                                                       br(),
                                                       actionButton("do", "Generate"),
                                                       style = "primary")
@@ -168,8 +225,8 @@ ui <- shinydashboard::dashboardPage(
                                              br(),
                                              h4(textOutput('small_area_abund')),
                                              h4(textOutput('medmode')),
-                                             h4('Sum of Variances: ', textOutput('overall_variance_sum')),
-                                             h4('Mean of Variances: ', textOutput('overall_variance_mean')),
+                                             h4(textOutput('overall_variance_sum')),
+                                             h4(textOutput('overall_variance_mean')),
                                              br(),
                                              br(),
                                              plotOutput('small_area_hist'),
@@ -179,8 +236,9 @@ ui <- shinydashboard::dashboardPage(
               fluidRow(
                 wellPanel(
                   #Shapefile upload/download UI 
-                  h3('Download or Upload Shapefile'),
+                  h3('Download Shapefile'),
                   downloadButton('downloadData', "Download Shapefile"),
+                  h4('Download Analysis (possibility later)')
                   
                   # File input only accepts zipped files. 
                   # Server below contains further code on validating content within
@@ -252,7 +310,7 @@ server <- function(input, output, session) {
     if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
     
     #This accesses the POPhex_MCMC$species column of values
-    species_data <- species_list2[[selected_species]]
+    species_data <- species_list2[[selected_species]]$data
     
     scaled_species_data <- species_data * selected_abund
     
@@ -367,9 +425,11 @@ server <- function(input, output, session) {
   
   #will change to observeEvent later if not used globally
   generate_analysis <- shiny::observeEvent(input$do, {
-    
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
+    selected_species <- input$mapselect
+    load(url(species_list2[[selected_species]]$url))
+    
     if (is.na(st_crs(shapefile_data))) {
       st_crs(shapefile_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
@@ -389,32 +449,57 @@ server <- function(input, output, session) {
     min_x <- min(coords_df$X)
     min_y <- min(coords_df$Y)
     
+    # Max X and Y value currently for debugging purposes 
     print(paste("Max X:", max_x, "Min X:", min_x))
     print(paste("Max Y:", max_y, "Min Y:", min_y))
     
+    # Calculates variance for RelAbund_MCMC for 1 (MCMC rows)
     row_variances <- apply(RelAbund_MCMC, 1, var)
+    
+    row_stdev <- apply(RelAbund_MCMC, 1, sd)
     
     POPdata_with_MCMC <- cbind(POPhex_MCMC, RelAbund_MCMC, row_variances)
     
     POPdata_with_MCMC$centroid.x <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,1]
     POPdata_with_MCMC$centroid.y <- st_coordinates(sf::st_centroid(POPdata_with_MCMC))[,2]
-    # 
     
     # Filter only those in the shapefile coordinates
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
       dplyr::filter(centroid.x >= min_x & centroid.x <= max_x & centroid.y >= min_y & centroid.y <= max_y)
     #print(POPdata_with_MCMC$Fin.Whale)
   
+    # POPdata_with_MCMC$t_value <- POPdata_with_MCMC$Fin.Whale / POPdata_with_MCMC$row_stdev
+    # 
+    # tval_pal <- colorNumeric(palette = "RdYlBu", domain = POPdata_with_MCMC$t_value, reverse = TRUE)
+    # 
+    # # Add polygons to the map with colors based on the t-values
+    # leafletProxy("map", session) %>%
+    #   addPolygons(data = shapefile_data,
+    #               fillColor = ~tval_pal(POPdata_with_MCMC$t_value),
+    #               fillOpacity = 0.8,
+    #               color = "black",
+    #               weight = 1,
+    #               group = "tvals") %>%
+    #   addLegend(pal = tval_pal, 
+    #             values = POPdata_with_MCMC$t_value, 
+    #             title = "T-Values",
+    #             position = "bottomright")
     
-    #incorrect given hexagons are dependent, works if independent 
-    var_sum <- sum(POPdata_with_MCMC$row_variances)
-    print(var_sum)
-    output$overall_variance_sum <- renderText(var_sum)
     
+
+    total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)
+    
+    # Calculate the variance of these summed values
+    overall_variance <- var(total_abundance_sums)
+    
+    print(overall_variance)
+    output$overall_variance_sum <- renderText("Variance for Selected Area: ", overall_variance)
+  
+    # Mean Variance for potential use later 
     n_hexagons <- nrow(POPdata_with_MCMC)
-    var_mean <- var_sum / (n_hexagons^2)
+    var_mean <- overall_variance / (n_hexagons^2)
     print(var_mean)
-    output$overall_variance_mean <- renderText(var_mean)
+    output$overall_variance_mean <- renderText("Mean Variance per Hexagon: ", var_mean)
   
     selected_abund <- species_info$selected_abund
     
@@ -424,19 +509,19 @@ server <- function(input, output, session) {
     total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)*selected_abund
     print(total_abundance_sums)
     
-    output$medmode <- renderText({paste0('Median: ', median(total_abundance_sums))})
+    output$medmode <- renderText({paste0('Median Abundance Estimate: ', median(total_abundance_sums))})
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
+      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", sum(species_list2[[selected_species]]$data))})
     }
       
     
     else{
-      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
+      output$small_area_abund <- renderText({paste0("Absolute Abundance Estimate for Selected Area: ", selected_abund*sum(species_list2[[selected_species]]$data))})
       
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
         geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
-        ggtitle("Histogram of MCMC Samples for Total Abundance") +
+        ggtitle("Histogram of Abundance Estimates") +
         xlab("Total Abundance") +
         ylab("Frequency") +
         theme_minimal() +
