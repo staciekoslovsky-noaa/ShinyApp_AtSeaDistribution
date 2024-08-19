@@ -250,6 +250,7 @@ ui <- shinydashboard::dashboardPage(
                                              h4(textOutput('medmode')),
                                              h4(textOutput('overall_variance_sum')),
                                              h4(textOutput('overall_variance_mean')),
+                                             h4(textOutput('overall_cv')),
                                              br(),
                                              br(),
                                              plotOutput('small_area_hist'),
@@ -515,20 +516,20 @@ server <- function(input, output, session) {
     browser()
     
     as.numeric(cv_input)
-    print(cv_input)
+    #print(cv_input)
     if (is.na(cv_input) || cv_input <= 0) { 
       cv_input <- 0.2 }
     
     cv_input <- 0.2
     #For histogram
     #total_abundance_sums <- total_abundance_sums*selected_abund
-    N_sim <- rlnorm(1000, meanlog = log(selected_abund), sdlog = sqrt(log(1 + (((selected_abund*cv_input)**2)/selected_abund)**2)))
+    N_sim <- rlnorm(1000, meanlog = log(selected_abund), sdlog = sqrt(log(1 + (cv_input**2))))
     total_abundance_sums <- N_sim * total_abundance_sums 
     
     ### GOODMAN'S FORMULA
-    updatedvar <- ((selected_abund)**2)*overall_variance + (sum(POPdata_with_MCMC$Fin.Whale)**2)*((selected_abund*cv_input)**2) + overall_variance*((selected_abund*cv_input)**2)
-    print(updatedvar)
-    stderror <- sqrt(updatedvar)
+    updated_var <- ((selected_abund)**2)*overall_variance + (sum(POPdata_with_MCMC$Fin.Whale)**2)*((selected_abund*cv_input)**2) + overall_variance*((selected_abund*cv_input)**2)
+    print(updated_var)
+    stderror <- sqrt(updated_var)
     cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC$Fin.Whale)))
     
     #Posterior indicates bayesian approach
@@ -544,7 +545,8 @@ server <- function(input, output, session) {
       #name <- as.character(species_list2[[selected_species]]$popdata)
       
       output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund*sum(POPdata_with_MCMC$Fin.Whale), digits = 0))})
-      output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", updated_var)})    
+      #output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", updated_var)})    
+      output$overall_cv <- renderText({paste0("Coefficient of Variation for Selected Area: ", cv_result)})
       
       bin_num <- input$bin_input
       
@@ -554,9 +556,9 @@ server <- function(input, output, session) {
         xlab("Total Abundance") +
         ylab("Frequency") +
         theme_minimal() +
-        theme(plot.title = element_text(size = 15, hjust = 0.5),
-              axis.title.x = element_text(size = 12),
-              axis.title.y = element_text(size = 12))
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+              axis.title.x = element_text(size = 16),
+              axis.title.y = element_text(size = 16))
       
       output$small_area_hist <- renderPlot({p})
     }
@@ -657,4 +659,5 @@ server <- function(input, output, session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 #options=c(launch.browser = .rs.invokeShinyPaneViewer)
+
 
