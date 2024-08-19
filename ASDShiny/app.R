@@ -145,8 +145,9 @@ ui <- shinydashboard::dashboardPage(
     sidebarMenu(
       menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
-      menuItem("Species Maps", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
+      menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Methods", tabName = "metd"),
+      menuItem("How to Cite", tabname = "howtocite"),
       menuItem("Licenses", tabName = "lic")
     )),
   dashboardBody(
@@ -193,28 +194,10 @@ ui <- shinydashboard::dashboardPage(
                        leafletOutput(outputId = "map", width="100%")
                 ),
                 column(4,
-                       # wellPanel(
-                       #   
-                       #   # Customization features in map
-                       #   #h3('Customize Map'),
-                       #   selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
-                       #   selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
-                       #                                                               "Low and High Density Emphasis 1",
-                       #                                                               "Low and High Density Emphasis 2", 
-                       #                                                               "Low Density Emphasis",
-                       #                                                               "High Density Emphasis")),
-                       #   fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
-                       #                                                              "Plasma",
-                       #                                                              "Blue-Purple",
-                       #                                                              "Yellow-Green-Blue",
-                       #                                                              "Greyscale"
-                       #                                                              ), width = NULL)),
-                       #            column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
-                         # textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
                          shinyBS::bsCollapse(id = "collapse_1", open = "Customize Map",
                            shinyBS::bsCollapsePanel("Customize Map", style = 'success',
-                           bsCollapse(id = "collapseExample", open = "Basic Options", 
-                                      bsCollapsePanel("Basic Options",
+                           bsCollapse(id = "collapseExample", open = "Select Species", 
+                                      bsCollapsePanel("Select Species",
                                                       wellPanel(
                                                         
                                                         # Customization features in map
@@ -225,17 +208,21 @@ ui <- shinydashboard::dashboardPage(
                                                                                                                     "Low and High Density Emphasis 2", 
                                                                                                                     "Low Density Emphasis",
                                                                                                                     "High Density Emphasis")),
-                                                        fluidRow(column(6, selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
+                                                        selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
                                                                                                                                       "Plasma",
                                                                                                                                       "Blue-Purple",
                                                                                                                                       "Yellow-Green-Blue",
                                                                                                                                       "Greyscale"
-                                                        ), width = NULL)),
-                                                        column(6, checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL))),
+                                                        ), width = NULL),
+                                                        checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL),
                                                       )),
                                       bsCollapsePanel("Abundance Estimate", 
-                                                      textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5,000"),
+                                                      textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
                                                       "Enter total abundance to get an updated abundance estimate.",
+                                                      br(),
+                                                      br(),
+                                                      textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
+                                                      "Enter a coefficient of variation value. The default value is 0.2.",
                                                       style = "info"),
                                       bsCollapsePanel("Custom Area Analysis",
                                                       "Upload a shapefile for custom area analysis.",
@@ -243,7 +230,6 @@ ui <- shinydashboard::dashboardPage(
                                                       br(),
                                                       br(),
                                                       fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
-                                                      textInput("std_er", "Standard Error", placeholder = "Optional?", width = NULL),
                                                       br(),
                                                       actionButton("do", "Generate"),
                                                       style = "primary")
@@ -267,6 +253,7 @@ ui <- shinydashboard::dashboardPage(
                                              br(),
                                              br(),
                                              plotOutput('small_area_hist'),
+                                             sliderInput('bin_input', "Bin Count", min = 10, max = 50, value = 15),
                                              style = "primary")
                 )
               )),
@@ -466,6 +453,8 @@ server <- function(input, output, session) {
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
     selected_species <- input$mapselect
+    cv_input <- input$coeff_var
+    
     if (is.null(selected_species)) {
       print("selected_species is NULL")
     }
@@ -496,6 +485,7 @@ server <- function(input, output, session) {
     print(paste("Max Y:", max_y, "Min Y:", min_y))
     
     # Calculates variance for RelAbund_MCMC for 1 (MCMC rows)
+    
     row_variances <- apply(RelAbund_MCMC, 1, var)
     
     row_stdev <- apply(RelAbund_MCMC, 1, sd)
@@ -508,64 +498,58 @@ server <- function(input, output, session) {
     # Filter only those in the shapefile coordinates
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
        dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
-    #print(POPdata_with_MCMC$Fin.Whale)
-  
-    # POPdata_with_MCMC$t_value <- POPdata_with_MCMC$Fin.Whale / POPdata_with_MCMC$row_stdev
-    # 
-    # tval_pal <- colorNumeric(palette = "RdYlBu", domain = POPdata_with_MCMC$t_value, reverse = TRUE)
-    # 
-    # # Add polygons to the map with colors based on the t-values
-    # leafletProxy("map", session) %>%
-    #   addPolygons(data = shapefile_data,
-    #               fillColor = ~tval_pal(POPdata_with_MCMC$t_value),
-    #               fillOpacity = 0.8,
-    #               color = "black",
-    #               weight = 1,
-    #               group = "tvals") %>%
-    #   addLegend(pal = tval_pal, 
-    #             values = POPdata_with_MCMC$t_value, 
-    #             title = "T-Values",
-    #             position = "bottomright")
-    
     
 
     total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)
     
     # Calculate the variance of these summed values
     overall_variance <- var(total_abundance_sums)
-    
     print(overall_variance)
-    output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", overall_variance)})
-  
-    # Mean Variance for potential use later 
-    n_hexagons <- nrow(POPdata_with_MCMC)
-    var_mean <- overall_variance / (n_hexagons^2)
-    print(var_mean)
-    output$overall_variance_mean <- renderText({paste0("Mean Variance per Hexagon: ", var_mean)})
+
   
     selected_abund <- species_info$selected_abund
     
     if (is.na(selected_abund) || selected_abund <= 0) { 
       selected_abund <- 1 }
     
-    total_abundance_sums <- total_abundance_sums*selected_abund
-    #print(total_abundance_sums)
+    browser()
+    
+    as.numeric(cv_input)
+    print(cv_input)
+    if (is.na(cv_input) || cv_input <= 0) { 
+      cv_input <- 0.2 }
+    
+    cv_input <- 0.2
+    #For histogram
+    #total_abundance_sums <- total_abundance_sums*selected_abund
+    N_sim <- rlnorm(1000, meanlog = log(selected_abund), sdlog = sqrt(log(1 + (((selected_abund*cv_input)**2)/selected_abund)**2)))
+    total_abundance_sums <- N_sim * total_abundance_sums 
+    
+    ### GOODMAN'S FORMULA
+    updatedvar <- ((selected_abund)**2)*overall_variance + (sum(POPdata_with_MCMC$Fin.Whale)**2)*((selected_abund*cv_input)**2) + overall_variance*((selected_abund*cv_input)**2)
+    print(updatedvar)
+    stderror <- sqrt(updatedvar)
+    cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC$Fin.Whale)))
     
     #Posterior indicates bayesian approach
-    output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', median(total_abundance_sums))})
+    output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 0))})
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Posterior Mean Estimate for Selected Area: ", sum(POPdata_with_MCMC$Fin.Whale))})
-    }
+      output$small_area_abund <- renderText({paste0("Relative Posterior Mean Estimate for Selected Area: ", round(sum(POPdata_with_MCMC$Fin.Whale)), digits = 3)})
+      output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", overall_variance)})    
+      }
       
     
     else{
       #name <- as.character(species_list2[[selected_species]]$popdata)
       
-      output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", selected_abund*sum(POPdata_with_MCMC$Fin.Whale))})
+      output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund*sum(POPdata_with_MCMC$Fin.Whale), digits = 0))})
+      output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", updated_var)})    
+      
+      bin_num <- input$bin_input
       
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
-        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
+        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9, bins = bin_num) +
         ggtitle("Histogram of Abundance Estimates") +
         xlab("Total Abundance") +
         ylab("Frequency") +
@@ -665,16 +649,12 @@ server <- function(input, output, session) {
     }
   )
   
-  #POPdata_with_MCMC
-  
-  
+
 }
 
 
 
 # Run the application 
-#shinyApp(ui = ui, server = server)
-#temporary due to bug
 shinyApp(ui = ui, server = server)
 #options=c(launch.browser = .rs.invokeShinyPaneViewer)
 
