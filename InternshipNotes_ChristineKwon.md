@@ -284,4 +284,49 @@ Internship Notes: Christine Kwon
 <span style="color:blue">08/5-7/24:</span>
 
 - `POPdata_with_MCMC` for data with MCMC (avoiding rewriting data)
-- 
+- Generate button that will currently lead to abundance estimate being provided
+
+
+<span style="color:blue">08/08/24:</span>
+
+- **REMINDER** set a reactive value to make sure you obtain any variables/values you don't want to lose in `observeEvent` block
+- put analysis in its own `observeEvent` block (away from upload shapefile)
+- reusing some variable names but within its own blocks (may cause issues later)
+  - notable: species_info()
+- Outputting value but failing to output correct estimate
+
+
+<span style="color:blue">08/09/24:</span>
+
+- Issue: Sometimes certain functions won't work but they will when RStudio restarted
+  - Or redownloaded 
+- Resolved issue with failing to output correct estimate - now full estimate provided
+  - Tested with RelAbund of single species (Fin Whale)
+  - Currently outputs into download data block
+    Goal:
+    - Implement into new block for all species
+    - Variance calculations
+    - explore caching
+    
+
+<span style="color:blue">08/15/24: (13-14 Posit conf) </span> 
+
+- Fixed variance calculations by summing all MCMC, then variance calculated from those sums
+- Changed up UI organization to maximize space
+- Histogram functional along with other calculations
+- Overview meeting
+  - Need to add CV value
+  - Output CV results instead of variance
+  
+  
+<span style="color:blue">08/16/24: </span> 
+
+- Change to CV (read over Goodman's formula notes from Paul)
+- Changing modifications in layout of the website
+
+
+<span style="color:blue">08/19/24: </span> 
+
+- Continuing on with CV/variance calculations and trying to apply this to histograms
+- Eventually make larger changes with calculation output layout (tables perhaps)
+- Make more small UI fixes in meeting notes
