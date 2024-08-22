@@ -15,6 +15,7 @@ library(mapview)
 library(tools)
 library(raster)
 library(RColorBrewer)
+library(DT)
 
 
 #Access files
@@ -189,6 +190,9 @@ ui <- shinydashboard::dashboardPage(
       
       # Species density map
       tabItem(tabName = "specmap",
+              wellPanel(
+                h4("Species Name")
+              ),
               fluidRow(
                 column(8, 
                        leafletOutput(outputId = "map", width="100%")
@@ -251,6 +255,7 @@ ui <- shinydashboard::dashboardPage(
                                              h4(textOutput('overall_variance_sum')),
                                              h4(textOutput('overall_variance_mean')),
                                              h4(textOutput('overall_cv')),
+                                             h4(tableOutput('stat_result')),
                                              br(),
                                              br(),
                                              plotOutput('small_area_hist'),
@@ -404,6 +409,7 @@ server <- function(input, output, session) {
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
         rectangleOptions = drawRectangleOptions(),
+        polylineOptions = FALSE,
         circleMarkerOptions = FALSE,
         editOptions = editToolbarOptions(edit = FALSE, 
                                          selectedPathOptions = FALSE, 
@@ -450,7 +456,7 @@ server <- function(input, output, session) {
   
   #will change to observeEvent later if not used globally
   generate_analysis <- shiny::observeEvent(input$do, {
-    #browser()
+    browser()
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
     selected_species <- input$mapselect
@@ -465,9 +471,9 @@ server <- function(input, output, session) {
     if (is.na(st_crs(shapefile_data))) {
       st_crs(shapefile_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
-    shapefile_data <- sf::st_transform(shapefile_data, 4326)
-    shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
-    sf::st_geometry(shapefile_data) <- shifted_geometry
+    # shapefile_data <- sf::st_transform(shapefile_data, 4326)
+    # shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    # sf::st_geometry(shapefile_data) <- shifted_geometry
     
     coords <- st_coordinates(shapefile_data)
     coords_df <- data.frame(coords)
@@ -475,7 +481,7 @@ server <- function(input, output, session) {
     output$coords_table <- renderTable({
       coords_df})
     
-    print(coords_df)
+    #print(coords_df)
     max_x <- max(coords_df$X)
     max_y <- max(coords_df$Y)
     min_x <- min(coords_df$X)
@@ -512,15 +518,15 @@ server <- function(input, output, session) {
     
     if (is.na(selected_abund) || selected_abund <= 0) { 
       selected_abund <- 1 }
+
+    cv_input <- as.numeric(cv_input)
+    # #print(cv_input)
+    # if (is.na(cv_input) || cv_input <= 0) { 
+    #   cv_input <- 0.2 }
+    # 
+    # cv_input <- 0.2
     
-    browser()
     
-    as.numeric(cv_input)
-    #print(cv_input)
-    if (is.na(cv_input) || cv_input <= 0) { 
-      cv_input <- 0.2 }
-    
-    cv_input <- 0.2
     #For histogram
     #total_abundance_sums <- total_abundance_sums*selected_abund
     N_sim <- rlnorm(1000, meanlog = log(selected_abund), sdlog = sqrt(log(1 + (cv_input**2))))
@@ -533,11 +539,19 @@ server <- function(input, output, session) {
     cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC$Fin.Whale)))
     
     #Posterior indicates bayesian approach
-    output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 0))})
+    
     
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
-      output$small_area_abund <- renderText({paste0("Relative Posterior Mean Estimate for Selected Area: ", round(sum(POPdata_with_MCMC$Fin.Whale)), digits = 3)})
-      output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", overall_variance)})    
+      output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", round(sum(POPdata_with_MCMC$Fin.Whale)), digits = 3)})
+      output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", round(overall_variance, digits = 5))})   
+      output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 3))})
+      
+      summary_data <- data.frame(
+        Species = species_info$selected_species,
+        'Relative Abundance Estimate' = round(sum(POPdata_with_MCMC$Fin.Whale), digits = 3),
+        'Variance' = round(overall_variance, digits = 5)
+      )
+      
       }
       
     
@@ -546,7 +560,15 @@ server <- function(input, output, session) {
       
       output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund*sum(POPdata_with_MCMC$Fin.Whale), digits = 0))})
       #output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", updated_var)})    
+      output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 0))})
       output$overall_cv <- renderText({paste0("Coefficient of Variation for Selected Area: ", cv_result)})
+      
+      summary_data <- data.frame(
+        Species = species_info$selected_species,
+        'Selected Abundance' = selected_abund,
+        'Posterior Mean Estimate' = round(selected_abund*sum(POPdata_with_MCMC$Fin.Whale)),
+        'Coefficient of Variation' = cv_result
+      )
       
       bin_num <- input$bin_input
       
@@ -562,20 +584,26 @@ server <- function(input, output, session) {
       
       output$small_area_hist <- renderPlot({p})
     }
+  
+      
+      
+    output$stat_result <- renderTable(summary_data
+    )
     
     })
   
   
-  
   uploaded_shapes <- reactiveVal(NULL)
+  
   # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
-    drawfile <- input$drawfile
-    # Create temp directory
-    temp_direc2 <- tempdir()
+    browser()
     uploaded_shapes(NULL)
-    # unlink(temp_direc2, recursive = TRUE)
-    # dir.create(temp_direc2)
+    shapefile_data <- NULL
+    temp_direc2 <- tempfile(pattern = "shapefile_temp_")
+    dir.create(temp_direc2)
+    
+    drawfile <- input$drawfile
     
     all_shapefiles <- list()
     
@@ -586,13 +614,21 @@ server <- function(input, output, session) {
     shape_file <- all_files[grepl("\\.shp$", all_files)]
     print('upload succesful')
     
-    # if (length(shape_file) > 1) {
+    if (length(shape_file) >= 1) {
       # Read the shapefile
       shapefile_data <- sf::st_read(shape_file)
       
       # Transform the projection to EPSG 4326 in case it is different
       shapefile_data <- sf::st_transform(shapefile_data, 4326)
+    
       shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+      # if (class(shapefile_data)[1] == "sfc_POLYGON") {
+      #   shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+      # #} else {
+      #   shifted_geometry <- sf::st_geometry(shapefile_data) + c(360, 0)  # Adjust this as needed
+      # #}
+      
+      
       sf::st_geometry(shapefile_data) <- shifted_geometry
       
       uploaded_shapes(shapefile_data)
@@ -602,7 +638,7 @@ server <- function(input, output, session) {
       # } else {
       #   drawn_shapes(rbind(existing_shapes, shapefile_data))
       # }
-      
+    }
       all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
       combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
@@ -610,7 +646,7 @@ server <- function(input, output, session) {
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
       print("shown on map")
        
-    # } 
+     
     # else {
     #   shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
     # }
@@ -621,8 +657,27 @@ server <- function(input, output, session) {
   
   # Update reactive value when a new shape is drawn
   observeEvent(input$map_draw_new_feature, {
+    browser()
     new_shape <- input$map_draw_new_feature
-    new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
+    
+    if (new_shape$properties$feature_type == "circle") {
+      # Extract the center and radius of the circle
+      center <- c(new_shape$geometry$coordinates[[1]], new_shape$geometry$coordinates[[2]])
+      radius <- new_shape$properties$radius
+      
+      # Convert the circle to a polygon (sf)
+      new_shape_sf <- sf::st_as_sf(
+        sf::st_buffer(
+          sf::st_sfc(sf::st_point(center), crs = 4326) %>%
+            sf::st_transform(32632), radius
+        ) %>%
+          sf::st_transform(4326)
+      )
+    } else {
+      # Assuming it's a polygon or similar
+      new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
+    }
+    #new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     
     # set/update new shape to reactive value
     existing_shapes <- drawn_shapes()
@@ -631,6 +686,8 @@ server <- function(input, output, session) {
     } else {
       drawn_shapes(rbind(existing_shapes, new_shape_sf))
     }
+    existing_shapes <- drawn_shapes()
+    uploaded_shapes(existing_shapes)
   })
   
   # Download handler for shapefiles
@@ -640,14 +697,21 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       temp_dir <- tempdir()
-      shp_file <- file.path(temp_dir, "drawn_shapes.shp")
+      #shp_file <- file.path(temp_dir, "drawn_shapes.shp")
       
+      shp_file <- file.path(temp_dir, "drawn_shapes.shp")
+      shx_file <- file.path(temp_dir, "drawn_shapes.shx")
+      dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
+      prj_file <- file.path(temp_dir, "drawn_shapes.prj")
       
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
       sf::st_write(drawn_shapes(), shp_file)
       
-      zip_file <- file
-      zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
+      # zip_file <- file
+      # zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
+      
+      # -j Means no directory paths, just files only!
+      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
     }
   )
   
