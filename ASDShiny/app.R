@@ -32,22 +32,6 @@ source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDis
 
 #load_all_files(urls)
 
-# species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
-#                       "Fin Whale" = POPhex_MCMC$Fin.Whale,
-#                       "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
-#                       #"Bearded Seal" = EB_MCMC, #currently using grid data
-#                       "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
-#                       "Sea Otter" = POPhex_MCMC$Sea.Otter,
-#                       "Gray Whale" = POPhex_MCMC$Gray.Whale,
-#                       "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-#                       "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
-#                       "Killer Whale" = POPhex_MCMC$Killer.Whale,
-#                       "Walrus" = POPhex_MCMC$Walrus,
-#                       "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
-#                       "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
-#                       "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
-#                       "Harbor Seal" = POPhex_MCMC$Harbor.Seal
-# )
 
 POPdata_with_MCMC <- POPhex_MCMC
 
@@ -191,7 +175,10 @@ ui <- shinydashboard::dashboardPage(
       # Species density map
       tabItem(tabName = "specmap",
               wellPanel(
-                h4("Species Name")
+                tags$div(
+                  textOutput("selected_species_name"),
+                  style = "color: #2c3e50; font-size: 20px; font-weight: bold;"  # Customize color, size, and weight
+                )
               ),
               fluidRow(
                 column(8, 
@@ -230,7 +217,7 @@ ui <- shinydashboard::dashboardPage(
                                                       style = "info"),
                                       bsCollapsePanel("Custom Area Analysis",
                                                       "Upload a shapefile for custom area analysis.",
-                                                      "Only zipped files will be accepted.",
+                                                      "Only single zipped files will be accepted.",
                                                       br(),
                                                       br(),
                                                       fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
@@ -250,15 +237,15 @@ ui <- shinydashboard::dashboardPage(
                                               section within Additional Options.',
                                              #tableOutput('coords_table'),
                                              br(),
-                                             h4(textOutput('small_area_abund')),
-                                             h4(textOutput('medmode')),
-                                             h4(textOutput('overall_variance_sum')),
-                                             h4(textOutput('overall_variance_mean')),
-                                             h4(textOutput('overall_cv')),
-                                             h4(tableOutput('stat_result')),
-                                             br(),
-                                             br(),
-                                             plotOutput('small_area_hist'),
+                                             # h4(textOutput('small_area_abund')),
+                                             # h4(textOutput('medmode')),
+                                             # h4(textOutput('overall_variance_sum')),
+                                             # h4(textOutput('overall_variance_mean')),
+                                             # h4(textOutput('overall_cv')),
+                                             fluidRow(
+                                                column(5, h4(tableOutput('stat_result'))),
+                                             #
+                                                column(7, plotOutput('small_area_hist'))),
                                              sliderInput('bin_input', "Bin Count", min = 10, max = 50, value = 15),
                                              style = "primary")
                 )
@@ -334,6 +321,16 @@ server <- function(input, output, session) {
   # Reactive value to hold palette data and calculate quartiles for legend
   species_pal <- shiny::reactive({
     selected_species <- input$mapselect
+    
+    output$selected_species_name <- renderText({
+      selected_species <- input$mapselect
+      if (selected_species == "Select" || is.null(selected_species)) {
+        "Base Map"  # Default text when no species is selected
+      } else {
+        selected_species  # The selected species name
+      }
+    })
+    
     rev_selection <- input$rev_pal
     selected_abund <- as.numeric(input$abs_abund)
     
@@ -460,6 +457,7 @@ server <- function(input, output, session) {
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
     selected_species <- input$mapselect
+    
     cv_input <- input$coeff_var
     
     if (is.null(selected_species)) {
@@ -478,10 +476,10 @@ server <- function(input, output, session) {
     coords <- st_coordinates(shapefile_data)
     coords_df <- data.frame(coords)
     
-    output$coords_table <- renderTable({
-      coords_df})
+    # use for debugging purposees (coordinates of shapefile area)
+    # output$coords_table <- renderTable({
+    #   coords_df})
     
-    #print(coords_df)
     max_x <- max(coords_df$X)
     max_y <- max(coords_df$Y)
     min_x <- min(coords_df$X)
@@ -520,13 +518,7 @@ server <- function(input, output, session) {
       selected_abund <- 1 }
 
     cv_input <- as.numeric(cv_input)
-    # #print(cv_input)
-    # if (is.na(cv_input) || cv_input <= 0) { 
-    #   cv_input <- 0.2 }
-    # 
-    # cv_input <- 0.2
-    
-    
+
     #For histogram
     #total_abundance_sums <- total_abundance_sums*selected_abund
     N_sim <- rlnorm(1000, meanlog = log(selected_abund), sdlog = sqrt(log(1 + (cv_input**2))))
@@ -538,9 +530,8 @@ server <- function(input, output, session) {
     stderror <- sqrt(updated_var)
     cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC$Fin.Whale)))
     
+  
     #Posterior indicates bayesian approach
-    
-    
     if (selected_abund == 1 || is.na(selected_abund) || selected_abund <= 0){
       output$small_area_abund <- renderText({paste0("Relative Abundance Estimate for Selected Area: ", round(sum(POPdata_with_MCMC$Fin.Whale)), digits = 3)})
       output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", round(overall_variance, digits = 5))})   
@@ -549,9 +540,11 @@ server <- function(input, output, session) {
       summary_data <- data.frame(
         Species = species_info$selected_species,
         'Relative Abundance Estimate' = round(sum(POPdata_with_MCMC$Fin.Whale), digits = 3),
-        'Variance' = round(overall_variance, digits = 5)
+        'Variance' = round(overall_variance, digits = 5),
+        check.names = FALSE
       )
       
+      output$stat_result <- renderTable(summary_data)
       }
       
     
@@ -567,10 +560,17 @@ server <- function(input, output, session) {
         Species = species_info$selected_species,
         'Selected Abundance' = selected_abund,
         'Posterior Mean Estimate' = round(selected_abund*sum(POPdata_with_MCMC$Fin.Whale)),
-        'Coefficient of Variation' = cv_result
+        'Posterior Median Abundance Estimate' = round(median(total_abundance_sums), digits = 3),
+        'Coefficient of Variation' = cv_result,
+        check.names = FALSE
       )
       
       bin_num <- input$bin_input
+      
+      transposed_data <- as.data.frame(t(summary_data))
+      transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
+      transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
+      
       
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
         geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9, bins = bin_num) +
@@ -580,15 +580,19 @@ server <- function(input, output, session) {
         theme_minimal() +
         theme(plot.title = element_text(size = 20, hjust = 0.5),
               axis.title.x = element_text(size = 16),
-              axis.title.y = element_text(size = 16))
+              axis.title.y = element_text(size = 16),
+              axis.text.x = element_text(size = 12),  # Adjusts x-axis numbers
+              axis.text.y = element_text(size = 12))
       
       output$small_area_hist <- renderPlot({p})
+      output$stat_result <- renderTable(transposed_data, 
+                                        colnames = FALSE,
+                                        rownames = FALSE)
     }
   
       
       
-    output$stat_result <- renderTable(summary_data
-    )
+    
     
     })
   
@@ -643,6 +647,7 @@ server <- function(input, output, session) {
       combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
       leaflet::leafletProxy("map", session) %>%
+        leaflet::clearGroup("shp") %>%
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
       print("shown on map")
        
