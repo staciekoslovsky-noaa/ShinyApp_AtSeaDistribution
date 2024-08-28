@@ -328,5 +328,34 @@ Internship Notes: Christine Kwon
 <span style="color:blue">08/19/24: </span> 
 
 - Continuing on with CV/variance calculations and trying to apply this to histograms
+  - Outputs variance for relative, but now outputs CV when abundance for area is provided 
+  - CV input also added, but default value is 0.2 to accoutn for uncertainty in this abundance value
+  - Log normalization `rlnorm` for simulated uncertainty into the `total_abundance_sums`
+    - 1000 trials for 1000 columns of matrix 
 - Eventually make larger changes with calculation output layout (tables perhaps)
-- Make more small UI fixes in meeting notes
+- Make more small UI fixes in meeting notes (in checkbox action items)
+  - Remove draw line, add map title, reverse palette location, add section/tab, etc
+  - Larger histogram text
+
+
+<span style="color:blue">08/20-23/24: </span> 
+
+- 2 informational interviews this week 
+- `renderDT` vs `renderTable` 
+  - First seems to be better but for limited data, renderTable might be better
+- Integrating drawn shape data
+  - Ran into bugs with circular data 
+  - Converts to polygon with numerous edges (circle into 30-edge polygon, for example)
+    - Doesn't seem to compromise the data, as it relies on the centroids of hexagons 
+- Rotating table to save space in custom area analysis card
+- Pushed clean code and sent over to Paul for review (Goodman's formula)
+  - All confirmed to look good 
+
+
+<span style="color:blue">08/26-30/24: </span> 
+
+- 2 inf. interviews 
+- Continuing to clean up and comment code
+- Adding more in depth descriptions of methods/tools
+- Palette bug fix - (ColorBrewer)
+- 
