@@ -18,22 +18,7 @@ urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSea
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
 
-species_list2 <- list("Northern Minke Whale" = POPhex_MCMC$Northern.Minke.Whale,
-                      "Fin Whale" = POPhex_MCMC$Fin.Whale,
-                      "Northern Fur Seal" = POPhex_MCMC$Northern.Fur.Seal,
-                      #"Bearded Seal" = EB_MCMC, #currently using grid data
-                      "Steller Sea Lion" = POPhex_MCMC$Steller.Sea.Lion,
-                      "Sea Otter" = POPhex_MCMC$Sea.Otter,
-                      "Gray Whale" = POPhex_MCMC$Gray.Whale,
-                      "Pacific White-Sided Dolphin" = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-                      "Humpback Whale" = POPhex_MCMC$Humpback.Whale,
-                      "Killer Whale" = POPhex_MCMC$Killer.Whale,
-                      "Walrus" = POPhex_MCMC$Walrus,
-                      "Dall's Porpoise" = POPhex_MCMC$Dall.s.Porpoise,
-                      "Sperm Whale" = POPhex_MCMC$Sperm.Whale,
-                      "Harbor Porpoise" = POPhex_MCMC$Harbor.Porpoise,
-                      "Harbor Seal" = POPhex_MCMC$Harbor.Seal
-)
+
 
 analysis_title <- reactiveVal(NULL)
 
@@ -135,11 +120,26 @@ tool_description <- div(h3("Using the Draw Toolbar"),
                               tags$li('"Low and High Density Emphasis 2" divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1'),
                               tags$li('"Low Density Emphasis" divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1'),
                               tags$li('"High Density Emphasis" divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1')), 
-                      h3("Customizing the Color Palette"),
-                      p('There are also additional options for viewing the map with various color palettes. 
-                             Possible palettes to select between include Blue-Purple, Yellow-Green-Blue, Blue-Green, Green-Blue, Red-Purple,
-                              Yellow-Orange-Brown, Greyscale, Purple, Red, and Orange.'),
-                      style = 'color: #005b96')
+                    h3("Customizing the Color Palette"),
+                    p('There are also additional options for viewing the map with various color palettes. 
+                      Possible palettes to select between include Viridis, Plasma, Blue-Purple, Yellow-Green-Blue, and Greyscale, as shown below.
+                      The reverse option can be toggled on and off to reverse the palette on the map.'),
+                    h3('Generating Analysis'),
+                    p('Additional options exist for analysis and abundance estimates for a specific area.
+                      Within the panel "Abundance Estimate", the user can input a total abundance for the area, along with a coefficient of variation value (CV),
+                      to get an updated abundance estimate and legend. If no CV value is inputted, the default value is 0.2.
+                      If the user has a shapefile to upload containing a specific area, the panel "Custom Area Analysis" provides an upload button for
+                      the shapefile. 
+                      The shapefile must contain a single area, and must be provided in a zipped format.
+                      The user can also designate the area manually using the toolbar on the left of the map. 
+                      One the shape is uploaded or drawn, the button "Generate Analysis" in the "Custom Area Analysis" panel can be pressed, at which the
+                      the bottom tab below the map, "Generated Custom Area Analysis", will output summary statistics, as well as a histogram that simulates
+                      possible abundances with the included uncertainty.
+                      If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), and 
+                      a histogram will not be provided in the generated analysis.
+                      '),
+                    style = 'color: #005b96')
+                      
 tool_info3 <- div('For any additional questions on code maintenance, contact Stacie Koslovsky. For additional questions
                   on the the statistical analysis, contact ___.', style = 'color: #005b96')
 tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
@@ -158,6 +158,10 @@ methods_info <- div('The statistical approaches for different data integration s
                     data source is attempting to “sample” the underlying species distribution. These models will use
                     existing data (i.e., no new data collection is anticipated, only processing and analysis of existing data).',
                     style = 'color: #005b96')
+
+methods_info2 <- div(h3("Platform of Opportunity Data"),
+                     p('Currently '
+                       ), style = 'color: #005b96')
   
 
 load_all_filest <- function(directory) {
