@@ -124,29 +124,33 @@ tool_description <- div(h3("Using the Draw Toolbar"),
                     p('There are also additional options for viewing the map with various color palettes. 
                       Possible palettes to select between include Viridis, Plasma, Blue-Purple, Yellow-Green-Blue, and Greyscale, as shown below.
                       The reverse option can be toggled on and off to reverse the palette on the map.'),
-                    h3('Generating Analysis'),
-                    p('Additional options exist for analysis and abundance estimates for a specific area.
-                      Within the panel "Abundance Estimate", the user can input a total abundance for the area, along with a coefficient of variation value (CV),
-                      to get an updated abundance estimate and legend. If no CV value is inputted, the default value is 0.2.
-                      If the user has a shapefile to upload containing a specific area, the panel "Custom Area Analysis" provides an upload button for
-                      the shapefile. 
-                      The shapefile must contain a single area, and must be provided in a zipped format.
-                      The user can also designate the area manually using the toolbar on the left of the map. 
-                      One the shape is uploaded or drawn, the button "Generate Analysis" in the "Custom Area Analysis" panel can be pressed, at which the
-                      the bottom tab below the map, "Generated Custom Area Analysis", will output summary statistics, as well as a histogram that simulates
-                      possible abundances with the included uncertainty.
-                      If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), and 
-                      a histogram will not be provided in the generated analysis.
-                      '),
                     style = 'color: #005b96')
+
+tool_description_cont <- div(h3('Generating Analysis'),
+                            p('Additional options exist for analysis and abundance estimates for a specific area.'),
+                  
+                            p('Within the panel "Abundance Estimate", the user can input a total abundance for the area, along with a coefficient of variation value (CV),
+                              to get an updated abundance estimate and legend. If no CV value is inputted, the default value is 0.2.'),
+                            p('If the user has a shapefile to upload containing a specific area, the panel "Custom Area Analysis" provides an upload button for
+                              the shapefile. 
+                              The shapefile must contain a single area, and must be provided in a zipped format.
+                              The user can also designate the area manually using the toolbar on the left of the map.'),
+                            p('One the shape is uploaded or drawn, the button "Generate Analysis" in the "Custom Area Analysis" panel can be pressed, at which the
+                              the bottom tab below the map, "Generated Custom Area Analysis", will output summary statistics, as well as a histogram that simulates
+                              possible abundances with the included uncertainty.
+                              If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), and 
+                              a histogram will not be provided in the generated analysis.
+                              '),
+                             style = 'color: #005b96')
                       
-tool_info3 <- div('For any additional questions on code maintenance, contact Stacie Koslovsky. For additional questions
-                  on the the statistical analysis, contact ___.', style = 'color: #005b96')
+tool_info3 <- div(h3('Additional Questions?'),
+                  p('For any additional questions on code maintenance, contact Stacie Koslovsky. For additional questions
+                  on the the statistical analysis, contact ___.'), style = 'color: #005b96')
 tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
 
 
 # Methods tab
-methods_title <- div('Methods and Approaches', style = 'color: #03396c')
+methods_title <- div('Methods and Approaches', style = '#011f4b')
 
 methods_info <- div('The statistical approaches for different data integration sub-projects differ depending on species and the
                     types of data available. For select cetacean species, POP provide the only data available and
@@ -159,7 +163,7 @@ methods_info <- div('The statistical approaches for different data integration s
                     existing data (i.e., no new data collection is anticipated, only processing and analysis of existing data).',
                     style = 'color: #005b96')
 
-methods_info2 <- div(h3("Platform of Opportunity Data"),
+methods_info2 <- div(h3("How the Estimates are Generated"),
                      p('Currently '
                        ), style = 'color: #005b96')
   

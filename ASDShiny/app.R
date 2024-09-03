@@ -7,15 +7,12 @@ library(sf)
 library(tidyverse)
 library(shinydashboard)
 library(leaflet.extras)
-#library(leaflet.mapboxgl) #mapbox extension 
 library(shinyWidgets)
 library(htmltools)
-library(htmlwidgets)
 library(mapview)
 library(tools)
-library(raster)
 library(RColorBrewer)
-library(DT)
+library(viridis)
 
 
 # Access files
@@ -28,7 +25,8 @@ source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDis
 # Initialize POPdata_with_MCMC (used for later custom area analysis)
 POPdata_with_MCMC <- POPhex_MCMC
 
-
+# List containing the species and its respective POP data column in dataframe (data), its name (as a string) that contains 
+# the MCMC posterior means (popdata), and url of the MCMC chains from Git (url)
 species_list2 <- list(
   "Northern Minke Whale" = list(
     data = POPhex_MCMC$Northern.Minke.Whale,
@@ -167,6 +165,7 @@ ui <- shinydashboard::dashboardPage(
                 p(tool_info1),# Separated texts to allow for appropriate spacing.
                 p(tool_description),
                 uiOutput("palettePlots"),
+                p(tool_description_cont),
                 p(tool_info3),
                 p(tool_info4)
               )),
@@ -251,7 +250,7 @@ ui <- shinydashboard::dashboardPage(
                                              
                                               # Histogram that only outputs when abundance value inputted 
                                                 column(7, plotOutput('small_area_hist'))),
-                                             sliderInput('bin_input', "Bin Count", min = 10, max = 50, value = 15),
+                                             
                                              style = "primary")
                 )
               )),
@@ -271,12 +270,19 @@ ui <- shinydashboard::dashboardPage(
               ),
               wellPanel(
                 p(methods_info),
+                br(), 
+                p(methods_info2), 
+                br(),
                 h3('For more information, contact: etc')
               )
       ),
+      tabItem(tabName = "howtocite",
+              wellPanel(
+                h2(strong(div('How to Cite the Data'), color = '#011f4b'))
+              )),
       tabItem(tabName = 'lic',
               wellPanel(
-                h2('licenses')
+                h2(strong(div('Licenses'), color = '#011f4b'))
               ))
     ))
 )
@@ -294,7 +300,18 @@ server <- function(input, output, session) {
   
   lapply(names(palettes), function(palette_name) {
     output[[paste0("plot_", palette_name)]] <- renderPlot({
-      palette_colors <- brewer.pal(9, palettes[[palette_name]])
+      if (palette_name == "Viridis") {
+        # For viridis-like palettes
+        palette_colors <- viridis::viridis(9, option = "viridis")}
+      else if (palette_name == "Plasma"){
+        palette_colors <- viridis::viridis(9, option = "plasma")
+      }
+       else {
+        # Default to RColorBrewer for other palettes
+        palette_colors <- brewer.pal(9, palettes[[palette_name]])
+      }
+      
+      #palette_colors <- brewer.pal(9, palettes[[palette_name]])
       ggplot(data.frame(x = 1:9, y = 1, fill = factor(1:9)), aes(x, y, fill = fill)) +
         geom_tile() +
         scale_fill_manual(values = palette_colors) +
@@ -469,7 +486,6 @@ server <- function(input, output, session) {
 
   # Generates custom area analysis when the "generate" button is pressed. 
   generate_analysis <- shiny::observeEvent(input$do, {
-    #browser()
     
     # Sets the following variables to uploaded shape/species_pal data/species input 
     shapefile_data <- uploaded_shapes()
@@ -601,6 +617,7 @@ server <- function(input, output, session) {
       
     
     else{
+      # Same approach as above if statement
       output$small_area_abund <- renderText({paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund*sum(POPdata_with_MCMC[[species_name]]), digits = 0))})  # *
       #output$overall_variance_sum <- renderText({paste0("Variance for Selected Area: ", updated_var)})    
       output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 0))})
@@ -615,14 +632,14 @@ server <- function(input, output, session) {
         check.names = FALSE
       )
       
-      
+      # Transpose data / turn it around so that it is better aligned and can include histogram on same plot
       transposed_data <- as.data.frame(t(summary_data))
       transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
       transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
       
-      bin_num <- input$bin_input
+      # Histogram that shows the possible abundance estimate simulations using MCMC chains and CV input uncertainty
       p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
-        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9, bins = bin_num) +
+        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggtitle("Histogram of Abundance Estimates") +
         xlab("Total Abundance") +
         ylab("Frequency") +
@@ -630,19 +647,19 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(size = 20, hjust = 0.5),
               axis.title.x = element_text(size = 16),
               axis.title.y = element_text(size = 16),
-              axis.text.x = element_text(size = 12),  # Adjusts x-axis numbers
+              axis.text.x = element_text(size = 12),  # Adjusts axis numbers (the actual values)
               axis.text.y = element_text(size = 12))
       
       output$small_area_hist <- renderPlot({
         
         p})
+      
+      # Set col and row names to false, or unnecessary matrix titles will appear 
       output$stat_result <- renderTable(transposed_data, 
                                         colnames = FALSE,
                                         rownames = FALSE)
     }
   
-      
-      
     
     
     })
@@ -652,50 +669,51 @@ server <- function(input, output, session) {
   
   # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
-    #browser()
+    # Null (clear) everything again in case there is something preexisting
     uploaded_shapes(NULL)
     shapefile_data <- NULL
     temp_direc2 <- tempfile(pattern = "shapefile_temp_")
     dir.create(temp_direc2)
     
+    # Take in inputted shapefile and set to variable
     drawfile <- input$drawfile
     
     all_shapefiles <- list()
     
     # Unzips the file
     for (i in 1:nrow(drawfile)) {
-    utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
-    all_files <- list.files(temp_direc2, full.names = TRUE)
-    shape_file <- all_files[grepl("\\.shp$", all_files)]
-    print('upload succesful')
+      utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
+      all_files <- list.files(temp_direc2, full.names = TRUE)
+      shape_file <- all_files[grepl("\\.shp$", all_files)]
+      print('upload succesful')
     
-    if (length(shape_file) >= 1) {
-      # Read the shapefile
-      shapefile_data <- sf::st_read(shape_file)
+      if (length(shape_file) >= 1) {
+        # Read the shapefile
+        shapefile_data <- sf::st_read(shape_file)
+        
+        # Transform the projection to EPSG 4326 in case it is different
+        shapefile_data <- sf::st_transform(shapefile_data, 4326)
       
-      # Transform the projection to EPSG 4326 in case it is different
-      shapefile_data <- sf::st_transform(shapefile_data, 4326)
-    
-      shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
-      # if (class(shapefile_data)[1] == "sfc_POLYGON") {
-      #   shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
-      # #} else {
-      #   shifted_geometry <- sf::st_geometry(shapefile_data) + c(360, 0)  # Adjust this as needed
-      # #}
+        shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+        
+        # Shifts the geometry taking the dateline into account
+        sf::st_geometry(shapefile_data) <- shifted_geometry
+        
+        # Sets the shapefile to uploaded shapes() reactive value
+        uploaded_shapes(shapefile_data)
+        
+        # Previously for when there would be more than one shape in the file (no longer option, shoud only 
+        # contain one shape only)
+        # existing_shapes <- drawn_shapes()
+        # if (is.null(existing_shapes)) {
+        #   drawn_shapes(shapefile_data)
+        # } else {
+        #   drawn_shapes(rbind(existing_shapes, shapefile_data))
+        # }
+      }
+      # all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
+      # combined_shapefiles <- do.call(rbind, all_shapefiles)
       
-      
-      sf::st_geometry(shapefile_data) <- shifted_geometry
-      
-      uploaded_shapes(shapefile_data)
-      # existing_shapes <- drawn_shapes()
-      # if (is.null(existing_shapes)) {
-      #   drawn_shapes(shapefile_data)
-      # } else {
-      #   drawn_shapes(rbind(existing_shapes, shapefile_data))
-      # }
-    }
-      all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
-      combined_shapefiles <- do.call(rbind, all_shapefiles)
       # Display the shapefile on the map
       leaflet::leafletProxy("map", session) %>%
         leaflet::clearGroup("shp") %>%
@@ -703,9 +721,6 @@ server <- function(input, output, session) {
       print("shown on map")
        
      
-    # else {
-    #   shiny::showNotification("No .shp file found in the uploaded zip file.", type = "error")
-    # }
     }
   })
   
@@ -713,7 +728,8 @@ server <- function(input, output, session) {
   
   # Update reactive value when a new shape is drawn
   observeEvent(input$map_draw_new_feature, {
-    #browser()
+    
+    # Takes in new shape and sets it to variable 
     new_shape <- input$map_draw_new_feature
     
     if (new_shape$properties$feature_type == "circle") {
@@ -733,15 +749,19 @@ server <- function(input, output, session) {
       # Assuming it's a polygon or similar
       new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
-    #new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
-    
+   
     # set/update new shape to reactive value
     existing_shapes <- drawn_shapes()
     if (is.null(existing_shapes)) {
       drawn_shapes(new_shape_sf)
     } else {
+      # While they should only draw one shape, this takes into the possibility that 
+      # more than one shape exists on map
       drawn_shapes(rbind(existing_shapes, new_shape_sf))
     }
+    
+    # Set existing_shapes to files in drawn shapes, then pass it onto uploaded_shapes()
+    # For analysis use 
     existing_shapes <- drawn_shapes()
     uploaded_shapes(existing_shapes)
   })
@@ -749,12 +769,15 @@ server <- function(input, output, session) {
   # Download handler for shapefiles
   output$downloadData <- downloadHandler(
     filename = function() {
+      # Set the title for the shapefile 
       paste0(input$mapselect,"drawn_shapes_", Sys.Date(), ".zip")
     },
     content = function(file) {
+      # Create temporary directory
       temp_dir <- tempdir()
-      #shp_file <- file.path(temp_dir, "drawn_shapes.shp")
       
+      #Manually create all the files to include in zipped file
+      # THis helps address previous issue where they came in a nested folder (folder in folder)
       shp_file <- file.path(temp_dir, "drawn_shapes.shp")
       shx_file <- file.path(temp_dir, "drawn_shapes.shx")
       dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
@@ -762,10 +785,7 @@ server <- function(input, output, session) {
       
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
       sf::st_write(drawn_shapes(), shp_file)
-      
-      # zip_file <- file
-      # zip(zip_file, files = list.files(temp_dir, full.names = TRUE, pattern = "drawn_shapes"))
-      
+   
       # -j Means no directory paths, just files only!
       zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
     }
