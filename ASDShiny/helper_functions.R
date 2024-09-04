@@ -176,13 +176,13 @@ methods_info2 <- div(h3("How the Estimates are Generated"),
                         the entire area, can be used to then estimate the uncertainty in the posterior mean estimate.
                         This is found using the Goodman's formula:"),
                      h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
-                     p("Where $$\\mu_x$$ and $$\\mu_y$$ are expected values ($$E[X]$$ and $$E[Y]$$) of the random variables.
+                     p("Where $\\mu_x$ and $\\mu_y$ are expected values ($E[X]$ and $E[Y]$) of the random variables.
                        The following values would replace each of the components of the Goodman's Formula:"),
                        tags$ul(
-                              tags$li("$$\\mu_x$$: inputted user abundance"),
-                              tags$li('$$Var(Y)$$: variance from the MCMC chains in the filtered area'),
-                              tags$li('$$\\mu_y$$: sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area'),
-                              tags$li('$$Var(X)$$: calculated by multiplying the user inputted abundance and the coefficient of variance, which yields the 
+                              tags$li("$\\mu_x$: inputted user abundance"),
+                              tags$li('$Var(Y)$: variance from the MCMC chains in the filtered area'),
+                              tags$li('$\\mu_y$: sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area'),
+                              tags$li('$Var(X)$: calculated by multiplying the user inputted abundance and the coefficient of variance, which yields the 
                                       standard error. Squared to then obtain variance.')),
                      p('This will then provide the new variance that takes into account both the uncertainty in the
                         user inputted data and the POP analyses. It is converted to a coefficient of variation value
