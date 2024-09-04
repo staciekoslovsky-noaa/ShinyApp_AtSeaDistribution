@@ -164,8 +164,34 @@ methods_info <- div('The statistical approaches for different data integration s
                     style = 'color: #005b96')
 
 methods_info2 <- div(h3("How the Estimates are Generated"),
-                     p('Currently '
-                       ), style = 'color: #005b96')
+                     p('The estimates are generated using platform-of-opportunity (POP) analyses from Jay Ver Hoef.'),
+                     p('Posterior means are taken from the MCMC chain analysis, and this leads to a posterior mean estimate
+                     for each individual cell/hexagon. The sum of these cells within the selected area obtains a relative abundance estimate, 
+                       ranging between 0 and 1.'),
+                     p("When an abundance estimate and coefficient of variation value is inputted by the user, 
+                        a more in-depth estimate can be generated.
+                        The relative abundance estimate is multipied by the abundance estimate to provide a posterior mean estimate
+                        within the same selected area. 
+                        Additionally, the coefficient of variation, which indicates the uncertainty in the user's inputted abundance estimate of
+                        the entire area, can be used to then estimate the uncertainty in the posterior mean estimate.
+                        This is found using the Goodman's formula:"),
+                     h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
+                     p("Where $\\mu_x$ and $\\mu_y$ are expected values (E[X] and E[Y]) of the random variables.
+                       The following values would replace each of the components of the Goodman's Formula:"),
+                       tags$ul(
+                              tags$li("$\\mu_x$: inputted user abundance d$\\mu_y$"),
+                              tags$li('Var(Y): variance from the MCMC chains in the filtered area'),
+                              tags$li('$\\mu_y$: sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area'),
+                              tags$li('Var(X): calculated by multiplying the user inputted abundance and the coefficient of variance, which yields the 
+                                      standard error. Squared to then obtain variance.')),
+                     p('This will then provide the new variance that takes into account both the uncertainty in the
+                        user inputted data and the POP analyses. It is converted to a coefficient of variation value
+                        for interpretability. Note that if a value is NOT provided, the CV will default to 0.2.'),
+                     p('A histogram is also displayed, which uses the relative abundance proportions in the MCMC chains with the user inputted 
+                     abundance estimate. However, it also takes in the uncertainty in the abundance estimate. A log normal sampling distribution
+                       is simulated, taking into account both the estimate and the CV value, and this is then multipled along with the MCMC chains (1000 columns/1000 simulations
+                       to result in a histogram propoagates uncertainity as shown in its spread.'),
+                     style = 'color: #005b96')
   
 
 load_all_filest <- function(directory) {
