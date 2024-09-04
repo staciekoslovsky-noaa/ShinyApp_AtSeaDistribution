@@ -129,7 +129,7 @@ ui <- shinydashboard::dashboardPage(
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
-      menuItem("How to Cite", tabname = "howtocite", icon = icon("book")),
+      menuItem("How to Cite", tabName = "howtocite", icon = icon("book")),
       menuItem("Licenses", tabName = "lic", icon = icon("file"))
     )),
   
@@ -139,8 +139,7 @@ ui <- shinydashboard::dashboardPage(
       # About the tool tab 
       tabItem(tabName = 'aboutpg',
               wellPanel(
-                h2(strong(div("About This Tool", style = 'color: #011f4b')))
-              ),
+                h2(strong("About This Tool"), style = 'color: #011f4b')),
               wellPanel(
                 h3(purp, width = "100%"),
                 p(information),
@@ -237,6 +236,10 @@ ui <- shinydashboard::dashboardPage(
                                              'Small Area Analysis will be provided once a shapefile is uploaded
                                               and the button "Generate Shapes" is pressed in the Custom Area Analysis
                                               section within Additional Options.',
+                                             
+                                             # Below are the stats that were commented out and replaced within the table
+                                             # Kept in case necessary later on, with relevant code in server
+                                             
                                              #tableOutput('coords_table'),
                                              br(),
                                              # h4(textOutput('small_area_abund')),
@@ -257,41 +260,47 @@ ui <- shinydashboard::dashboardPage(
               )),
               fluidRow(
                 wellPanel(
-                  #Shapefile upload/download UI 
                   h3('Download Shapefile'),
                   downloadButton('downloadData', "Download Shapefile"),
-                  #h4('Download Analysis (possibility later)')
                   
                 )
               )
       ),
+      
+      # Methods tab detailing POP data and how estimates were calculated
       tabItem(tabName = "metd",
               wellPanel(
                 div(h2(strong(methods_title)), style = 'color: #011f4b')
               ),
               wellPanel(
+                
+                # Necessary to allow math equation writing (LaTex-like equation formatting)
                 withMathJax(),
                 p(methods_info),
                 br(), 
                 p(methods_info2), 
                 br(),
+                
+                # Needs to be completed
                 h3('For more information, contact: _', style = 'color: #011f4b')
               )
       ),
-      tabItem(tabName = "howtocite",
-              wellPanel(
-                h2(strong(div('How to Cite the Data', style = 'color: #011f4b')))
-              ),
-              wellPanel(
-                p("To be completed")
-              )),
+      
+      # Licenses and How to Cite tab // Needs to be completed
       tabItem(tabName = 'lic',
               wellPanel(
-                h2(strong(div('Licenses', style = 'color: #011f4b')))
-              ),
+                h2(strong('Licenses'), style = 'color: #011f4b')),
               wellPanel(
                 p('To be completed')
-              ))
+              )),
+      
+      tabItem(tabName = "howtocite",
+              wellPanel(
+                h2(strong('How to Cite the Data'), style = 'color: #011f4b')),
+              wellPanel(
+                p("To be completed")
+              )
+      )
     ))
 )
 
@@ -622,6 +631,10 @@ server <- function(input, output, session) {
       
       # This just renders as regular table, not transposed, because there is no histogram
       output$stat_result <- renderTable(summary_data)
+      
+      # This line is necessary if switching between the two analyses - for example if you have a histogram outputted before
+      # when an abundance was previously inputted,
+      # this removes/nulls the histogram when it is reverted back to relative abundance 
       output$small_area_hist <- renderPlot(NULL)
       }
       
@@ -633,6 +646,7 @@ server <- function(input, output, session) {
       output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 0))})
       output$overall_cv <- renderText({paste0("Coefficient of Variation for Selected Area: ", cv_result)})
       
+      # Summary data frame
       summary_data <- data.frame(
         Species = species_info$selected_species,
         'Selected Abundance' = format(selected_abund, big.mark = ",", scientific = FALSE),
