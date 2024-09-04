@@ -115,6 +115,7 @@ palettes <- list(
 
 # UI
 ui <- shinydashboard::dashboardPage(
+
   # Dashboard based Shiny set up (collapsible sidebar)
   dashboardHeader(title = "At Sea Densities of Marine Mammals"),
   dashboardSidebar(
@@ -124,12 +125,12 @@ ui <- shinydashboard::dashboardPage(
     
     # Various tabs inclued in sidebar menu
     sidebarMenu(
-      menuItem("About This Tool", tabName = "aboutpg", icon = icon("about")),
+      menuItem("About This Tool", tabName = "aboutpg", icon = icon("info-circle")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
-      menuItem("Methods", tabName = "metd"),
-      menuItem("How to Cite", tabname = "howtocite"),
-      menuItem("Licenses", tabName = "lic")
+      menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
+      menuItem("How to Cite", tabname = "howtocite", icon = icon("book")),
+      menuItem("Licenses", tabName = "lic", icon = icon("file"))
     )),
   
   dashboardBody(
@@ -266,23 +267,30 @@ ui <- shinydashboard::dashboardPage(
       ),
       tabItem(tabName = "metd",
               wellPanel(
-                h2(strong(methods_title))
+                div(h2(strong(methods_title)), style = 'color: #011f4b')
               ),
               wellPanel(
+                withMathJax(),
                 p(methods_info),
                 br(), 
                 p(methods_info2), 
                 br(),
-                h3('For more information, contact: etc')
+                h3('For more information, contact: _', style = 'color: #011f4b')
               )
       ),
       tabItem(tabName = "howtocite",
               wellPanel(
-                h2(strong(div('How to Cite the Data'), color = '#011f4b'))
+                h2(strong(div('How to Cite the Data', style = 'color: #011f4b')))
+              ),
+              wellPanel(
+                p("To be completed")
               )),
       tabItem(tabName = 'lic',
               wellPanel(
-                h2(strong(div('Licenses'), color = '#011f4b'))
+                h2(strong(div('Licenses', style = 'color: #011f4b')))
+              ),
+              wellPanel(
+                p('To be completed')
               ))
     ))
 )
@@ -449,7 +457,7 @@ server <- function(input, output, session) {
       
       # Adding layers to turn coordinates or shapes on and off.
       addLayersControl(
-        overlayGroups = c("Shapes", "Coordinates", "Legend", "Hexagons", "shp"),
+        overlayGroups = c("Shapes", "Coordinates", "Legend", "Hexagons", "Shapefile"),
         options = layersControlOptions(collapsed = TRUE)
       ) %>%
       
@@ -582,7 +590,7 @@ server <- function(input, output, session) {
     # Obtaining resulting CV using CV = (stderror / mean) formula
     cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC[[species_name]])))
 
-    browser()  
+    #browser()  
     
     relative_abundance <- reactive({
       species_name <- species_list2[[input$mapselect]]$popdata  # Example: "Fin.Whale"
@@ -603,16 +611,18 @@ server <- function(input, output, session) {
       
       # Posterior indicates Bayesian appraoch - include in output name
       output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 3))})
-      
+
       # Summary data frame 
       summary_data <- data.frame(
         Species = species_info$selected_species,
-        'Relative Abundance Estimate' = round(sum(POPdata_with_MCMC[[species_name]]), digits = 3),
-        'Variance' = round(overall_variance, digits = 5),
+        'Relative Abundance Estimate' = format(sum(POPdata_with_MCMC[[species_name]]), digits = 6, scientific = FALSE),
+        'Variance' = format(round(overall_variance, digits = 7), scientific = TRUE),
         check.names = FALSE
       )
       
+      # This just renders as regular table, not transposed, because there is no histogram
       output$stat_result <- renderTable(summary_data)
+      output$small_area_hist <- renderPlot(NULL)
       }
       
     
@@ -625,20 +635,21 @@ server <- function(input, output, session) {
       
       summary_data <- data.frame(
         Species = species_info$selected_species,
-        'Selected Abundance' = selected_abund,
+        'Selected Abundance' = format(selected_abund, big.mark = ",", scientific = FALSE),
         'Posterior Mean Estimate' = round(selected_abund*sum(POPdata_with_MCMC[[species_name]])),
-        'Posterior Median Abundance Estimate' = round(median(total_abundance_sums), digits = 3),
-        'Coefficient of Variation' = cv_result,
+        'Posterior Median Abundance Estimate' = round(median(total_abundance_sums)),
+        'Coefficient of Variation' = round(cv_result, digits = 2),
         check.names = FALSE
       )
       
+      # Turn the data into a data frame and then 
       # Transpose data / turn it around so that it is better aligned and can include histogram on same plot
       transposed_data <- as.data.frame(t(summary_data))
       transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
       transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
       
       # Histogram that shows the possible abundance estimate simulations using MCMC chains and CV input uncertainty
-      p <- ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
+      p <- ggplot2::ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
         geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggtitle("Histogram of Abundance Estimates") +
         xlab("Total Abundance") +
@@ -678,6 +689,7 @@ server <- function(input, output, session) {
     # Take in inputted shapefile and set to variable
     drawfile <- input$drawfile
     
+    # Added list for later possibility if there are >1 shapefiles
     all_shapefiles <- list()
     
     # Unzips the file
@@ -716,8 +728,9 @@ server <- function(input, output, session) {
       
       # Display the shapefile on the map
       leaflet::leafletProxy("map", session) %>%
-        leaflet::clearGroup("shp") %>%
-        leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "shp")
+        leaflet::clearGroup("Shapefile") %>%
+        leaflet::clearGroup("Shapes") %>%
+        leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
       print("shown on map")
        
      
@@ -728,7 +741,8 @@ server <- function(input, output, session) {
   
   # Update reactive value when a new shape is drawn
   observeEvent(input$map_draw_new_feature, {
-    
+    drawn_shapes(NULL)
+    uploaded_shapes(NULL)
     # Takes in new shape and sets it to variable 
     new_shape <- input$map_draw_new_feature
     
@@ -783,6 +797,7 @@ server <- function(input, output, session) {
       dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
       prj_file <- file.path(temp_dir, "drawn_shapes.prj")
       
+      # Unlinks all files in temp_dir for clean up 
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
       sf::st_write(drawn_shapes(), shp_file)
    
