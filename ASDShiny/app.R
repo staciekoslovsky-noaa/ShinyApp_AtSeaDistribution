@@ -664,7 +664,7 @@ server <- function(input, output, session) {
       
       # Histogram that shows the possible abundance estimate simulations using MCMC chains and CV input uncertainty
       p <- ggplot2::ggplot(data.frame(TotalAbundance = total_abundance_sums), aes(x = TotalAbundance)) +
-        geom_histogram(fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
+        geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggtitle("Histogram of Abundance Estimates") +
         xlab("Total Abundance") +
         ylab("Frequency") +
