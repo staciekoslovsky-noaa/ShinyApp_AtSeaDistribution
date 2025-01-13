@@ -117,7 +117,9 @@ palettes <- list(
 ui <- shinydashboard::dashboardPage(
 
   # Dashboard based Shiny set up (collapsible sidebar)
-  dashboardHeader(title = "At Sea Densities of Marine Mammals"),
+  dashboardHeader(
+    title = "At Sea Densities of Marine Mammals",
+    titleWidth = 400),
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
@@ -127,7 +129,7 @@ ui <- shinydashboard::dashboardPage(
     sidebarMenu(
       menuItem("About This Tool", tabName = "aboutpg", icon = icon("info-circle")),
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
-      menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
+      menuItem("Explore Data", tabName = "specmap", icon = icon("map")),
       menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
       menuItem("Reference Information", tabName = "reference", icon = icon("book"))
     )),
