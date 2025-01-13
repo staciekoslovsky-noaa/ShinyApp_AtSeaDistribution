@@ -129,8 +129,7 @@ ui <- shinydashboard::dashboardPage(
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
-      menuItem("How to Cite", tabName = "howtocite", icon = icon("book")),
-      menuItem("Licenses", tabName = "lic", icon = icon("file"))
+      menuItem("Reference Information", tabName = "references", icon = icon("book"))
     )),
   
   dashboardBody(
@@ -142,7 +141,8 @@ ui <- shinydashboard::dashboardPage(
                 h2(strong("About This Tool"), style = 'color: #011f4b')),
               wellPanel(
                 h3(purp, width = "100%"),
-                p(information),
+                p(about_info1),
+                p(about_info2),
                 tags$figure(
                   class = "centerFigure",
                   tags$img(
@@ -152,7 +152,8 @@ ui <- shinydashboard::dashboardPage(
                     alt = "Picture of a male ribbon seal"
                   ),
                   tags$figcaption("NOAA Fisheries/Josh M London"),
-                  p(info_two)
+                  p(about_info3),
+                  p(about_info4)
                 )
               )),
       
@@ -161,11 +162,11 @@ ui <- shinydashboard::dashboardPage(
               wellPanel(
                 (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
               wellPanel(
-                p(tool_info),
-                p(tool_info1),# Separated texts to allow for appropriate spacing.
-                p(tool_description),
+                p(tool_info1),
+                p(tool_info2),# Separated texts to allow for appropriate spacing.
+                p(tool_descript1),
                 uiOutput("palettePlots"),
-                p(tool_description_cont),
+                p(tool_descript2),
                 p(tool_info3),
                 p(tool_info4)
               )),
@@ -273,36 +274,31 @@ ui <- shinydashboard::dashboardPage(
                 div(h2(strong(methods_title)), style = 'color: #011f4b')
               ),
               wellPanel(
-                
                 # Necessary to allow math equation writing (LaTex-like equation formatting)
                 withMathJax(),
-                p(methods_info),
+                p(methods_info1),
                 br(), 
                 p(methods_info2), 
                 br(),
-                
-                # Needs to be completed
-                h3('For more information, contact: _', style = 'color: #011f4b')
+                h3('For more information, contact Paul Conn (paul.conn [at] noaa.gov).', style = 'color: #011f4b')
               )
       ),
       
       # Licenses and How to Cite tab // Needs to be completed
-      tabItem(tabName = 'lic',
+      tabItem(tabName = 'reference',
               wellPanel(
                 h2(strong('Licenses'), style = 'color: #011f4b')),
               wellPanel(
-                p('To be completed')
-              )),
-      
-      tabItem(tabName = "howtocite",
+                p(licenses),
+                h2(strong('How to Cite the Data/Application'), style = 'color: #011f4b')),
               wellPanel(
-                h2(strong('How to Cite the Data'), style = 'color: #011f4b')),
-              wellPanel(
-                p("To be completed")
+                p("Authors: Conn, P.B., C. Kwon, S. Koslovsky"),
+                p("Page Title: At Sea Densities of Marine Mammals")
+                )
               )
       )
-    ))
-)
+    )
+  )
 
 # Define server logic
 server <- function(input, output, session) {
