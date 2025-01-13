@@ -129,7 +129,7 @@ ui <- shinydashboard::dashboardPage(
       menuItem("How to Use", tabName = "widgets", icon = icon("th")),
       menuItem("Explore Data", tabName = "specmap", icon = icon("otter", lib = "font-awesome")),
       menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
-      menuItem("Reference Information", tabName = "references", icon = icon("book"))
+      menuItem("Reference Information", tabName = "reference", icon = icon("book"))
     )),
   
   dashboardBody(
@@ -278,27 +278,32 @@ ui <- shinydashboard::dashboardPage(
                 withMathJax(),
                 p(methods_info1),
                 br(), 
-                p(methods_info2), 
-                br(),
-                h3('For more information, contact Paul Conn (paul.conn [at] noaa.gov).', style = 'color: #011f4b')
+                p(methods_info2)
               )
       ),
       
       # Licenses and How to Cite tab // Needs to be completed
       tabItem(tabName = 'reference',
               wellPanel(
-                h2(strong('Licenses'), style = 'color: #011f4b')),
+                (h2(strong(div("Reference Information", style = 'color: #011f4b'))))),
               wellPanel(
-                p(licenses),
-                h2(strong('How to Cite the Data/Application'), style = 'color: #011f4b')),
+                (h3(strong(div("License", style = 'color: #011f4b')))),
+                p(licenses)),
               wellPanel(
-                p("Authors: Conn, P.B., C. Kwon, S. Koslovsky"),
-                p("Page Title: At Sea Densities of Marine Mammals")
-                )
+                h3(strong('How to Cite the Data/Application'), style = 'color: #011f4b'),
+                p("Authors: P.B. Conn, S.M. Koslovsky, C. Kwon (alphabetical; order TBD)", style = 'color: #005b96'),
+                p("Page Title: At Sea Densities of Marine Mammals", style = 'color: #005b96')),
+              wellPanel(
+                h3(strong('References'), style = 'color: #011f4b'),
+                p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = 'color: #005b96'),
+                p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology 
+                  and Evolution, 12, 1911-1925.", style = 'color: #005b96')
               )
       )
     )
   )
+)
+
 
 # Define server logic
 server <- function(input, output, session) {

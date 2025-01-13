@@ -139,7 +139,7 @@ tool_info4 <- div('For further reference, the code base can be found on GitHub, 
 
 
 # Methods tab
-methods_title <- div('Methods and Approaches', style = '#011f4b')
+methods_title <- div('Methods', style = '#011f4b')
 
 methods_info1 <- div('The statistical approaches for different data integration sub-projects differ depending on species and the types of data available. For select cetacean species, 
                      POP constitute the only data available and existing models developed with previous NMFS Protected Resources Toolbox funding can be applied directly to estimate species 
