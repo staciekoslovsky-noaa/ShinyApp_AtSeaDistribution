@@ -115,11 +115,23 @@ palettes <- list(
 
 # UI
 ui <- shinydashboard::dashboardPage(
+  
+  skin = "black", 
 
   # Dashboard based Shiny set up (collapsible sidebar)
   dashboardHeader(
     title = "At Sea Densities of Marine Mammals",
-    titleWidth = 400),
+    titleWidth = 400, 
+    tags$li(class = "dropdown",
+            tags$a(
+              #href = 'https://www.fisheries.noaa.gov/themes/custom/noaa_components/images',
+              tags$img(
+                src = "https://www.fisheries.noaa.gov/themes/custom/noaa_components/images/fisheries_header_logo_jul2019.png",
+                height = "50px",
+                width = "125px"
+              ),
+              style = "padding: 0;"
+            ))),
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
@@ -139,8 +151,8 @@ ui <- shinydashboard::dashboardPage(
       
       # About the tool tab 
       tabItem(tabName = 'aboutpg',
-              wellPanel(
-                h2(strong("About This Tool"), style = 'color: #011f4b')),
+              # wellPanel(
+              #   h2(strong("About This Tool"), style = 'color: #011f4b')),
               wellPanel(
                 h3(purp, width = "100%"),
                 p(about_info1),
@@ -161,8 +173,8 @@ ui <- shinydashboard::dashboardPage(
       
       # How to use/instructional tab
       tabItem(tabName = 'widgets',
-              wellPanel(
-                (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
+              # wellPanel(
+              #   (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
               wellPanel(
                 p(tool_info1),
                 p(tool_info2),# Separated texts to allow for appropriate spacing.
@@ -272,9 +284,8 @@ ui <- shinydashboard::dashboardPage(
       
       # Methods tab detailing POP data and how estimates were calculated
       tabItem(tabName = "metd",
-              wellPanel(
-                div(h2(strong(methods_title)), style = 'color: #011f4b')
-              ),
+              # wellPanel(
+              #   div(h2(strong(methods_title)), style = 'color: #011f4b')),
               wellPanel(
                 # Necessary to allow math equation writing (LaTex-like equation formatting)
                 withMathJax(),
@@ -286,8 +297,8 @@ ui <- shinydashboard::dashboardPage(
       
       # Licenses and How to Cite tab // Needs to be completed
       tabItem(tabName = 'reference',
-              wellPanel(
-                (h2(strong(div("Reference Information", style = 'color: #011f4b'))))),
+              # wellPanel(
+              #   (h2(strong(div("Reference Information", style = 'color: #011f4b'))))),
               wellPanel(
                 (h3(strong(div("License", style = 'color: #011f4b')))),
                 p(licenses)),

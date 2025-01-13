@@ -91,7 +91,7 @@ about_info4 <- div('The potential benefits of these analytical approaches are ex
 
 
 # How to Use Tab 
-tool_info1 <- div('This tool was developed using Shiny, a package that facilitates web app development directly from coding languages such as R.', style = 'color: #005b96')
+tool_info1 <- div('This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.', style = 'color: #005b96')
 tool_info2 <- div(p("To access species density maps, click the Species button in the sidebar. Use the right panel to toggle between different marine mammal species."), style = 'color: #005b96')
                   
 tool_descript1 <- div(h3("Using the Draw Toolbar"),
