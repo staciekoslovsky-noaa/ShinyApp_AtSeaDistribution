@@ -1,3 +1,6 @@
+# Helper functions for running At Sea Shiny App
+
+# Load data
 urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData',
           'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData',
           'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData',
@@ -14,11 +17,8 @@ urls <- c('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSea
           'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
 )
 
-
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
 load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhexagons_sf.rda'))
-
-
 
 analysis_title <- reactiveVal(NULL)
 
@@ -61,59 +61,51 @@ purp <- div('Integrating Diverse Datasets to Understand the Seasonal Distributio
         and Densities of Marine Mammals', style = 'color: #03396c')
 
 # About tab 
-information <- div('Understanding seasonal distributions and densities of marine mammals remains a high priority for
-                    NMFS science centers and regional offices. In addition to answering basic ecological questions, such
-                    information is frequently requested of science center staff to help in calculation of “takes” under the
-                    Marine Mammal Protection Act (MMPA) and the Endangered Species Act (ESA) (e.g., due to offshore
-                    energy development, naval exercises, aquaculture permitting, pier construction, or hazard remediation). 
-                    Calculation of at-sea densities remains challenging however, as many Arctic marine mammal surveys
-                    are timed to occur during spring or summer months when animals are the most accessible (and often on
-                    land in the case of many pinniped species). But the continuing need for such density estimates for
-                    management purposes has led to approximating distributions based on suboptimal approaches such as
-                    redistributing animals from haul-out and rookery locations, or applying spring and summer distributions
-                    to other seasons in order to calculate takes. However, we continue to believe that there are better
-                    approaches. In particular, there is a large amount of data that may be leveraged to provide more refined
-                    estimates of seasonal densities, including scientific surveys, satellite telemetry, acoustic detections,
-                    Alaska Native subsistence harvests, and platform-of-opportunity (POP) observations.', style = 'color: #005b96')
+about_info1 <- div('Understanding seasonal distributions and densities of marine mammals remains a high priority for NMFS science centers and regional offices. 
+                   In addition to answering basic ecological questions, such information is frequently requested of science center staff to help in calculation 
+                   of “takes” under the Marine Mammal Protection Act (MMPA) and the Endangered Species Act (ESA) (e.g., due to offshore energy development, 
+                   fisheries interactions, naval exercises, aquaculture permitting, pier construction, or hazard remediation).', style = 'color: #005b96')
 
-info_two <- div(p('Thus, this tool serves as a data portal to share species densities maps.'), 
-                    p("Marine spatial planning requires knowledge of the timing and location of marine mammal distribution,
-                      migrations, density in local areas, and movements to mitigate anthropogenic impacts on protected
-                      species. The ability to combine data from surveys, POP, telemetry, and passive acoustic recorders will
-                      shrink spatial-temporal data gaps and provide managers with a product that represents the best scientific
-                      information available. This more complete information can then be used to assist in NEPA analyses,
-                      ESA Section 7 consultations, MMPA Incidental Harassment Authorizations, and other permit and
-                      management needs. Further, because the gaps present in the data proposed for development of this
-                      toolbox are not unique to the Alaska Region, the framework developed here will have broad
-                      applicability beyond Arctic ecosystems and for all NMFS science centers and regional offices.
-                      The potential benefits of these analytical approaches are expected to reach well beyond just NMFS.
-                      Other federal and state agencies, tribal governments and Alaska Native organizations, non-governmental
-                      organizations, and a variety of industry and community stakeholders seek the type of information
-                      products that this project is targeting. Information about seasonal patterns of marine mammal density
-                      distributions and habitat use will help these groups to better assess potential impacts, implement
-                      mitigation actions where appropriate, and develop plans that are more fully informed by science.
-                      Examples of specific federal agencies that have expressed a desire for access to better information on the
-                      seasonal locations and densities of marine mammals include BOEM and the U.S. Navy."), style = 'color: #005b96')
+about_info2 <- div('Calculation of at-sea densities remains challenging, however, as many Arctic marine mammal surveys are timed to occur during spring or summer 
+                   months when animals are the most accessible (and often on land in the case of many pinniped species). In practice,there is a large amount of 
+                   data that may be leveraged to provide estimates of seasonal densities, including scientific surveys, satellite telemetry, acoustic detections, 
+                   Alaska Native subsistence harvests, and platform-of-opportunity (POP) observations. Seasonal species distribution and density maps inevitably 
+                   require fitting a statistical model to one or more of these data sources, and to use the fitted model to make spatially referenced predictions. 
+                   Our goal with this tool is to share such predictive maps with interested stakeholders. We anticipate more maps being added over time as 
+                   increasingly sophisticated models are applied to individual species.', style = 'color: #005b96')
+
+about_info3 <- div('Marine spatial planning requires knowledge of the timing and location of marine mammal distribution, migrations, density in local areas, and 
+                   movements to mitigate anthropogenic impacts on protected species. The ability to combine data from surveys, POP, telemetry, and passive acoustic 
+                   recorders will shrink spatial-temporal data gaps and provide managers with a product that represents the best scientific information available. 
+                   This more complete information can then be used to assist in NEPA analyses, ESA Section 7 consultations, MMPA Incidental Harassment Authorizations, 
+                   and other permit and management needs. Further, because the gaps present in the data proposed for development of this toolbox are not unique to the 
+                   Alaska Region, the framework developed here will have broad applicability beyond Arctic ecosystems and for all NMFS science centers and regional 
+                   offices.', style = 'color: #005b96')
+
+about_info4 <- div('The potential benefits of these analytical approaches are expected to reach well beyond just NMFS. Other federal and state agencies, tribal 
+                   governments and Alaska Native organizations, non-governmental organizations, and a variety of industry and community stakeholders seek the type 
+                   of information products that this project is targeting. Information about seasonal patterns of marine mammal density distributions and habitat 
+                   use will help these groups to better assess potential impacts, implement mitigation actions where appropriate, and develop plans that are more 
+                   fully informed by science. Examples of specific federal agencies that have expressed a desire for access to better information on the seasonal 
+                   locations and densities of marine mammals include BOEM and the U.S. Navy.', style = 'color: #005b96')
 
 
 # How to Use Tab 
-tool_info <- div('This tool was developed using Shiny, a package that facilitates web app development directly 
-                  from coding languages such as R.', style = 'color: #005b96')
-tool_info1 <- div(p("To first access species density maps, click the Species button in the sidebar. 
-                  Use the right panel to toggle between different marine mammal species."), style = 'color: #005b96')
+tool_info1 <- div('This tool was developed using Shiny, a package that facilitates web app development directly from coding languages such as R.', style = 'color: #005b96')
+tool_info2 <- div(p("To access species density maps, click the Species button in the sidebar. Use the right panel to toggle between different marine mammal species."), style = 'color: #005b96')
                   
-tool_description <- div(h3("Using the Draw Toolbar"),
-                      p("The toolbar on the left of the map contains various tools to work with select data shown on the map. 
-                        The polygon, rectangle, and circle options on the toolbar can be used to draw shapes
-                        that can be downloaded as a shapefile. 
-                        The marker can be used to obtain coordinates of the selected location. 
-                        The trash bin will delete any shapes or lines that are no longer necessary.
-                        The bottom panel contains buttons to download a shapefile of the drawn polygons and upload the user's own shape data
-                        for analysis in one of the following formats: zipped .kmz or .shp file."),
+tool_descript1 <- div(h3("Using the Draw Toolbar"),
+                      p("The toolbar on the left of the map contains various tools to work with select data shown on the map (for instance to perform small area calculations, as when the user is 
+                      interested in the number of animals or fraction of a population that are in a specific area of interest). 
+                        The polygon, rectangle, and circle options on the toolbar can be used to draw shapes corresponding to areas of interest; 
+                        The marker can be used to obtain coordinates of the selected location; 
+                        The trash bin will delete any shapes or lines that are no longer necessary; 
+                        The bottom panel contains buttons to download a shapefile of the drawn polygons and upload the user's own shape data for analysis in one of the following formats: 
+                          zipped .kmz or .shp file."),
   
                     h3("Customizing the Legend"),
-                      'The legend in the map can be customized using the "Select Legend" option in the sidebar.
-                       The options are named:',
+                      'The legend in the map can be customized using the "Select Legend" option in the sidebar.  This can be useful in visualizing changes in abundance across a map, 
+                    particularly when species are clustered in small areas. The options are named:',
                       tags$ul(
                               tags$li('"Quintiles" divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 1'),
                               tags$li('"Low and High Density Emphasis 1" divides them into the following: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1'),
@@ -121,77 +113,72 @@ tool_description <- div(h3("Using the Draw Toolbar"),
                               tags$li('"Low Density Emphasis" divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1'),
                               tags$li('"High Density Emphasis" divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1')), 
                     h3("Customizing the Color Palette"),
-                    p('There are also additional options for viewing the map with various color palettes. 
-                      Possible palettes to select between include Viridis, Plasma, Blue-Purple, Yellow-Green-Blue, and Greyscale, as shown below.
-                      The reverse option can be toggled on and off to reverse the palette on the map.'),
+                    p('There are also additional options for viewing the map with various color palettes. Possible palettes to select between include Viridis, Plasma, Blue-Purple, 
+                      Yellow-Green-Blue, and Greyscale, as shown below. The reverse option can be toggled on and off to reverse the palette on the map.'),
                     style = 'color: #005b96')
 
-tool_description_cont <- div(h3('Generating Analysis'),
-                            p('Additional options exist for analysis and abundance estimates for a specific area.'),
-                  
-                            p('Within the panel "Abundance Estimate", the user can input a total abundance for the area, along with a coefficient of variation value (CV),
-                              to get an updated abundance estimate and legend. If no CV value is inputted, the default value is 0.2.'),
-                            p('If the user has a shapefile to upload containing a specific area, the panel "Custom Area Analysis" provides an upload button for
-                              the shapefile. 
-                              The shapefile must contain a single area, and must be provided in a zipped format.
-                              The user can also designate the area manually using the toolbar on the left of the map.'),
-                            p('One the shape is uploaded or drawn, the button "Generate Analysis" in the "Custom Area Analysis" panel can be pressed, at which the
-                              the bottom tab below the map, "Generated Custom Area Analysis", will output summary statistics, as well as a histogram that simulates
-                              possible abundances with the included uncertainty.
-                              If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), and 
-                              a histogram will not be provided in the generated analysis.
-                              '),
+tool_descript2 <- div(h3('Generating Analysis'),
+                            p('Additional options exist for analysis and abundance estimates for a specific area. For example, all of the initial maps we have made available only 
+                              provide relative abundance (defined as the proportion of the population in a specific region). In order to make inference about absolute abundance, 
+                              one must specify the total abundance of the population. For instance, such estimates could be taken from NMFS stock assessment reports.'),
+                            p('Within the panel "Abundance Estimate", the user can input a population-wide abundance estimate, along with a coefficient of variation value (CV), 
+                              to get an updated abundance estimate and legend. If no CV value is input, the default value is 0.2.'),
+                            p('If the user has a shapefile to upload containing a specific area of interest, the panel "Custom Area Analysis" provides an upload button for the shapefile. 
+                              The shapefile must contain a single polygon and must be provided in a zipped format. The user can also designate the polygon manually using the toolbar on 
+                              the left of the map'),
+                            p('Once the shape is uploaded or drawn, the button "Generate Analysis" in the "Custom Area Analysis" panel can be pressed, at which the the bottom tab below
+                              the map, "Generated Custom Area Analysis", will output summary statistics, as well as a histogram that simulates possible abundances with the included uncertainty.'),
+                            p(' If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), 
+                              and a histogram will not be provided in the generated analysis.'),
                              style = 'color: #005b96')
                       
 tool_info3 <- div(h3('Additional Questions?'),
-                  p('For any additional questions on code maintenance, contact Stacie Koslovsky. For additional questions
-                  on the the statistical analysis, contact ___.'), style = 'color: #005b96')
-tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link:____', style = 'color: #005b96')
+                  p('For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, 
+                    contact Paul Conn (paul.conn [at] noaa.gov). '), style = 'color: #005b96')
+tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.', style = 'color: #005b96')
 
 
 # Methods tab
 methods_title <- div('Methods and Approaches', style = '#011f4b')
 
-methods_info <- div('The statistical approaches for different data integration sub-projects differ depending on species and the
-                    types of data available. For select cetacean species, POP provide the only data available and
-                    existing models developed with previous Toolbox funding can be applied directly to estimate species
-                    distributions (Ver Hoef et al., 2021). For species with more data sources (e.g., bearded seals, Cook Inlet
-                    beluga whales), partially or fully integrated species distribution models are needed, as described in Conn
-                    et al. (In prep) and presented at the 2023 PSAW conference. These models work similarly to fisheries
-                    stock-assessment models with inference conducted using a product log-likelihood, assuming that each
-                    data source is attempting to “sample” the underlying species distribution. These models will use
-                    existing data (i.e., no new data collection is anticipated, only processing and analysis of existing data).',
-                    style = 'color: #005b96')
+methods_info1 <- div('The statistical approaches for different data integration sub-projects differ depending on species and the types of data available. For select cetacean species, 
+                     POP constitute the only data available and existing models developed with previous NMFS Protected Resources Toolbox funding can be applied directly to estimate species 
+                     distributions (Ver Hoef et al., 2021). For species with more data sources (e.g., bearded seals, Cook Inlet beluga whales), partially or fully integrated species 
+                     distribution models are needed, as described in Conn et al. (In prep) and presented at the 2023 PSAW conference. These models work similarly to fisheries stock-assessment 
+                     models with inference conducted using a product log-likelihood, assuming that each data source is attempting to “sample” the underlying species distribution. At present, 
+                     only POP-derived surfaces are available but more maps are expected to be added in the future. Notably, the POP estimates are produced using observations obtained 
+                     between May and September, so only represents spatial distributions for the “ice free” period.', style = 'color: #005b96')
 
-methods_info2 <- div(h3("How the Estimates are Generated"),
+methods_info2 <- div(h3("How the POP Estimates are Generated"),
                      p('The estimates are generated using platform-of-opportunity (POP) analyses from Jay Ver Hoef.'),
-                     p('Posterior means are taken from the MCMC chain analysis, and this leads to a posterior mean estimate
-                     for each individual cell/hexagon. The sum of these cells within the selected area obtains a relative abundance estimate, 
-                       ranging between 0 and 1.'),
-                     p("When an abundance estimate and coefficient of variation value is inputted by the user, 
-                        a more in-depth estimate can be generated.
-                        The relative abundance estimate is multipied by the abundance estimate to provide a posterior mean estimate
-                        within the same selected area. 
-                        Additionally, the coefficient of variation, which indicates the uncertainty in the user's inputted abundance estimate of
-                        the entire area, can be used to then estimate the uncertainty in the posterior mean estimate.
-                        This is found using the Goodman's formula:"),
+                     p('Posterior means are taken from the resulting Bayesian analysis for each hexagon. The sum of these cells within the selected area is taken as  a relative abundance 
+                       estimate, ranging between 0 and 1.  Uncertainty in this quantity is propagated by taking quantiles or calculating coefficient of variation (CV) from posterior (MCMC) 
+                       samples.'),
+                     p("When an abundance estimate and CV value is inputted by the user, a more in-depth estimate can be generated. The relative abundance estimate (a proportion) is 
+                       multiplied by the absolute abundance estimate to generate an absolute abundance estimate for the selected area. Additionally, the user-input CV, which indicates the 
+                       uncertainty in the user's inputted abundance estimate of the entire area, can be propagated into the small area estimate using Goodman's exact formula:"),
                      h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
-                     p("Where mu_x and mu_y are expected values (E[X] and E[Y]) of the random variables.
-                       The following values would replace each of the components of the Goodman's Formula:"),
+                     p("Where mu_x and mu_y are expected values (E[X] and E[Y]) of the random variables. The following values would replace each of the components of the Goodman's 
+                       exact formula (1960):"),
                        tags$ul(
                               tags$li("Mu (x): inputted user abundance"),
                               tags$li('Var(Y): variance from the MCMC chains in the filtered area'),
                               tags$li('Mu (y): sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area'),
                               tags$li('Var(X): calculated by multiplying the user inputted abundance and the coefficient of variance, which yields the 
                                       standard error. Squared to then obtain variance.')),
-                     p('This will then provide the new variance that takes into account both the uncertainty in the
-                        user inputted data and the POP analyses. It is converted to a coefficient of variation value
-                        for interpretability. Note that if a value is NOT provided, the CV will default to 0.2.'),
-                     p('A histogram is also displayed, which uses the relative abundance proportions in the MCMC chains with the user inputted 
-                     abundance estimate. However, it also takes in the uncertainty in the abundance estimate. A log normal sampling distribution
-                       is simulated, taking into account both the estimate and the CV value, and this is then multipled along with the MCMC chains (1000 columns/1000 simulations
-                       to result in a histogram propoagates uncertainity as shown in its spread.'),
+                     p('This will then provide the new variance that takes into account both the uncertainty in the user inputted data and the POP analyses. It is converted to a coefficient 
+                       of variation value for interpretability. Note that if a value is NOT provided, the CV will default to 0.2.'),
+                     p('A histogram is also displayed, conveying uncertainty in the small area abundance estimate. In particular, we assume a log normal sampling distribution.'),
                      style = 'color: #005b96')
+
+# Reference tab
+licenses <- div(p("NOAA data is available under the CC-BY-4.0 license, which allows for unrestricted use. User must read and fully comprehend the metadata prior to use. 
+                  Applications or inferences derived from the data should be carefully considered for accuracy. While every effort has been made to ensure that these data 
+                  are accurate and reliable within the limits of the current state of the art, NOAA cannot assume liability for any damages caused by any errors or omissions 
+                  in the data, nor as a result of the failure of the data to function on a particular system. NOAA makes no warranty, expressed or implied, nor does the fact 
+                  of distribution constitute such a warranty. Acknowledge NOAA/NMFS/AFSC or the specified citation as the source from which these data were obtained in any 
+                  publications and/or other representations of these data. Communication and collaboration with dataset authors is strongly encouraged."),
+                style = 'color: #005b96')
   
 
 load_all_filest <- function(directory) {
