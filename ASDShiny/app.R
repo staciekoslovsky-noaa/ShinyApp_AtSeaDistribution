@@ -116,7 +116,7 @@ palettes <- list(
 # UI
 ui <- shinydashboard::dashboardPage(
   
-  skin = "black", 
+  skin = "black",
 
   # Dashboard based Shiny set up (collapsible sidebar)
   dashboardHeader(
@@ -180,9 +180,9 @@ ui <- shinydashboard::dashboardPage(
                 p(tool_info2),# Separated texts to allow for appropriate spacing.
                 p(tool_descript1),
                 uiOutput("palettePlots"),
-                p(tool_descript2),
-                p(tool_info3),
-                p(tool_info4)
+                p(tool_descript2)#,
+                # p(tool_info3),
+                # p(tool_info4)
               )),
       
       # Species density map
@@ -300,18 +300,23 @@ ui <- shinydashboard::dashboardPage(
               # wellPanel(
               #   (h2(strong(div("Reference Information", style = 'color: #011f4b'))))),
               wellPanel(
-                (h3(strong(div("License", style = 'color: #011f4b')))),
-                p(licenses)),
+                (h3(strong(div("Additional Questions?", style = 'color: #011f4b')))),
+                p('For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, 
+                    contact Paul Conn (paul.conn [at] noaa.gov).', style = 'color: #005b96'),
+                p('For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.', 
+                  style = 'color: #005b96')),
               wellPanel(
                 h3(strong('How to Cite the Data/Application'), style = 'color: #011f4b'),
                 p("Authors: P.B. Conn, S.M. Koslovsky, C. Kwon (alphabetical; order TBD)", style = 'color: #005b96'),
                 p("Page Title: At Sea Densities of Marine Mammals", style = 'color: #005b96')),
               wellPanel(
+                (h3(strong(div("License", style = 'color: #011f4b')))),
+                p(licenses)),
+              wellPanel(
                 h3(strong('References'), style = 'color: #011f4b'),
                 p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = 'color: #005b96'),
                 p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology 
-                  and Evolution, 12, 1911-1925.", style = 'color: #005b96')
-              )
+                  and Evolution, 12, 1911-1925.", style = 'color: #005b96'))
       )
     )
   )

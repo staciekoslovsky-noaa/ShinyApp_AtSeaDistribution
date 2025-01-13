@@ -131,12 +131,6 @@ tool_descript2 <- div(h3('Generating Analysis'),
                             p(' If no abundance estimate value is inputted by the user, or an invalid value is inputted, it will default to the relative abundance estimates (abundance = 1), 
                               and a histogram will not be provided in the generated analysis.'),
                              style = 'color: #005b96')
-                      
-tool_info3 <- div(h3('Additional Questions?'),
-                  p('For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, 
-                    contact Paul Conn (paul.conn [at] noaa.gov). '), style = 'color: #005b96')
-tool_info4 <- div('For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.', style = 'color: #005b96')
-
 
 # Methods tab
 methods_title <- div('Methods', style = '#011f4b')
