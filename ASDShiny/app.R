@@ -415,7 +415,6 @@ server <- function(input, output, session) {
     # Updates selected_pal with any changes in palette choice in UI 
     selected_pal <- palette_choices()
     
-    
     # Manually selected quartile divisions to display different variations of the data 
     quartile_vals <- shiny::reactive({
       switch(input$legendselect,
@@ -456,8 +455,7 @@ server <- function(input, output, session) {
     
     # Data layer obtained from selected species
     leaflet(species_info$data) %>%
-      addTiles(
-      ) %>%
+      addTiles() %>%
       addPolygons(fillColor = ~species_info$pal(species_info$column),
                   fillOpacity = 0.8,
                   opacity = 0.7,
@@ -475,6 +473,7 @@ server <- function(input, output, session) {
         polygonOptions = drawPolygonOptions(),
         circleOptions = drawCircleOptions(),
         rectangleOptions = drawRectangleOptions(),
+        markerOptions = FALSE, # Turned off by SMK; to re-add, remove this line and uncomment "# Provides coordinates for markers when you place them on the map." section ~30 lines below here
         polylineOptions = FALSE,
         circleMarkerOptions = FALSE,
         editOptions = editToolbarOptions(edit = FALSE, 
@@ -485,7 +484,8 @@ server <- function(input, output, session) {
       
       # Adding layers to turn coordinates or shapes on and off.
       addLayersControl(
-        overlayGroups = c("Shapes", "Coordinates", "Legend", "Hexagons", "Shapefile"),
+        overlayGroups = c("Shapes", #"Coordinates", 
+                          "Legend", "Hexagons", "Shapefile"),
         options = layersControlOptions(collapsed = TRUE)
       ) %>%
       
@@ -503,22 +503,20 @@ server <- function(input, output, session) {
       )
   })
   
-  
   # Provides coordinates for markers when you place them on the map. 
   # Currently does not delete together - FIX
-  shiny::observeEvent(input$map_draw_new_feature, {
-    feature <- input$map_draw_new_feature
-    if (feature$properties$feature_type == "marker") {
-      leaflet::leafletProxy("map") %>%
-        leaflet::addLabelOnlyMarkers(
-          lng <- feature$geometry$coordinates[[1]],
-          lat <- feature$geometry$coordinates[[2]],
-          label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
-          labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10)),
-          group = "Coordinates"
-        )
-    }})
-  
+  # shiny::observeEvent(input$map_draw_new_feature, {
+  #   feature <- input$map_draw_new_feature
+  #   if (feature$properties$feature_type == "marker") {
+  #     leaflet::leafletProxy("map") %>%
+  #       leaflet::addLabelOnlyMarkers(
+  #         lng <- feature$geometry$coordinates[[1]],
+  #         lat <- feature$geometry$coordinates[[2]],
+  #         label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
+  #         labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10)),
+  #         group = "Coordinates"
+  #       )
+  #   }})
 
   # Generates custom area analysis when the "generate" button is pressed. 
   generate_analysis <- shiny::observeEvent(input$do, {
@@ -747,7 +745,7 @@ server <- function(input, output, session) {
         # Sets the shapefile to uploaded shapes() reactive value
         uploaded_shapes(shapefile_data)
         
-        # Previously for when there would be more than one shape in the file (no longer option, shoud only 
+        # Previously for when there would be more than one shape in the file (no longer option, should only 
         # contain one shape only)
         # existing_shapes <- drawn_shapes()
         # if (is.null(existing_shapes)) {
@@ -823,8 +821,9 @@ server <- function(input, output, session) {
       # Create temporary directory
       temp_dir <- tempdir()
       
-      #Manually create all the files to include in zipped file
-      # THis helps address previous issue where they came in a nested folder (folder in folder)
+      # Manually create all the files to include in zipped file
+      
+      # This helps address previous issue where they came in a nested folder (folder in folder)
       shp_file <- file.path(temp_dir, "drawn_shapes.shp")
       shx_file <- file.path(temp_dir, "drawn_shapes.shx")
       dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
@@ -838,14 +837,10 @@ server <- function(input, output, session) {
       zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
     }
   )
-  
 
 }
-
 
 
 # Run the application 
 shinyApp(ui = ui, server = server)
 #options=c(launch.browser = .rs.invokeShinyPaneViewer)
-
-
