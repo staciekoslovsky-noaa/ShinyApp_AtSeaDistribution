@@ -25,3 +25,15 @@
 - Within helper_functions.R:
   - Find a better place to store the text strings for the information tabs
 - All other fixes that are mentioned in project document already
+
+## June 3rd, 2026
+### 9:00 - Blueprint
+- Wrote blueprint for first 4 weeks based on code review
+### 12:00 - Coast Survey - Data Driven Future (Lorraine Robidoux)
+- Deputy Director of the Office of Coast Survey, which is a subset of the NOS
+- Navigation products like the ENC (Electronic Navigational Chart) instead of the rasters aligns to mapping in AtSeaDistribution application
+### 13:00 - Project Meeting
+- With the for-loop approach, other species can have spatio-temporal representation,
+  - Paul will provide basic data to test with
+  - Try to have some sort of standardization with the data for easier handling
+- A couple of information interviews: Erin, Ben, Josh
