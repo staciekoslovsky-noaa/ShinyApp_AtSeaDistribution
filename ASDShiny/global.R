@@ -1,16 +1,24 @@
-# Load all library packages
+# basic shiny packages needed
 library(shiny)
 library(shinyjs)
-library(leaflet)
 library(shinyBS)
+library(shinydashboard)
+library(shinyWidgets)
+
+# packages for spatial visualization on map
+library(leaflet)
+library(leaflet.extras)
+library(mapview)
+
+# tools for data processing
 library(sf)
 library(tidyverse)
-library(shinydashboard)
-library(leaflet.extras)
-library(shinyWidgets)
+
+#misc. tools
 library(htmltools)
-library(mapview)
 library(tools)
+
+# likely to be deleted
 library(RColorBrewer)
 library(viridis)
 
