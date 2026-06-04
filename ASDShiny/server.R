@@ -1,328 +1,3 @@
-# Load all library packages
-library(shiny)
-library(shinyjs)
-library(leaflet)
-library(shinyBS)
-library(sf)
-library(tidyverse)
-library(shinydashboard)
-library(leaflet.extras)
-library(shinyWidgets)
-library(htmltools)
-library(mapview)
-library(tools)
-library(RColorBrewer)
-library(viridis)
-
-
-# Access files
-source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
-source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/custom_area_analysis.R')
-
-
-# Access via GitHub
-
-# Initialize POPdata_with_MCMC (used for later custom area analysis)
-POPdata_with_MCMC <- POPhex_MCMC
-
-# List containing the species and its respective POP data column in dataframe (data), its name (as a string) that contains 
-# the MCMC posterior means (popdata), and url of the MCMC chains from Git (url)
-species_list2 <- list(
-  "Northern Minke Whale" = list(
-    data = POPhex_MCMC$Northern.Minke.Whale,
-    popdata = "Northern.Minke.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData'
-  ),
-  "Fin Whale" = list(
-    data = POPhex_MCMC$Fin.Whale,
-    popdata = "Fin.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData'
-  ),
-  "Northern Fur Seal" = list(
-    data = POPhex_MCMC$Northern.Fur.Seal,
-    popdata = "Northern.Fur.Seal",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData'
-  ),
-  "Steller Sea Lion" = list(
-    data = POPhex_MCMC$Steller.Sea.Lion,
-    popdata = "Steller.Sea.Lion",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData'
-  ),
-  "Sea Otter" = list(
-    data = POPhex_MCMC$Sea.Otter,
-    popdata = "Sea.Otter",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData'
-  ),
-  "Gray Whale" = list(
-    data = POPhex_MCMC$Gray.Whale,
-    popdata = "Gray.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData'
-  ),
-  "Pacific White-Sided Dolphin" = list(
-    data = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-    popdata = "Pacific.White.Sided.Dolphin",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData'
-  ),
-  "Humpback Whale" = list(
-    data = POPhex_MCMC$Humpback.Whale,
-    popdata = "Humpback.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData'
-  ),
-  "Killer Whale" = list(
-    data = POPhex_MCMC$Killer.Whale,
-    popdata = "Killer.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData'
-  ),
-  "Walrus" = list(
-    data = POPhex_MCMC$Walrus,
-    popdata = "Walrus",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData'
-  ),
-  "Dall's Porpoise" = list(
-    data = POPhex_MCMC$Dall.s.Porpoise,
-    popdata = "Dall.s.Porpoise",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData'
-  ),
-  "Sperm Whale" = list(
-    data = POPhex_MCMC$Sperm.Whale,
-    popdata = "Sperm.Whale",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData'
-  ),
-  "Harbor Porpoise" = list(
-    data = POPhex_MCMC$Harbor.Porpoise,
-    popdata = "Harbor.Porpoise",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData'
-  ),
-  "Harbor Seal" = list(
-    data = POPhex_MCMC$Harbor.Seal,
-    popdata = "Harbor.Seal",
-    url = 'https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData'
-  )
-)
-
-
-# Initialize RelAbund_MCMC as object
-# NULL is later replaced by loaded MCMC file from Git
-RelAbund_MCMC <- NULL
-
-palettes <- list(
-  "Viridis" = "viridis",
-  "Plasma" = "plasma",
-  "Blue-Purple" = "BuPu",
-  "Yellow-Green-Blue" = "YlGnBu",
-  "Greyscale" = "Greys"
-)
-
-# UI
-ui <- shinydashboard::dashboardPage(
-  
-  skin = "black",
-
-  # Dashboard based Shiny set up (collapsible sidebar)
-  dashboardHeader(
-    title = "At Sea Densities of Marine Mammals",
-    titleWidth = 400, 
-    tags$li(class = "dropdown",
-            tags$a(
-              #href = 'https://www.fisheries.noaa.gov/themes/custom/noaa_components/images',
-              tags$img(
-                src = "https://www.fisheries.noaa.gov/themes/custom/noaa_components/images/fisheries_header_logo_jul2019.png",
-                height = "50px",
-                width = "125px"
-              ),
-              style = "padding: 0;"
-            ))),
-  dashboardSidebar(
-    tags$head(
-      tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
-    ),
-    
-    # Various tabs inclued in sidebar menu
-    sidebarMenu(
-      menuItem("About This Tool", tabName = "aboutpg", icon = icon("info-circle")),
-      menuItem("How to Use", tabName = "widgets", icon = icon("th")),
-      menuItem("Explore Data", tabName = "specmap", icon = icon("map")),
-      menuItem("Methods", tabName = "metd", icon = icon("clipboard")),
-      menuItem("Reference Information", tabName = "reference", icon = icon("book"))
-    )),
-  
-  dashboardBody(
-    shinydashboard::tabItems(
-      
-      # About the tool tab 
-      tabItem(tabName = 'aboutpg',
-              # wellPanel(
-              #   h2(strong("About This Tool"), style = 'color: #011f4b')),
-              wellPanel(
-                h3(purp, width = "100%"),
-                p(about_info1),
-                p(about_info2),
-                tags$figure(
-                  class = "centerFigure",
-                  tags$img(
-                    src = "sampleseal.jpg",
-                    width = '50%',
-                    align = "center",
-                    alt = "Picture of a male ribbon seal"
-                  ),
-                  tags$figcaption("NOAA Fisheries/Josh M London"),
-                  p(about_info3),
-                  p(about_info4)
-                )
-              )),
-      
-      # How to use/instructional tab
-      tabItem(tabName = 'widgets',
-              # wellPanel(
-              #   (h2(strong(div("How to Use", style = 'color: #011f4b'))))),
-              wellPanel(
-                p(tool_info1),
-                p(tool_info2),# Separated texts to allow for appropriate spacing.
-                p(tool_descript1),
-                uiOutput("palettePlots"),
-                p(tool_descript2)#,
-                # p(tool_info3),
-                # p(tool_info4)
-              )),
-      
-      # Species density map
-      tabItem(tabName = "specmap",
-              wellPanel(
-                tags$div(
-                  
-                  # Map title with species on top of page
-                  textOutput("selected_species_name"),
-                  style = "color: #2c3e50; font-size: 20px; font-weight: bold;"  # Customize color, size, and weight
-                )
-              ),
-              fluidRow(
-                column(8, 
-                       leafletOutput(outputId = "map", width="100%")
-                ),
-                column(4,
-                       
-                       # Collapsible set up for saving space and appropriate order of user input possibilities 
-                         shinyBS::bsCollapse(id = "collapse_1", open = "Customize Map",
-                           shinyBS::bsCollapsePanel("Customize Map", style = 'success',
-                           bsCollapse(id = "collapseExample", open = "Select Species", 
-                                      bsCollapsePanel("Select Species",
-                                                      wellPanel(
-                                                        
-                                                        # Customization features in map
-                                                        selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
-                                                        selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
-                                                                                                                    "Low and High Density Emphasis 1",
-                                                                                                                    "Low and High Density Emphasis 2", 
-                                                                                                                    "Low Density Emphasis",
-                                                                                                                    "High Density Emphasis")),
-                                                        selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
-                                                                                                                    "Plasma",
-                                                                                                                    "Blue-Purple",
-                                                                                                                    "Yellow-Green-Blue",
-                                                                                                                    "Greyscale"
-                                                        ), width = NULL),
-                                                        checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL),
-                                                      )),
-                                      bsCollapsePanel("Abundance Estimate", 
-                                                      textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
-                                                      "Enter total abundance to get an updated abundance estimate.",
-                                                      br(),
-                                                      br(),
-                                                      textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
-                                                      "Enter a coefficient of variation value. The default value is 0.2.",
-                                                      style = "info"),
-                                      bsCollapsePanel("Custom Area Analysis",
-                                                      "Upload a shapefile for custom area analysis.",
-                                                      "Only single zipped files will be accepted.",
-                                                      br(),
-                                                      br(),
-                                                      fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
-                                                      br(),
-                                                      actionButton("do", "Generate"),
-                                                      style = "primary")
-                           )
-                         )
-                       )
-                )),
-              fluidRow(
-                wellPanel(
-                  bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                             bsCollapsePanel("Generated Custom Area Analysis", 
-                                             'Small Area Analysis will be provided once a shapefile is uploaded
-                                              and the button "Generate Shapes" is pressed in the Custom Area Analysis
-                                              section within Additional Options.',
-                                             
-                                             # Below are the stats that were commented out and replaced within the table
-                                             # Kept in case necessary later on, with relevant code in server
-                                             
-                                             #tableOutput('coords_table'),
-                                             br(),
-                                             # h4(textOutput('small_area_abund')),
-                                             # h4(textOutput('medmode')),
-                                             # h4(textOutput('overall_variance_sum')),
-                                             # h4(textOutput('overall_variance_mean')),
-                                             # h4(textOutput('overall_cv')),
-                                             
-                                             # Stat summary table 
-                                             fluidRow(
-                                                column(5, h4(tableOutput('stat_result'))),
-                                             
-                                              # Histogram that only outputs when abundance value inputted 
-                                                column(7, plotOutput('small_area_hist'))),
-                                             
-                                             style = "primary")
-                )
-              )),
-              fluidRow(
-                wellPanel(
-                  h3('Download Shapefile'),
-                  downloadButton('downloadData', "Download Shapefile"),
-                  
-                )
-              )
-      ),
-      
-      # Methods tab detailing POP data and how estimates were calculated
-      tabItem(tabName = "metd",
-              # wellPanel(
-              #   div(h2(strong(methods_title)), style = 'color: #011f4b')),
-              wellPanel(
-                # Necessary to allow math equation writing (LaTex-like equation formatting)
-                withMathJax(),
-                p(methods_info1),
-                br(), 
-                p(methods_info2)
-              )
-      ),
-      
-      # Licenses and How to Cite tab // Needs to be completed
-      tabItem(tabName = 'reference',
-              # wellPanel(
-              #   (h2(strong(div("Reference Information", style = 'color: #011f4b'))))),
-              wellPanel(
-                (h3(strong(div("Additional Questions?", style = 'color: #011f4b')))),
-                p('For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, 
-                    contact Paul Conn (paul.conn [at] noaa.gov).', style = 'color: #005b96'),
-                p('For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.', 
-                  style = 'color: #005b96')),
-              wellPanel(
-                h3(strong('How to Cite the Data/Application'), style = 'color: #011f4b'),
-                p("Authors: P.B. Conn, S.M. Koslovsky, C. Kwon (alphabetical; order TBD)", style = 'color: #005b96'),
-                p("Page Title: At Sea Densities of Marine Mammals", style = 'color: #005b96')),
-              wellPanel(
-                (h3(strong(div("License", style = 'color: #011f4b')))),
-                p(licenses)),
-              wellPanel(
-                h3(strong('References'), style = 'color: #011f4b'),
-                p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = 'color: #005b96'),
-                p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology 
-                  and Evolution, 12, 1911-1925.", style = 'color: #005b96'))
-      )
-    )
-  )
-)
-
-
 # Define server logic
 server <- function(input, output, session) {
   
@@ -342,7 +17,7 @@ server <- function(input, output, session) {
       else if (palette_name == "Plasma"){
         palette_colors <- viridis::viridis(9, option = "plasma")
       }
-       else {
+      else {
         # Default to RColorBrewer for other palettes
         palette_colors <- brewer.pal(9, palettes[[palette_name]])
       }
@@ -517,7 +192,7 @@ server <- function(input, output, session) {
   #         group = "Coordinates"
   #       )
   #   }})
-
+  
   # Generates custom area analysis when the "generate" button is pressed. 
   generate_analysis <- shiny::observeEvent(input$do, {
     
@@ -576,7 +251,7 @@ server <- function(input, output, session) {
     
     # Filter only those within the shapefile coordinates
     POPdata_with_MCMC <- POPdata_with_MCMC %>%
-       dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
+      dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
     
     # Gather total abundance sums by summing those columns after filter
     total_abundance_sums <- colSums(st_drop_geometry(POPdata_with_MCMC)[, paste0("X", 1:1000)], na.rm = TRUE)
@@ -584,16 +259,16 @@ server <- function(input, output, session) {
     # Calculate the variance of these summed values
     overall_variance <- var(total_abundance_sums)
     print(overall_variance)
-
+    
     # Placed again for debugging (ignore) 
     selected_abund <- species_info$selected_abund
     
     if (is.na(selected_abund) || selected_abund <= 0) { 
       selected_abund <- 1 }
-
+    
     # Turns coefficient of variation input (originally character/string class) to numeric/number
     cv_input <- as.numeric(cv_input)
-
+    
     # For histogram
     #total_abundance_sums <- total_abundance_sums*selected_abund
     
@@ -610,12 +285,12 @@ server <- function(input, output, session) {
     # (selected_abund*cv_input) squared (standard error is abund*CV, now square to get variance: var X)
     updated_var <- ((selected_abund)**2)*overall_variance + (sum(POPdata_with_MCMC[[species_name]])**2)*((selected_abund*cv_input)**2) + overall_variance*((selected_abund*cv_input)**2)  # *
     print(updated_var)
-
+    
     stderror <- sqrt(updated_var)
     
     # Obtaining resulting CV using CV = (stderror / mean) formula
     cv_result <- stderror/(selected_abund*(sum(POPdata_with_MCMC[[species_name]])))
-
+    
     #browser()  
     
     relative_abundance <- reactive({
@@ -637,7 +312,7 @@ server <- function(input, output, session) {
       
       # Posterior indicates Bayesian appraoch - include in output name
       output$medmode <- renderText({paste0('Posterior Median Abundance Estimate: ', round(median(total_abundance_sums), digits = 3))})
-
+      
       # Summary data frame 
       summary_data <- data.frame(
         Species = species_info$selected_species,
@@ -653,8 +328,8 @@ server <- function(input, output, session) {
       # when an abundance was previously inputted,
       # this removes/nulls the histogram when it is reverted back to relative abundance 
       output$small_area_hist <- renderPlot(NULL)
-      }
-      
+    }
+    
     
     else{
       # Same approach as above if statement
@@ -701,10 +376,10 @@ server <- function(input, output, session) {
                                         colnames = FALSE,
                                         rownames = FALSE)
     }
-  
     
     
-    })
+    
+  })
   
   
   uploaded_shapes <- reactiveVal(NULL)
@@ -729,14 +404,14 @@ server <- function(input, output, session) {
       all_files <- list.files(temp_direc2, full.names = TRUE)
       shape_file <- all_files[grepl("\\.shp$", all_files)]
       print('upload succesful')
-    
+      
       if (length(shape_file) >= 1) {
         # Read the shapefile
         shapefile_data <- sf::st_read(shape_file)
         
         # Transform the projection to EPSG 4326 in case it is different
         shapefile_data <- sf::st_transform(shapefile_data, 4326)
-      
+        
         shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
         
         # Shifts the geometry taking the dateline into account
@@ -763,8 +438,8 @@ server <- function(input, output, session) {
         leaflet::clearGroup("Shapes") %>%
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
       print("shown on map")
-       
-     
+      
+      
     }
   })
   
@@ -794,7 +469,7 @@ server <- function(input, output, session) {
       # Assuming it's a polygon or similar
       new_shape_sf <- sf::st_as_sf(st_sfc(st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
-   
+    
     # set/update new shape to reactive value
     existing_shapes <- drawn_shapes()
     if (is.null(existing_shapes)) {
@@ -832,15 +507,10 @@ server <- function(input, output, session) {
       # Unlinks all files in temp_dir for clean up 
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
       sf::st_write(drawn_shapes(), shp_file)
-   
+      
       # -j Means no directory paths, just files only!
       zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
     }
   )
-
+  
 }
-
-
-# Run the application 
-shinyApp(ui = ui, server = server)
-#options=c(launch.browser = .rs.invokeShinyPaneViewer)
