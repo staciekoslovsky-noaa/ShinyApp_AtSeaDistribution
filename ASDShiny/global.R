@@ -23,13 +23,6 @@ library(RColorBrewer)
 library(viridis)
 
 
-# Access files
-source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
-source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/custom_area_analysis.R')
-
-
-# Access via GitHub
-
 # Initialize POPdata_with_MCMC (used for later custom area analysis)
 POPdata_with_MCMC <- POPhex_MCMC
 
