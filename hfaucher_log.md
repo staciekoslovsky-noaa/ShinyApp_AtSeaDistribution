@@ -37,3 +37,20 @@
   - Paul will provide basic data to test with
   - Try to have some sort of standardization with the data for easier handling
 - A couple of information interviews: Erin, Ben, Josh
+
+## June 4th, 2026
+### 9:30 - Planning and Programming
+- Edited the blueprint a bit, and made notes for the next steps
+- Separated the UI and the server and moved the old helper_functions and custom_area_analysis into the global.R for now. 
+  - Waiting for coworking to merge into main
+- Organized packages on global.R
+### 12:00 - How to get the most of the internship
+- Make networking a priority, and reach out to people even to talk about non-work related subjects
+### 13:00 - Coworking
+- Working with GitHub and going over pull request
+  - Merged
+- Stacie told me about Positron/VSCode so spent most of the time trying to get that working
+- Started working on disbaled the generating custom area analysis button until a shapefile(s) has been uploaded
+### 14:00 - Integrated Data Analysis Working Group
+- Introduced myself
+- Listened to others on how I could contribute to their projectsds
