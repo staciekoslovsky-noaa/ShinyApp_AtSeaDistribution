@@ -32,6 +32,7 @@ ui <- shinydashboard::dashboardPage(
     )),
   
   dashboardBody(
+    useShinyjs(),
     shinydashboard::tabItems(
       
       # About the tool tab 
@@ -123,7 +124,7 @@ ui <- shinydashboard::dashboardPage(
                                                                                                br(),
                                                                                                fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
                                                                                                br(),
-                                                                                               actionButton("do", "Generate"),
+                                                                                               disabled(actionButton("generate_button", "Generate")),
                                                                                                style = "primary")
                                                                     )
                                            )

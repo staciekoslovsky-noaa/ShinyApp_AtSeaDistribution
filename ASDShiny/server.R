@@ -194,7 +194,7 @@ server <- function(input, output, session) {
   #   }})
   
   # Generates custom area analysis when the "generate" button is pressed. 
-  generate_analysis <- shiny::observeEvent(input$do, {
+  generate_analysis <- shiny::observeEvent(input$generate_button, {
     
     # Sets the following variables to uploaded shape/species_pal data/species input 
     shapefile_data <- uploaded_shapes()
@@ -386,6 +386,8 @@ server <- function(input, output, session) {
   
   # Observe when shapefile is uploaded. 
   shiny::observeEvent(input$drawfile, {
+    enable("generate_button")
+    
     # Null (clear) everything again in case there is something preexisting
     uploaded_shapes(NULL)
     shapefile_data <- NULL
@@ -403,7 +405,7 @@ server <- function(input, output, session) {
       utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
       all_files <- list.files(temp_direc2, full.names = TRUE)
       shape_file <- all_files[grepl("\\.shp$", all_files)]
-      print('upload succesful')
+      message('upload succesful')
       
       if (length(shape_file) >= 1) {
         # Read the shapefile
@@ -428,18 +430,21 @@ server <- function(input, output, session) {
         # } else {
         #   drawn_shapes(rbind(existing_shapes, shapefile_data))
         # }
-      }
-      # all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
-      # combined_shapefiles <- do.call(rbind, all_shapefiles)
-      
-      # Display the shapefile on the map
-      leaflet::leafletProxy("map", session) %>%
+
+        # Display the shapefile on the map
+        leaflet::leafletProxy("map", session) %>%
         leaflet::clearGroup("Shapefile") %>%
         leaflet::clearGroup("Shapes") %>%
         leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
-      print("shown on map")
-      
-      
+        print("shown on map")
+      } else {
+        shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
+        shinyjs::reset("drawfile")
+        drawfile <- NULL
+        disable("generate_button")
+      }
+      # all_shapefiles[[length(all_shapefiles) + 1]] <- shapefile_data
+      # combined_shapefiles <- do.call(rbind, all_shapefiles)
     }
   })
   
