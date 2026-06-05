@@ -53,4 +53,18 @@
 - Started working on disbaled the generating custom area analysis button until a shapefile(s) has been uploaded
 ### 14:00 - Integrated Data Analysis Working Group
 - Introduced myself
-- Listened to others on how I could contribute to their projectsds
+- Listened to others on how I could contribute to their projects
+
+## June 5th, 2026
+### 9:00 - Setting Up and Programming
+- Got VSCode to work well on my laptop
+  - Had to add a load statement on global because VSCode doesn't have sessions that save variables
+- Made a branch to disable the generate button until a valid file is uploaded
+ - This caused an error as I was testing with an invalid file
+  - Solved this by adding an else statement
+- Started cleaning the code according to the R linter
+  - Only got through UI, but the other ones should *hopefully* be quicker. 
+### 12:00 - From the GCRL SFP to Board-Certified Fish Veterinarian (Johnny Shelley, NMFS SIP)
+- Mostly about his pathway
+  - Emphasized networking and extracurricular research/academics
+  
