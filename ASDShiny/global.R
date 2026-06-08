@@ -24,6 +24,7 @@ library(viridis)
 
 
 # Initialize POPdata_with_MCMC (used for later custom area analysis)
+load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/POPhex_MCMC.rda'))
 POPdata_with_MCMC <- POPhex_MCMC
 
 # List containing the species and its respective POP data column in dataframe (data), its name (as a string) that contains 
@@ -340,10 +341,6 @@ load_all_filest <- function(directory) {
 # }
 
 # ============================ custom_area_analysis ============================
-
-source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/helper_functions.R')
-# source('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/ASDShiny/app.R')
-
 
 #load_all_files(urls)
 
