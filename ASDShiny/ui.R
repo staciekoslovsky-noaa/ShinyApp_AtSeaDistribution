@@ -48,7 +48,7 @@ ui <- shinydashboard::dashboardPage(
               wellPanel(
                 h2(strong("About This Tool"),
                    style = "color: #011f4b"),
-                h3(purp, width = "100%"),
+                h3(about_title, width = "100%"),
                 p(about_info1),
                 p(about_info2),
                 tags$figure(
@@ -73,7 +73,6 @@ ui <- shinydashboard::dashboardPage(
           p(tool_info1),
           p(tool_info2),
           p(tool_descript1),
-          uiOutput("palettePlots"),
           p(tool_descript2)
         )
       ),
@@ -138,7 +137,7 @@ ui <- shinydashboard::dashboardPage(
                                   br(),
                                   fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE), # nolint: line_length_linter.
                                   br(),
-                                  disabled(actionButton("generate_button", "Generate")),
+                                  disabled(actionButton("generate_button", "Generate")), # nolint: line_length_linter
                                   style = "primary")
                 )
               )

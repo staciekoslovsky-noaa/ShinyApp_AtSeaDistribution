@@ -1,202 +1,13 @@
 # Define server logic
 server <- function(input, output, session) {
-  
-  # Palette plots for how to use tab.
-  output$palettePlots <- renderUI({
-    plot_list <- lapply(names(palettes), function(palette_name) {
-      plotOutput(outputId = paste0("plot_", palette_name), height = "100px", width = "100%")
-    })
-    do.call(tagList, plot_list)
-  })
-  
-  lapply(names(palettes), function(palette_name) {
-    output[[paste0("plot_", palette_name)]] <- renderPlot({
-      if (palette_name == "Viridis") {
-        # For viridis-like palettes
-        palette_colors <- viridis::viridis(9, option = "viridis")}
-      else if (palette_name == "Plasma"){
-        palette_colors <- viridis::viridis(9, option = "plasma")
-      }
-      else {
-        # Default to RColorBrewer for other palettes
-        palette_colors <- brewer.pal(9, palettes[[palette_name]])
-      }
-      
-      #palette_colors <- brewer.pal(9, palettes[[palette_name]])
-      ggplot(data.frame(x = 1:9, y = 1, fill = factor(1:9)), aes(x, y, fill = fill)) +
-        geom_tile() +
-        scale_fill_manual(values = palette_colors) +
-        theme_void() +
-        theme(legend.position = "none",
-              plot.title = element_text(size = 10, hjust = 0.5, family = "Helvetica Neue")) +
-        ggtitle(palette_name)
-    })
-  })
-  
-  # Converts starting projection to EPSG 4326 to be displayed onto base map.
-  POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
-  POPhex_MCMC <- sf::st_transform(POPhex_MCMC, 4326)
-  
-  # As Alaska is split by the international dateline, the following lines move 
-  # the data across the dateline for a unified view. 
-  POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
-  POPhex_MCMC$geometry <- (sf::st_geometry(POPhex_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
-  
-  # Sample for one species (Northern Minke Whale) which filters the dataframe for
-  # areas in which data is available fpr the selected species
-  filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
-  
-  
-  # Reactive value to hold palette data and calculate quartiles for legend
-  species_pal <- shiny::reactive({
-    selected_species <- input$mapselect
-    
-    # Code for map title on top of page
-    output$selected_species_name <- renderText({
-      selected_species <- input$mapselect
-      if (selected_species == "Select" || is.null(selected_species)) {
-        "Base Map"  # Default text when no species is selected
-      } else {
-        selected_species  # The selected species name
-      }
-    })
-    
-    # Takes input on whether reverse is selected or not for the palette on map
-    rev_selection <- input$rev_pal
-    
-    # Turns inputted value for selected abundance as a number (otherwise remains a string)
-    selected_abund <- as.numeric(input$abs_abund)
-    
-    # If not inputted, set it to 1
-    if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
-    
-    #This accesses the POPhex_MCMC$species column of values
-    species_data <- species_list2[[selected_species]]$data
-    
-    # Scales data with selected abundance
-    scaled_species_data <- species_data * selected_abund
-    
-    # Palette choices to select from
-    palette_choices <- shiny::reactive({
-      switch(input$palselect,
-             "Viridis" = "viridis",
-             "Plasma" = "plasma",
-             "Blue-Purple" = "BuPu",
-             "Yellow-Green-Blue" = "YlGnBu",
-             "Greyscale" = "Greys"
-      )
-    })
-    
-    # Updates selected_pal with any changes in palette choice in UI 
-    selected_pal <- palette_choices()
-    
-    # Manually selected quartile divisions to display different variations of the data 
-    quartile_vals <- shiny::reactive({
-      switch(input$legendselect,
-             "Quintiles" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-             "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-             "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-             "Low Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-             "High Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
-    })
-    
-    # Set that reeactive value to quartile_opt var
-    quartile_opt <- quartile_vals()
-    
-    # Color palette, bincount, and other customizations for reactive legend
-    pal <- leaflet::colorBin(
-      palette = selected_pal, 
-      reverse = rev_selection,
-      domain = scaled_species_data,
-      bins = quartile_opt,
-      pretty = FALSE,
-      na.color = "#FFFFFF80"
-    )
-    
-    list(
-      selected_species = selected_species,
-      data = POPhex_MCMC,
-      column = scaled_species_data,
-      quartile_opt = quartile_opt,
-      fillColor = ~pal(species_data),
-      pal = pal,
-      selected_abund = selected_abund)
-  })
-  
-  # Output leaflet map
-  output$map <- renderLeaflet({
-    #map_info <- map_data()
-    species_info <- species_pal()
-    
-    # Data layer obtained from selected species
-    leaflet(species_info$data) %>%
-      addTiles() %>%
-      addPolygons(fillColor = ~species_info$pal(species_info$column),
-                  fillOpacity = 0.8,
-                  opacity = 0.7,
-                  color = ~species_info$pal(species_info$column),
-                  weight = 1,
-                  # smoothFactor helps control the level of smoothing
-                  # In practice, this setting lowers resolution at a smaller
-                  # zoom and returns to better resolution with larger zoom levels.
-                  smoothFactor = 0.5,
-                  options = pathOptions(zIndex = 5000),
-                  group = 'Hexagons') %>%
-      
-      # Options to draw polygons and circles onto the map for download or analysis 
-      leaflet.extras::addDrawToolbar(
-        polygonOptions = drawPolygonOptions(),
-        circleOptions = drawCircleOptions(),
-        rectangleOptions = drawRectangleOptions(),
-        markerOptions = FALSE, # Turned off by SMK; to re-add, remove this line and uncomment "# Provides coordinates for markers when you place them on the map." section ~30 lines below here
-        polylineOptions = FALSE,
-        circleMarkerOptions = FALSE,
-        editOptions = editToolbarOptions(edit = FALSE, 
-                                         selectedPathOptions = FALSE, 
-                                         remove = TRUE),
-        targetGroup = "Shapes"
-      ) %>%
-      
-      # Adding layers to turn coordinates or shapes on and off.
-      addLayersControl(
-        overlayGroups = c("Shapes", #"Coordinates", 
-                          "Legend", "Hexagons", "Shapefile"),
-        options = layersControlOptions(collapsed = TRUE)
-      ) %>%
-      
-      # Static set view of Alaska 
-      setView(208, 64, 3) %>%
-      addScaleBar(position = "bottomright",
-                  options = scaleBarOptions(maxWidth = 250)) %>%
-      addLegend(
-        "bottomright",
-        pal = species_info$pal,
-        values = species_info$column,
-        title = ifelse(species_info$selected_abund == 1, 'Relative Abundance:', 'Abundance Estimate'),
-        labFormat = leaflet::labelFormat(digits = 6),
-        group = 'Legend'
-      )
-  })
-  
-  # Provides coordinates for markers when you place them on the map. 
-  # Currently does not delete together - FIX
-  # shiny::observeEvent(input$map_draw_new_feature, {
-  #   feature <- input$map_draw_new_feature
-  #   if (feature$properties$feature_type == "marker") {
-  #     leaflet::leafletProxy("map") %>%
-  #       leaflet::addLabelOnlyMarkers(
-  #         lng <- feature$geometry$coordinates[[1]],
-  #         lat <- feature$geometry$coordinates[[2]],
-  #         label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
-  #         labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10)),
-  #         group = "Coordinates"
-  #       )
-  #   }})
-  
-  # Generates custom area analysis when the "generate" button is pressed. 
-  generate_analysis <- shiny::observeEvent(input$generate_button, {
-    
-    # Sets the following variables to uploaded shape/species_pal data/species input 
+
+  # ============
+
+  # ============ observers ==============
+
+  # Generates custom area analysis when the "generate" button is pressed.
+    shiny::observeEvent(input$generate_button, {
+
     shapefile_data <- uploaded_shapes()
     species_info <- species_pal()
     selected_species <- input$mapselect
@@ -380,11 +191,7 @@ server <- function(input, output, session) {
     
     
   })
-  
-  
-  uploaded_shapes <- reactiveVal(NULL)
-  
-  # Observe when shapefile is uploaded. 
+
   shiny::observeEvent(input$drawfile, {
     enable("generate_button")
     
@@ -447,9 +254,7 @@ server <- function(input, output, session) {
       # combined_shapefiles <- do.call(rbind, all_shapefiles)
     }
   })
-  
-  drawn_shapes <- reactiveVal(NULL)
-  
+
   # Update reactive value when a new shape is drawn
   observeEvent(input$map_draw_new_feature, {
     drawn_shapes(NULL)
@@ -490,32 +295,212 @@ server <- function(input, output, session) {
     existing_shapes <- drawn_shapes()
     uploaded_shapes(existing_shapes)
   })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # Converts starting projection to EPSG 4326 to be displayed onto base map.
+  POPhexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
+  POPhex_MCMC <- sf::st_transform(POPhex_MCMC, 4326)
   
+  # As Alaska is split by the international dateline, the following lines move
+  # the data across the dateline for a unified view. 
+  POPhexagons_sf$geometry <- (sf::st_geometry(POPhexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  POPhex_MCMC$geometry <- (sf::st_geometry(POPhex_MCMC) + c(360, 90)) %% c(360) - c(0, 90)
+  
+  # Sample for one species (Northern Minke Whale) which filters the dataframe for
+  # areas in which data is available fpr the selected species
+  filtered_sf <- POPhexagons_sf %>% filter(!is.na(CU))
+  
+  
+  # Reactive value to hold palette data and calculate quartiles for legend
+  species_pal <- shiny::reactive({
+    selected_species <- input$mapselect
+    
+    # Code for map title on top of page
+    output$selected_species_name <- renderText({
+      selected_species <- input$mapselect
+      if (selected_species == "Select" || is.null(selected_species)) {
+        "Base Map"  # Default text when no species is selected
+      } else {
+        selected_species  # The selected species name
+      }
+    })
+    
+    # Takes input on whether reverse is selected or not for the palette on map
+    rev_selection <- input$rev_pal
+    
+    # Turns inputted value for selected abundance as a number (otherwise remains a string)
+    selected_abund <- as.numeric(input$abs_abund)
+    
+    # If not inputted, set it to 1
+    if (is.na(selected_abund) || selected_abund <= 0) { selected_abund <- 1 }
+    
+    #This accesses the POPhex_MCMC$species column of values
+    species_data <- species_list2[[selected_species]]$data
+    
+    # Scales data with selected abundance
+    scaled_species_data <- species_data * selected_abund
+    
+    # Palette choices to select from
+    palette_choices <- shiny::reactive({
+      switch(input$palselect,
+             "Viridis" = "viridis",
+             "Plasma" = "plasma",
+             "Blue-Purple" = "BuPu",
+             "Yellow-Green-Blue" = "YlGnBu",
+             "Greyscale" = "Greys"
+      )
+    })
+    
+    # Updates selected_pal with any changes in palette choice in UI 
+    selected_pal <- palette_choices()
+    
+    # Manually selected quartile divisions to display different variations of the data 
+    quartile_vals <- shiny::reactive({
+      switch(input$legendselect,
+             "Quintiles" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+             "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+             "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+             "Low Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+             "High Density Emphasis" = raster::quantile(scaled_species_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) 
+    })
+    
+    # Set that reeactive value to quartile_opt var
+    quartile_opt <- quartile_vals()
+    
+    # Color palette, bincount, and other customizations for reactive legend
+    pal <- leaflet::colorBin(
+      palette = selected_pal, 
+      reverse = rev_selection,
+      domain = scaled_species_data,
+      bins = quartile_opt,
+      pretty = FALSE,
+      na.color = "#FFFFFF80"
+    )
+    
+    list(
+      selected_species = selected_species,
+      data = POPhex_MCMC,
+      column = scaled_species_data,
+      quartile_opt = quartile_opt,
+      fillColor = ~pal(species_data),
+      pal = pal,
+      selected_abund = selected_abund)
+  })
+  
+  # Output leaflet map
+  output$map <- renderLeaflet({
+    #map_info <- map_data()
+    species_info <- species_pal()
+    
+    # Data layer obtained from selected species
+    leaflet(species_info$data) %>%
+      addTiles() %>%
+      addPolygons(fillColor = ~species_info$pal(species_info$column),
+                  fillOpacity = 0.8,
+                  opacity = 0.7,
+                  color = ~species_info$pal(species_info$column),
+                  weight = 1,
+                  # smoothFactor helps control the level of smoothing
+                  # In practice, this setting lowers resolution at a smaller
+                  # zoom and returns to better resolution with larger zoom levels.
+                  smoothFactor = 0.5,
+                  options = pathOptions(zIndex = 5000),
+                  group = 'Hexagons') %>%
+      
+      # Options to draw polygons and circles onto the map for download or analysis 
+      leaflet.extras::addDrawToolbar(
+        polygonOptions = drawPolygonOptions(),
+        circleOptions = drawCircleOptions(),
+        rectangleOptions = drawRectangleOptions(),
+        markerOptions = FALSE, # Turned off by SMK; to re-add, remove this line and uncomment "# Provides coordinates for markers when you place them on the map." section ~30 lines below here
+        polylineOptions = FALSE,
+        circleMarkerOptions = FALSE,
+        editOptions = editToolbarOptions(edit = FALSE, 
+                                         selectedPathOptions = FALSE, 
+                                         remove = TRUE),
+        targetGroup = "Shapes"
+      ) %>%
+      
+      # Adding layers to turn coordinates or shapes on and off.
+      addLayersControl(
+        overlayGroups = c("Shapes", #"Coordinates", 
+                          "Legend", "Hexagons", "Shapefile"),
+        options = layersControlOptions(collapsed = TRUE)
+      ) %>%
+      
+      # Static set view of Alaska 
+      setView(208, 64, 3) %>%
+      addScaleBar(position = "bottomright",
+                  options = scaleBarOptions(maxWidth = 250)) %>%
+      addLegend(
+        "bottomright",
+        pal = species_info$pal,
+        values = species_info$column,
+        title = ifelse(species_info$selected_abund == 1, 'Relative Abundance:', 'Abundance Estimate'),
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = 'Legend'
+      )
+  })
+  
+  # Provides coordinates for markers when you place them on the map. 
+  # Currently does not delete together - FIX
+  # shiny::observeEvent(input$map_draw_new_feature, {
+  #   feature <- input$map_draw_new_feature
+  #   if (feature$properties$feature_type == "marker") {
+  #     leaflet::leafletProxy("map") %>%
+  #       leaflet::addLabelOnlyMarkers(
+  #         lng <- feature$geometry$coordinates[[1]],
+  #         lat <- feature$geometry$coordinates[[2]],
+  #         label = sprintf("Lat: %0.5f, Lng: %0.5f", lat, lng),
+  #         labelOptions = labelOptions(noHide = TRUE, direction = 'top', offset = c(0, -10)),
+  #         group = "Coordinates"
+  #       )
+  #   }})
+
+  uploaded_shapes <- reactiveVal(NULL)
+
+  drawn_shapes <- reactiveVal(NULL)
+
   # Download handler for shapefiles
   output$downloadData <- downloadHandler(
     filename = function() {
       # Set the title for the shapefile 
-      paste0(input$mapselect,"drawn_shapes_", Sys.Date(), ".zip")
+      paste0(input$mapselect, "drawn_shapes_", Sys.Date(), ".zip")
     },
     content = function(file) {
       # Create temporary directory
       temp_dir <- tempdir()
-      
+
       # Manually create all the files to include in zipped file
-      
-      # This helps address previous issue where they came in a nested folder (folder in folder)
       shp_file <- file.path(temp_dir, "drawn_shapes.shp")
       shx_file <- file.path(temp_dir, "drawn_shapes.shx")
       dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
       prj_file <- file.path(temp_dir, "drawn_shapes.prj")
-      
+
       # Unlinks all files in temp_dir for clean up 
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
       sf::st_write(drawn_shapes(), shp_file)
-      
+
       # -j Means no directory paths, just files only!
-      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
+      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j") #nolint: line_length_linter
     }
   )
-  
 }
