@@ -51,7 +51,7 @@ server <- function(input, output, session) {
   species_pal <- shiny::reactive({
     selected_species <- input$mapselect
     
-    # Code for map title on top of page 
+    # Code for map title on top of page
     output$selected_species_name <- renderText({
       selected_species <- input$mapselect
       if (selected_species == "Select" || is.null(selected_species)) {

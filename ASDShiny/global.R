@@ -396,3 +396,27 @@ load(url('https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaD
 #   theme(plot.title = element_text(size = 15, hjust = 0.5),
 #         axis.title.x = element_text(size = 12),
 #         axis.title.y = element_text(size = 12))
+
+# ===================== some commented out stuff i found =============================
+
+# around line 150 in ui.R 
+# Below are the stats that were commented out and replaced within the table
+                                                # Kept in case necessary later on, with relevant code in server
+                                                
+                                                #tableOutput('coords_table'),
+                                                #br(),
+                                                # h4(textOutput('small_area_abund')),
+                                                # h4(textOutput('medmode')),
+                                                # h4(textOutput('overall_variance_sum')),
+                                                # h4(textOutput('overall_variance_mean')),
+                                                # h4(textOutput('overall_cv')),
+                                                
+                                                # Stat summary table 
+                                                #fluidRow(
+                                                  #column(5, h4(tableOutput('stat_result'))),
+                                                  
+                                                  # Histogram that only outputs when abundance value inputted 
+                                                  #column(7, plotOutput('small_area_hist'))),
+                                                
+                                                #style = "primary")
+                      #)
