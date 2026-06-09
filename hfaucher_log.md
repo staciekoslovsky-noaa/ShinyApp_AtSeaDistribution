@@ -68,3 +68,16 @@
 - Mostly about his pathway
   - Emphasized networking and extracurricular research/academics
   
+## June 8th, 2026
+### 9:00 - Programming
+- Merged in pr for disabling the generate analysis button
+- Cleaned global.R by removing functions and variables that aren't used
+### 12:00 - Domestic fisheries management 101 (Deb Lambert, NMFS)
+- Presentation on the three pillars of fisheries service
+- Described stock assessment, and saw some parallels to our project
+### 13:00 - Coworking
+- Worked on cleaning server.R, but messed up at some point so had to revert my changes
+  - This should be done by tomorrow, and I should be able to tackle the color palette removal
+### 15:00 - Global Monitoring Laboratory "Taking the Pulse of the Planet" (Vanda Grubisic)
+- Talked about the research themes of the laboratory
+- Described data products, which was cool to hear about
