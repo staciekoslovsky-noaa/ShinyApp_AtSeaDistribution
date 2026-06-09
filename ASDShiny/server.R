@@ -42,29 +42,28 @@ server <- function(input, output, session) {
     spec_data * selected_abund()
   })
 
-  pal <- shiny::reactive({
-    palette_choices <- switch(input$palselect,
-      "Viridis" = "viridis",
-      "Plasma" = "plasma",
-      "Blue-Purple" = "BuPu",
-      "Yellow-Green-Blue" = "YlGnBu",
-      "Greyscale" = "Greys"
-    )
+  color_palette <- shiny::reactive({
+    if (input$greyscale) {
+      "Greys"
+    } else {
+      "plasma"
+    }
+  })
 
-
-    # Manually selected quartile divisions
-    quartile_vals <- switch(input$legendselect,
+  quartiles <- shiny::reactive({
+    switch(input$legendselect,
                             "Quintiles" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
                             "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
                             "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data(), probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
                             "Low Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
                             "High Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
+  })
 
-
+  pal <- shiny::reactive({
     leaflet::colorBin(
-      palette = palette_choices,
+      palette = color_palette(),
       domain = scaled_species_data(),
-      bins = quartile_vals,
+      bins = quartiles(),
       pretty = FALSE,
       na.color = "#FFFFFF80"
     )

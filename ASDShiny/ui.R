@@ -106,11 +106,11 @@ ui <- shinydashboard::dashboardPage(
                                                               choices = c(
                                                                 "Quintiles",
                                                                 "Low and High Density Emphasis 1",
-                                                                "Low and High Density Empasis 2",
+                                                                "Low and High Density Emphasis 2",
                                                                 "Low Density Emphasis",
                                                                 "High Density Emphasis"
                                                               )),
-                                               checkboxInput("greyscale", "greyscale", value = FALSE, width = NULL),
+                                               checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
                                              ))),
                   bsCollapsePanel("Abundance Estimate",
                                   textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
@@ -148,93 +148,6 @@ ui <- shinydashboard::dashboardPage(
             downloadButton("downloadData", "Download Shapefile"),
           )
         )
-              wellPanel(
-                tags$div(
-                  
-                  # Map title with species on top of page
-                  textOutput("selected_species_name"),
-                  style = "color: #2c3e50; font-size: 20px; font-weight: bold;"  # Customize color, size, and weight
-                )
-              ),
-              fluidRow(
-                column(8, 
-                       leafletOutput(outputId = "map", width="100%")
-                ),
-                column(4,
-                       
-                       # Collapsible set up for saving space and appropriate order of user input possibilities 
-                       shinyBS::bsCollapse(id = "collapse_1", open = "Customize Map",
-                                           shinyBS::bsCollapsePanel("Customize Map", style = 'success',
-                                                                    bsCollapse(id = "collapseExample", open = "Select Species", 
-                                                                               bsCollapsePanel("Select Species",
-                                                                                               wellPanel(
-                                                                                                 
-                                                                                                 # Customization features in map
-                                                                                                 selectizeInput("mapselect", "Select Marine Mammal", choices = c("Select", sort(names(species_list2)))),
-                                                                                                 selectizeInput("legendselect", "Select Legend", choices = c("Quintiles",
-                                                                                                                                                             "Low and High Density Emphasis 1",
-                                                                                                                                                             "Low and High Density Emphasis 2", 
-                                                                                                                                                             "Low Density Emphasis",
-                                                                                                                                                             "High Density Emphasis")),
-                                                                                                 checkboxInput("greyscale", "greyscale", value = FALSE, width = NULL),
-                                                                                               )),
-                                                                               bsCollapsePanel("Abundance Estimate", 
-                                                                                               textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
-                                                                                               "Enter total abundance to get an updated abundance estimate.",
-                                                                                               br(),
-                                                                                               br(),
-                                                                                               textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
-                                                                                               "Enter a coefficient of variation value. The default value is 0.2.",
-                                                                                               style = "info"),
-                                                                               bsCollapsePanel("Custom Area Analysis",
-                                                                                               "Upload a shapefile for custom area analysis.",
-                                                                                               "Only single zipped files will be accepted.",
-                                                                                               br(),
-                                                                                               br(),
-                                                                                               fileInput('drawfile', "Upload Shapefile", accept = '.zip', multiple = TRUE),
-                                                                                               br(),
-                                                                                               disabled(actionButton("generate_button", "Generate")),
-                                                                                               style = "primary")
-                                                                    )
-                                           )
-                       )
-                )),
-              fluidRow(
-                wellPanel(
-                  bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                             bsCollapsePanel("Generated Custom Area Analysis", 
-                                             'Small Area Analysis will be provided once a shapefile is uploaded
-                                              and the button "Generate Shapes" is pressed in the Custom Area Analysis
-                                              section within Additional Options.',
-                                             
-                                             # Below are the stats that were commented out and replaced within the table
-                                             # Kept in case necessary later on, with relevant code in server
-                                             
-                                             #tableOutput('coords_table'),
-                                             br(),
-                                             # h4(textOutput('small_area_abund')),
-                                             # h4(textOutput('medmode')),
-                                             # h4(textOutput('overall_variance_sum')),
-                                             # h4(textOutput('overall_variance_mean')),
-                                             # h4(textOutput('overall_cv')),
-                                             
-                                             # Stat summary table 
-                                             fluidRow(
-                                               column(5, h4(tableOutput('stat_result'))),
-                                               
-                                               # Histogram that only outputs when abundance value inputted 
-                                               column(7, plotOutput('small_area_hist'))),
-                                             
-                                             style = "primary")
-                  )
-                )),
-              fluidRow(
-                wellPanel(
-                  h3('Download Shapefile'),
-                  downloadButton('downloadData', "Download Shapefile"),
-                  
-                )
-              )
       ),
 
       # Methods tab detailing POP data and how estimates were calculated
