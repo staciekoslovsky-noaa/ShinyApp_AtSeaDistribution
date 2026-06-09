@@ -106,21 +106,11 @@ ui <- shinydashboard::dashboardPage(
                                                               choices = c(
                                                                 "Quintiles",
                                                                 "Low and High Density Emphasis 1",
-                                                                "Low and High Density Empasis 2",
+                                                                "Low and High Density Emphasis 2",
                                                                 "Low Density Emphasis",
                                                                 "High Density Emphasis"
                                                               )),
-                                               selectizeInput("palselect",
-                                                              "Select Palette",
-                                                              choices =  c(
-                                                                "Viridis",
-                                                                "Plasma",
-                                                                "Blue-Purple",
-                                                                "Yellow-Green-Blue",
-                                                                "Greyscale"
-                                                              ),
-                                                              width = NULL),
-                                               checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL),
+                                               checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
                                              ))),
                   bsCollapsePanel("Abundance Estimate",
                                   textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
