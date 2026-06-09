@@ -229,9 +229,6 @@ tool_descript1 <- div(h3("Using the Draw Toolbar"),
                         tags$li('"Low and High Density Emphasis 2" divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1'),
                         tags$li('"Low Density Emphasis" divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1'),
                         tags$li('"High Density Emphasis" divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1')), 
-                      h3("Customizing the Color Palette"),
-                      p('There are also additional options for viewing the map with various color palettes. Possible palettes to select between include Viridis, Plasma, Blue-Purple, 
-                      Yellow-Green-Blue, and Greyscale, as shown below. The reverse option can be toggled on and off to reverse the palette on the map.'),
                       style = 'color: #005b96')
 
 tool_descript2 <- div(h3('Generating Analysis'),

@@ -65,7 +65,6 @@ ui <- shinydashboard::dashboardPage(
                 p(tool_info1),
                 p(tool_info2),# Separated texts to allow for appropriate spacing.
                 p(tool_descript1),
-                uiOutput("palettePlots"),
                 p(tool_descript2)#,
                 # p(tool_info3),
                 # p(tool_info4)
@@ -101,13 +100,7 @@ ui <- shinydashboard::dashboardPage(
                                                                                                                                                              "Low and High Density Emphasis 2", 
                                                                                                                                                              "Low Density Emphasis",
                                                                                                                                                              "High Density Emphasis")),
-                                                                                                 selectizeInput("palselect", "Select Palette", choices =  c("Viridis",
-                                                                                                                                                            "Plasma",
-                                                                                                                                                            "Blue-Purple",
-                                                                                                                                                            "Yellow-Green-Blue",
-                                                                                                                                                            "Greyscale"
-                                                                                                 ), width = NULL),
-                                                                                                 checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL),
+                                                                                                 checkboxInput("greyscale", "greyscale", value = FALSE, width = NULL),
                                                                                                )),
                                                                                bsCollapsePanel("Abundance Estimate", 
                                                                                                textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
