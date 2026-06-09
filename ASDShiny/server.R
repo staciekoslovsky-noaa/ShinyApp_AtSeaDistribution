@@ -4,13 +4,13 @@ server <- function(input, output, session) {
   # ============ setup ============
 
   # Converts starting projection to EPSG 4326 to be displayed onto base map.
-  hexagons_sf <- sf::st_transform(POPhexagons_sf, 4326) # nolint: object_usage_linter, line_length_linter.
-  hex_mcmc <- sf::st_transform(POPhex_MCMC, 4326) # nolint: object_usage_linter, line_length_linter.
+  hexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
+  hex_mcmc <- sf::st_transform(POPhex_MCMC, 4326)
 
   # As Alaska is split by the international dateline, the following lines move
   # the data across the dateline for a unified view.
-  hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90) # nolint: line_length_linter.
-  hex_mcmc$geometry <- (sf::st_geometry(hex_mcmc) + c(360, 90)) %% c(360) - c(0, 90) # nolint: line_length_linter.
+  hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  hex_mcmc$geometry <- (sf::st_geometry(hex_mcmc) + c(360, 90)) %% c(360) - c(0, 90)
 
   uploaded_shapes <- shiny::reactiveVal(NULL)
 
@@ -37,7 +37,7 @@ server <- function(input, output, session) {
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- species_list2[[selected_species()]]$data # nolint: object_usage_linter, line_length_linter.
+    spec_data <- species_list2[[selected_species()]]$data
 
     spec_data * selected_abund()
   })
@@ -54,11 +54,11 @@ server <- function(input, output, session) {
 
     # Manually selected quartile divisions
     quartile_vals <- switch(input$legendselect,
-                            "Quintiles" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)), # nolint: line_length_linter.
-                            "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)), # nolint: line_length_linter.
-                            "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data(), probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)), # nolint: line_length_linter.
-                            "Low Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)), # nolint: line_length_linter.
-                            "High Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1))) # nolint: line_length_linter.
+                            "Quintiles" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+                            "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+                            "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data(), probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+                            "Low Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+                            "High Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
 
 
     leaflet::colorBin(
@@ -74,7 +74,7 @@ server <- function(input, output, session) {
   # ============ ui/output ============
 
   output$selected_species_name <- shiny::renderText({
-    if (selected_species() == "Select" || !(selected_species() %in% names(species_list2))) { # nolint: object_usage_linter, line_length_linter.
+    if (selected_species() == "Select" || !(selected_species() %in% names(species_list2))) {
       "Base Map"  # Default text when no species is selected
     } else {
       selected_species()  # The selected species name
@@ -104,7 +104,7 @@ server <- function(input, output, session) {
         polylineOptions = FALSE,
         circleMarkerOptions = FALSE,
         editOptions = leaflet.extras::editToolbarOptions(edit = FALSE,
-                                                         selectedPathOptions = FALSE, # nolint: line_length_linter.
+                                                         selectedPathOptions = FALSE,
                                                          remove = TRUE),
         targetGroup = "Shapes"
       ) |>
@@ -119,12 +119,12 @@ server <- function(input, output, session) {
       # Static set view of Alaska
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomright",
-                           options = leaflet::scaleBarOptions(maxWidth = 250)) |> # nolint: line_length_linter.
+                           options = leaflet::scaleBarOptions(maxWidth = 250)) |>
       leaflet::addLegend(
         "bottomright",
         pal = pal(),
         values = scaled_species_data(),
-        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"), # nolint: line_length_linter.
+        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
         labFormat = leaflet::labelFormat(digits = 6),
         group = "Legend"
       )
@@ -151,7 +151,7 @@ server <- function(input, output, session) {
       sf::st_write(drawn_shapes(), shp_file)
 
       # -j Means no directory paths, just files only!
-      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j") #nolint: line_length_linter
+      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
     }
   )
 
@@ -166,7 +166,7 @@ server <- function(input, output, session) {
 
     if (new_shape$properties$feature_type == "circle") {
       # Extract the center and radius of the circle
-      center <- c(new_shape$geometry$coordinates[[1]], new_shape$geometry$coordinates[[2]]) # nolint: line_length_linter.
+      center <- c(new_shape$geometry$coordinates[[1]], new_shape$geometry$coordinates[[2]])
       radius <- new_shape$properties$radius
 
       # Convert the circle to a polygon (sf)
@@ -179,7 +179,7 @@ server <- function(input, output, session) {
       )
     } else {
       # Assuming it's a polygon or similar
-      new_shape_sf <- sf::st_as_sf(sf::st_sfc(sf::st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326) # nolint: line_length_linter.
+      new_shape_sf <- sf::st_as_sf(sf::st_sfc(sf::st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
 
     # set/update new shape to reactive value
@@ -220,7 +220,7 @@ server <- function(input, output, session) {
         # Transform the projection to EPSG 4326 in case it is different
         shapefile_data <- sf::st_transform(shapefile_data, 4326)
 
-        shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90) # nolint: line_length_linter.
+        shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
 
         # Shifts the geometry taking the dateline into account
         sf::st_geometry(shapefile_data) <- shifted_geometry
@@ -232,10 +232,10 @@ server <- function(input, output, session) {
         leaflet::leafletProxy("map", session) |>
           leaflet::clearGroup("Shapefile") |>
           leaflet::clearGroup("Shapes") |>
-          leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile") # nolint: line_length_linter.
+          leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
         print("shown on map")
       } else {
-        shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error") # nolint: line_length_linter.
+        shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
         shinyjs::reset("drawfile")
         drawfile <- NULL
         shinyjs::disable("generate_button")
@@ -247,7 +247,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$generate_button, {
 
     shapefile_data <- uploaded_shapes()
-    species_name <- species_list2[[selected_species()]]$popdata # nolint: object_usage_linter, line_length_linter.
+    species_name <- species_list2[[selected_species()]]$popdata
 
     # Coefficient of variation input
     cv_input <- input$coeff_var
@@ -257,7 +257,7 @@ server <- function(input, output, session) {
     }
 
     # the resulting matrix will be named RelAbund_MCMC
-    load(url(species_list2[[selected_species()]]$url)) # nolint: object_usage_linter, line_length_linter.
+    load(url(species_list2[[selected_species()]]$url))
 
     # Processing shapefile data if crs is not provided or different
     if (is.na(sf::st_crs(shapefile_data))) {
@@ -281,20 +281,20 @@ server <- function(input, output, session) {
     print(paste("Max Y:", max_y, "Min Y:", min_y))
 
     # Calculates variance for RelAbund_MCMC for 1 (MCMC rows)
-    row_variances <- apply(RelAbund_MCMC, 1, var) # nolint: object_usage_linter, line_length_linter.
+    row_variances <- apply(RelAbund_MCMC, 1, var)
 
-    bound_mcmc <- cbind(hex_mcmc, RelAbund_MCMC, row_variances) # nolint: object_usage_linter, line_length_linter.
+    bound_mcmc <- cbind(hex_mcmc, RelAbund_MCMC, row_variances)
 
     # Gather centroids of each hexagon in POP data
-    bound_mcmc$centroid.x <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 1] # nolint: line_length_linter.
-    bound_mcmc$centroid.y <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 2] # nolint: line_length_linter.
+    bound_mcmc$centroid.x <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 1]
+    bound_mcmc$centroid.y <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 2]
 
     # Filter only those within the shapefile coordinates
     bound_mcmc <- bound_mcmc |>
-      dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y) # nolint: object_usage_linter, line_length_linter.
+      dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
 
     # Gather total abundance sums by summing those columns after filter
-    total_abundance_sums <- colSums(sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)], na.rm = TRUE) # nolint: line_length_linter.
+    total_abundance_sums <- colSums(sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)], na.rm = TRUE)
 
     # Calculate the variance of these summed values
     overall_variance <- var(total_abundance_sums)
@@ -304,7 +304,7 @@ server <- function(input, output, session) {
     cv_input <- as.numeric(cv_input)
 
     # Simulating a log normal sampling distribution with`rlnorm`
-    n_sim <- rlnorm(1000, meanlog = log(selected_abund()), sdlog = sqrt(log(1 + (cv_input**2)))) # nolint: line_length_linter.
+    n_sim <- rlnorm(1000, meanlog = log(selected_abund()), sdlog = sqrt(log(1 + (cv_input**2))))
 
     # previously computed total abundance sums from MCMC chains
     total_abundance_sums <- n_sim * total_abundance_sums
@@ -314,36 +314,36 @@ server <- function(input, output, session) {
     # overall_var (calculated by just getting variance from MCMC chains only
     # summed POP data column (containing mean for each hexagon
     # (selected_abund*cv_input) squared
-    updated_var <- ((selected_abund())**2) * overall_variance + (sum(bound_mcmc[[species_name]])**2) * ((selected_abund() * cv_input)**2) + overall_variance * ((selected_abund() * cv_input)**2)  # nolint: line_length_linter.
+    updated_var <- ((selected_abund())**2) * overall_variance + (sum(bound_mcmc[[species_name]])**2) * ((selected_abund() * cv_input)**2) + overall_variance * ((selected_abund() * cv_input)**2) 
     print(updated_var)
 
     stderror <- sqrt(updated_var)
 
     # Obtaining resulting CV using CV = (stderror / mean) formula
-    cv_result <- stderror / (selected_abund() * (sum(bound_mcmc[[species_name]]))) # nolint: line_length_linter.
+    cv_result <- stderror / (selected_abund() * (sum(bound_mcmc[[species_name]])))
 
-    relative_abundance <- round(sum(bound_mcmc[[species_name]], na.rm = TRUE), digits = 3) # nolint: line_length_linter.
+    relative_abundance <- round(sum(bound_mcmc[[species_name]], na.rm = TRUE), digits = 3)
 
-    if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) { # nolint: line_length_linter.
+    if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       # currently not outputted, but can be modified if renderText in UI added
       output$small_area_abund <- shiny::renderText({
-        paste0("Relative Abundance Estimate for Selected Area: ", relative_abundance) # nolint: line_length_linter.
+        paste0("Relative Abundance Estimate for Selected Area: ", relative_abundance)
       })
       output$overall_variance_sum <- shiny::renderText({
-        paste0("Variance for Selected Area: ", round(overall_variance, digits = 5)) # nolint: line_length_linter.
+        paste0("Variance for Selected Area: ", round(overall_variance, digits = 5))
       })
 
       # Posterior indicates Bayesian appraoch - include in output name
       output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 3)) # nolint: line_length_linter.
+        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 3))
       })
 
       # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Relative Abundance Estimate" = format(sum(bound_mcmc[[species_name]]), digits = 6, scientific = FALSE), # nolint: line_length_linter.
-        "Variance" = format(round(overall_variance, digits = 7), scientific = TRUE), # nolint: line_length_linter.
+        "Relative Abundance Estimate" = format(sum(bound_mcmc[[species_name]]), digits = 6, scientific = FALSE),
+        "Variance" = format(round(overall_variance, digits = 7), scientific = TRUE),
         check.names = FALSE
       )
 
@@ -356,10 +356,10 @@ server <- function(input, output, session) {
     } else {
       # Same approach as above if statement
       output$small_area_abund <- shiny::renderText({
-        paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund() * sum(bound_mcmc[[species_name]]), digits = 0)) # nolint: line_length_linter.
+        paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund() * sum(bound_mcmc[[species_name]]), digits = 0))
       })
       output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 0)) # nolint: line_length_linter.
+        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 0))
       })
       output$overall_cv <- shiny::renderText({
         paste0("Coefficient of Variation for Selected Area: ", cv_result)
@@ -368,27 +368,27 @@ server <- function(input, output, session) {
       # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Selected Abundance" = format(selected_abund(), big.mark = ",", scientific = FALSE), # nolint: line_length_linter.
-        "Posterior Mean Estimate" = round(selected_abund() * sum(bound_mcmc[[species_name]])), # nolint: line_length_linter.
-        "Posterior Median Abundance Estimate" = round(median(total_abundance_sums)), # nolint: line_length_linter.
-        "Coefficient of Variation" = round(cv_result, digits = 2), # nolint: line_length_linter.
+        "Selected Abundance" = format(selected_abund(), big.mark = ",", scientific = FALSE),
+        "Posterior Mean Estimate" = round(selected_abund() * sum(bound_mcmc[[species_name]])),
+        "Posterior Median Abundance Estimate" = round(median(total_abundance_sums)),
+        "Coefficient of Variation" = round(cv_result, digits = 2),
         check.names = FALSE
       )
 
       # Turn the data into a data frame and then
       # Transpose data so it is aligned and can include histogram on same plot
       transposed_data <- as.data.frame(t(summary_data))
-      transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics") # nolint: line_length_linter.
+      transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
       transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
 
       # Histogram that shows the possible abundance estimate simulations
-      p <- ggplot2::ggplot(data.frame(TotalAbundance = total_abundance_sums), ggplot2::aes(x = TotalAbundance)) + # nolint: object_usage_linter, line_length_linter.
-        ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) + # nolint: line_length_linter.
+      p <- ggplot2::ggplot(data.frame(TotalAbundance = total_abundance_sums), ggplot2::aes(x = TotalAbundance)) +
+        ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggplot2::ggtitle("Histogram of Abundance Estimates") +
         ggplot2::xlab("Total Abundance") +
         ggplot2::ylab("Frequency") +
         ggplot2::theme_minimal() +
-        ggplot2::theme(plot.title = element_text(size = 20, hjust = 0.5), # nolint: object_usage_linter, line_length_linter.
+        ggplot2::theme(plot.title = element_text(size = 20, hjust = 0.5),
                        axis.title.x = element_text(size = 16),
                        axis.title.y = element_text(size = 16),
                        axis.text.x = element_text(size = 12),

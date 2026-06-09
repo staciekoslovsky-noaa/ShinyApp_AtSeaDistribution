@@ -28,92 +28,92 @@ load("../data/POPhex_MCMC.rda")
 load("../data/POPhexagons_sf.rda")
 
 species_links <- list(
-  "Northern Minke Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData", # nolint: line_length_linter.
-  "Fin Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData", # nolint: line_length_linter.
-  "Northern Fur Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData", # nolint: line_length_linter.
-  "Steller Sea Lion" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData", # nolint: line_length_linter.
-  "Sea Otter" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData", # nolint: line_length_linter.
-  "Gray Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData", # nolint: line_length_linter.
-  "Pacific White-Sided Dolphin" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData", # nolint: line_length_linter.
-  "Humpback Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData", # nolint: line_length_linter.
-  "Killer Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData", # nolint: line_length_linter.
-  "Walrus" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData", # nolint: line_length_linter.
-  "Dall's Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData", # nolint: line_length_linter.
-  "Sperm Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData", # nolint: line_length_linter.
-  "Harbor Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData", # nolint: line_length_linter.
-  "Harbor Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData" # nolint: line_length_linter.
+  "Northern Minke Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData",
+  "Fin Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData",
+  "Northern Fur Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData",
+  "Steller Sea Lion" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData",
+  "Sea Otter" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData",
+  "Gray Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData",
+  "Pacific White-Sided Dolphin" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData",
+  "Humpback Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData",
+  "Killer Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData",
+  "Walrus" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData",
+  "Dall's Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData",
+  "Sperm Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData",
+  "Harbor Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData",
+  "Harbor Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData"
 )
 
 species_list2 <- list(
   "Northern Minke Whale" = list(
     data = POPhex_MCMC$Northern.Minke.Whale,
     popdata = "Northern.Minke.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData"
   ),
   "Fin Whale" = list(
     data = POPhex_MCMC$Fin.Whale,
     popdata = "Fin.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData"
   ),
   "Northern Fur Seal" = list(
     data = POPhex_MCMC$Northern.Fur.Seal,
     popdata = "Northern.Fur.Seal",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData"
   ),
   "Steller Sea Lion" = list(
     data = POPhex_MCMC$Steller.Sea.Lion,
     popdata = "Steller.Sea.Lion",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData"
   ),
   "Sea Otter" = list(
     data = POPhex_MCMC$Sea.Otter,
     popdata = "Sea.Otter",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData"
   ),
   "Gray Whale" = list(
     data = POPhex_MCMC$Gray.Whale,
     popdata = "Gray.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData"
   ),
   "Pacific White-Sided Dolphin" = list(
     data = POPhex_MCMC$Pacific.White.Sided.Dolphin,
     popdata = "Pacific.White.Sided.Dolphin",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData"
   ),
   "Humpback Whale" = list(
     data = POPhex_MCMC$Humpback.Whale,
     popdata = "Humpback.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData"
   ),
   "Killer Whale" = list(
     data = POPhex_MCMC$Killer.Whale,
     popdata = "Killer.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData"
   ),
   "Walrus" = list(
     data = POPhex_MCMC$Walrus,
     popdata = "Walrus",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData"
   ),
   "Dall's Porpoise" = list(
     data = POPhex_MCMC$Dall.s.Porpoise,
     popdata = "Dall.s.Porpoise",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData"
   ),
   "Sperm Whale" = list(
     data = POPhex_MCMC$Sperm.Whale,
     popdata = "Sperm.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData"
   ),
   "Harbor Porpoise" = list(
     data = POPhex_MCMC$Harbor.Porpoise,
     popdata = "Harbor.Porpoise",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData"
   ),
   "Harbor Seal" = list(
     data = POPhex_MCMC$Harbor.Seal,
     popdata = "Harbor.Seal",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData" # nolint: line_length_linter.
+    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData"
   )
 )
 
@@ -133,7 +133,7 @@ palettes <- list(
 # ========================= helper_functions =========================
 
 # =============== about tab ===================
-about_title <- div("Integrating Diverse Datasets to Understand the Seasonal Distributions and Densities of Marine Mammals", style = "color: #03396c") # nolint: line_length_linter.
+about_title <- div("Integrating Diverse Datasets to Understand the Seasonal Distributions and Densities of Marine Mammals", style = "color: #03396c")
 
 about_info1 <- div("Understanding seasonal distributions and densities of marine
                    mammals remains a high priority for NMFS science centers and 
@@ -202,8 +202,8 @@ about_info4 <- div("The potential benefits of these analytical approaches are
 
 
 # ============== how to use tab ====================
-tool_info1 <- div("This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.", style = "color: #005b96") # nolint: line_length_linter.
-tool_info2 <- div("To access species density maps, click the Species button in the sidebar. Use the right panel to toggle between different marine mammal species.", style = "color: #005b96") # nolint: line_length_linter.
+tool_info1 <- div("This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.", style = "color: #005b96")
+tool_info2 <- div("To access species density maps, click the Species button in the sidebar. Use the right panel to toggle between different marine mammal species.", style = "color: #005b96")
 
 tool_descript1 <- div(h3("Using the Draw Toolbar"),
                       p("The toolbar on the left of the map contains various
@@ -227,11 +227,11 @@ tool_descript1 <- div(h3("Using the Draw Toolbar"),
                       changes in abundance across a map, particularly when
                       species are clustered in small areas. The options are:",
                       tags$ul(
-                              tags$li("'Quintiles' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 1"), # nolint: line_length_linter.
-                              tags$li("'Low and High Density Emphasis 1' divides them into the following: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1"), # nolint: line_length_linter.
-                              tags$li("'Low and High Density Emphasis 2' divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1"), # nolint: line_length_linter.
-                              tags$li("'Low Density Emphasis' divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1"), # nolint: line_length_linter.
-                              tags$li("'High Density Emphasis' divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1")),  # nolint: line_length_linter.
+                              tags$li("'Quintiles' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 1"),
+                              tags$li("'Low and High Density Emphasis 1' divides them into the following: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1"),
+                              tags$li("'Low and High Density Emphasis 2' divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1"),
+                              tags$li("'Low Density Emphasis' divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1"),
+                              tags$li("'High Density Emphasis' divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1")), 
                       style = "color: #005b96")
 
 tool_descript2 <- div(h3("Generating Analysis"),
@@ -242,7 +242,7 @@ tool_descript2 <- div(h3("Generating Analysis"),
                         population in a specific region). In order to make
                         inferences about absolute abundance, one must specify
                         the total abundance of the population. For instance,
-                        such estimates could be taken from NMFS stock assessment reports."), # nolint: line_length_linter.
+                        such estimates could be taken from NMFS stock assessment reports."),
                       p("Within the panel 'Abundance Estimate', the user can
                         input a population-wide abundance estimate, along with a
                         coefficient of variation value (CV), to get an updated
@@ -258,11 +258,11 @@ tool_descript2 <- div(h3("Generating Analysis"),
                         'Generate Analysis' in the 'Custom Area Analysis'
                         panel can be pressed, at which the the bottom tab below
                         the map, 'Generated Custom Area Analysis', will output
-                        summary statistics, as well as a histogram that simulates possible abundances with the included uncertainty."), # nolint: line_length_linter.
+                        summary statistics, as well as a histogram that simulates possible abundances with the included uncertainty."),
                       p("If no abundance estimate value is inputted by the user,
                         or an invalid value is inputted, it will default to the
                         relative abundance estimates (abundance = 1), 
-                        and a histogram will not be provided in the generated analysis."), # nolint: line_length_linter.
+                        and a histogram will not be provided in the generated analysis."),
                       style = "color: #005b96")
 
 # ============== methods tab ==================
@@ -291,13 +291,13 @@ methods_info1 <- div("The statistical approaches for different data integration
                      style = "color: #005b96")
 
 methods_info2 <- div(h3("How the POP Estimates are Generated"),
-                     p("The estimates are generated using platform-of-opportunity (POP) analyses from Jay Ver Hoef."), # nolint: line_length_linter.
+                     p("The estimates are generated using platform-of-opportunity (POP) analyses from Jay Ver Hoef."),
                      p("Posterior means are taken from the resulting Bayesian
                        analysis for each hexagon. The sum of these cells within
                        the selected area is taken as  a relative abundance 
                        estimate, ranging between 0 and 1. Uncertainty in this
                        quantity is propagated by taking quantiles or calculating
-                       coefficient of variation (CV) from posterior (MCMC) samples."), # nolint: line_length_linter.
+                       coefficient of variation (CV) from posterior (MCMC) samples."),
                      p("When an abundance estimate and CV value is inputted by a
                        user, a more in-depth estimate can be generated.
                        The relative abundance estimate (a proportion) is 
@@ -307,14 +307,14 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                        uncertainty in the user's inputted abundance estimate
                        of the entire area, can be propagated into the small
                        area estimate using Goodman's exact formula:"),
-                     h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"), # nolint: line_length_linter.
+                     h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
                      p("Where mu_x and mu_y are expected values (E[X] and E[Y])
                      of the random variables. The following values would replace
-                     each of the components of the Goodman's exact formula (1960):"), # nolint: line_length_linter.
+                     each of the components of the Goodman's exact formula (1960):"),
                      tags$ul(
                              tags$li("Mu (x): inputted user abundance"),
-                             tags$li("Var(Y): variance from the MCMC chains in the filtered area"), # nolint: line_length_linter.
-                             tags$li("Mu (y): sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area"), # nolint: line_length_linter.
+                             tags$li("Var(Y): variance from the MCMC chains in the filtered area"),
+                             tags$li("Mu (y): sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area"),
                              tags$li("Var(X): calculated by multiplying the user
                                      inputted abundance and the coefficient of
                                      variance, which yields the standard error.
@@ -324,7 +324,7 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                        and the POP analyses. It is converted to a coefficient 
                        of variation value for interpretability. Note that if
                        a value is NOT provided, the CV will default to 0.2."),
-                     p("A histogram is also displayed, conveying uncertainty in the small area abundance estimate. In particular, we assume a log normal sampling distribution."), # nolint: line_length_linter.
+                     p("A histogram is also displayed, conveying uncertainty in the small area abundance estimate. In particular, we assume a log normal sampling distribution."),
                      style = "color: #005b96")
 
 # Reference tab
@@ -343,5 +343,5 @@ licenses <- div(p("NOAA data is available under the CC-BY-4.0 license, which
                   NOAA/NMFS/AFSC or the specified citation as the source
                   from which these data were obtained in any publications
                   and/or other representations of these data.
-                  Communication and collaboration with dataset authors is strongly encouraged."), # nolint: line_length_linter.
+                  Communication and collaboration with dataset authors is strongly encouraged."),
                 style = "color: #005b96")

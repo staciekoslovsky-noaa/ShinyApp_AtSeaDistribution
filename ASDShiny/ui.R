@@ -18,7 +18,7 @@ ui <- shinydashboard::dashboardPage(
   dashboardSidebar(
                    tags$head(
                      tags$link(rel = "stylesheet",
-                               href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"), # nolint: line_length_linter.
+                               href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"),
                    ),
 
                    # Various tabs inclued in sidebar menu
@@ -59,7 +59,7 @@ ui <- shinydashboard::dashboardPage(
                     align = "center",
                     alt = "Picture of a male ribbon seal"
                   ),
-                  tags$figcaption("NOAA Fisheries/Josh M London"),  # nolint: line_length_linter.
+                  tags$figcaption("NOAA Fisheries/Josh M London"), 
                   p(about_info3),
                   p(about_info4)
                 )
@@ -95,20 +95,20 @@ ui <- shinydashboard::dashboardPage(
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
                 bsCollapsePanel("Customize Map", style = "success",
-                  bsCollapse(id = "species", open = "Select Species", # nolint: line_length_linter.
+                  bsCollapse(id = "species", open = "Select Species",
                              bsCollapsePanel("Select Species",
                                              wellPanel(
                                                selectizeInput("mapselect",
-                                                              "Select Marine Mammal", # nolint: line_length_linter.
-                                                              choices = c("Select", sort(names(species_list2)))), # nolint: line_length_linter.
+                                                              "Select Marine Mammal",
+                                                              choices = c("Select", sort(names(species_list2)))),
                                                selectizeInput("legendselect",
                                                               "Select Legend",
                                                               choices = c(
                                                                 "Quintiles",
-                                                                "Low and High Density Emphasis 1", # nolint: line_length_linter.
-                                                                "Low and High Density Empasis 2", # nolint: line_length_linter.
-                                                                "Low Density Emphasis", # nolint: line_length_linter.
-                                                                "High Density Emphasis" # nolint: line_length_linter.
+                                                                "Low and High Density Emphasis 1",
+                                                                "Low and High Density Empasis 2",
+                                                                "Low Density Emphasis",
+                                                                "High Density Emphasis"
                                                               )),
                                                selectizeInput("palselect",
                                                               "Select Palette",
@@ -116,26 +116,26 @@ ui <- shinydashboard::dashboardPage(
                                                                 "Viridis",
                                                                 "Plasma",
                                                                 "Blue-Purple",
-                                                                "Yellow-Green-Blue", # nolint: line_length_linter.
+                                                                "Yellow-Green-Blue",
                                                                 "Greyscale"
                                                               ),
                                                               width = NULL),
-                                               checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL), # nolint: line_length_linter.
+                                               checkboxInput("rev_pal", "Reverse Palette", value = FALSE, width = NULL),
                                              ))),
                   bsCollapsePanel("Abundance Estimate",
-                                  textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), # nolint: line_length_linter.
-                                  "Enter total abundance to get an updated abundance estimate.", # nolint: line_length_linter.
+                                  textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
+                                  "Enter total abundance to get an updated abundance estimate.",
                                   br(),
                                   br(),
-                                  textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), # nolint: line_length_linter.
-                                  "Enter a coefficient of variation value. The default value is 0.2.", # nolint: line_length_linter.
+                                  textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
+                                  "Enter a coefficient of variation value. The default value is 0.2.",
                                   style = "info"),
                   bsCollapsePanel("Custom Area Analysis",
-                                  "Upload a shapefile for custom area analysis.", # nolint: line_length_linter.
-                                  "Only single zipped files will be accepted.", # nolint: line_length_linter.
+                                  "Upload a shapefile for custom area analysis.",
+                                  "Only single zipped files will be accepted.",
                                   br(),
                                   br(),
-                                  fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE), # nolint: line_length_linter.
+                                  fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
                                   br(),
                                   disabled(actionButton("generate_button", "Generate")), # nolint: line_length_linter
                                   style = "primary")
@@ -146,11 +146,11 @@ ui <- shinydashboard::dashboardPage(
           wellPanel(
                     bsCollapse(id = "collapseanalysis", open = "Panel 3",
                       bsCollapsePanel("Generated Custom Area Analysis",
-                                      "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.", # nolint: line_length_linter.
+                                      "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
                                       br(),
                                       fluidRow(
-                                               column(5, h4(tableOutput("stat_result"))), # nolint: line_length_linter.
-                                               column(7, plotOutput("small_area_hist"))), # nolint: line_length_linter.
+                                               column(5, h4(tableOutput("stat_result"))),
+                                               column(7, plotOutput("small_area_hist"))),
                                       style = "primary")
                     )),
           wellPanel(
@@ -177,9 +177,9 @@ ui <- shinydashboard::dashboardPage(
         wellPanel(
           h2(strong("Reference Information", style = "color: #011f4b")),
           wellPanel(
-            h3(strong("How to Cite the Data/Application"), style = "color: #011f4b"), # nolint: line_length_linter.
-            p("Authors: P.B. Conn, H.L. Faucher, S.M. Koslovsky, C. Kwon (alphabetical; order TBD)", style = "color: #005b96"), # nolint: line_length_linter.
-            p("Page Title: At Sea Densities of Marine Mammals", style = "color: #005b96") # nolint: line_length_linter.
+            h3(strong("How to Cite the Data/Application"), style = "color: #011f4b"),
+            p("Authors: P.B. Conn, H.L. Faucher, S.M. Koslovsky, C. Kwon (alphabetical; order TBD)", style = "color: #005b96"),
+            p("Page Title: At Sea Densities of Marine Mammals", style = "color: #005b96")
           ),
           wellPanel(
             h3(strong("License", style = "color: #011f4b")),
@@ -187,13 +187,13 @@ ui <- shinydashboard::dashboardPage(
           ),
           wellPanel(
             h3(strong("References"), style = "color: #011f4b"),
-            p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = "color: #005b96"), # nolint: line_length_linter.
-            p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology and Evolution, 12, 1911-1925.", style = "color: #005b96") # nolint: line_length_linter.
+            p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = "color: #005b96"),
+            p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology and Evolution, 12, 1911-1925.", style = "color: #005b96")
           ),
           wellPanel(
-            h3(strong("Additional Questions?", style = "color: #011f4b")), # nolint: line_length_linter.
-            p("For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, contact Paul Conn (paul.conn [at] noaa.gov).", style = "color: #005b96"), # nolint: line_length_linter.
-            p("For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.", style = "color: #005b96") # nolint: line_length_linter.
+            h3(strong("Additional Questions?", style = "color: #011f4b")),
+            p("For any additional questions on code maintenance, contact Stacie Koslovsky (stacie.koslovsky [at] noaa.gov). For additional questions regarding  statistical analysis, contact Paul Conn (paul.conn [at] noaa.gov).", style = "color: #005b96"),
+            p("For further reference, the code base can be found on GitHub, at the following link: https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution.", style = "color: #005b96")
           ),
         )
       )
