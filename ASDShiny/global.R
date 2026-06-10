@@ -18,7 +18,6 @@ library(tidyverse)
 library(htmltools)
 library(tools)
 
-# likely to be deleted
 library(RColorBrewer)
 library(viridis)
 
@@ -26,23 +25,6 @@ library(viridis)
 # Initialize POPhex_MCMC (used for later custom area analysis)
 load("../data/POPhex_MCMC.rda")
 load("../data/POPhexagons_sf.rda")
-
-species_links <- list(
-  "Northern Minke Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData",
-  "Fin Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData",
-  "Northern Fur Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData",
-  "Steller Sea Lion" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData",
-  "Sea Otter" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData",
-  "Gray Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData",
-  "Pacific White-Sided Dolphin" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData",
-  "Humpback Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData",
-  "Killer Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData",
-  "Walrus" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData",
-  "Dall's Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData",
-  "Sperm Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData",
-  "Harbor Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData",
-  "Harbor Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData"
-)
 
 species_list2 <- list(
   "Northern Minke Whale" = list(
