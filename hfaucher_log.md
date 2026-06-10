@@ -101,3 +101,15 @@
 - Discussed looking more into the files and why we have POPhex_MCMC and POPhexagons_sf
   - Going to look more into this tomorrow
 - Decided to not meet with Paul tomorrow, as there is not much visual changes to show
+
+## June 10th, 2026
+### 9:00 - Solo Work
+- Trying to understand the data pipeline a little more
+  - Looking through variables in RStudio environment
+  - Coming up with a way to change the pipeline to be a bit more efficient
+### 12:00 - Global Ocean Monitoring and Observation in NOAA and Beyond (Jess Snowden)
+- A good seminar building off of the National Data Buoy Center talk from yesterday
+- Also mentioned that you DON'T need a PHD to succeed at NOAA.
+### 13:00 - Coworking
+- Still working through pipeline
+  - Stacie provided me with a code snippet that should make it possible to only load in files as needed.
