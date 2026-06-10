@@ -46,7 +46,7 @@ server <- function(input, output, session) {
     if (input$greyscale) {
       "Greys"
     } else {
-      "plasma"
+      "turbo"
     }
   })
 

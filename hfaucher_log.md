@@ -81,3 +81,23 @@
 ### 15:00 - Global Monitoring Laboratory "Taking the Pulse of the Planet" (Vanda Grubisic)
 - Talked about the research themes of the laboratory
 - Described data products, which was cool to hear about
+
+## June 9th, 2026
+### 9:00 - Programming
+- Cleaned server.R
+- Removed all lintr comments from all three files once everything was cleaned
+- Waited for Stacie to approve, then merged
+### 12:00 - Satellite Observations of Severe Storms (Dan Lindsey, NESDIS)
+- Talked about current satellites (GOES-East and GOES-West)
+  - Current version (GOES-19 and GOES-16)
+  - Future improvements (increased resolution)
+### 13:00 - Programming
+- Removed color palette options
+  - Kept a checkbox for greyscale
+- Resolved merge conflicts with this PR
+### 15:00 - National Data Buoy Center "Guardians of the Pelagic Sea" (Bill Burnett)
+- Described the four different types of data buoys, as well as uncrewed systems and Voluntary Observing Ships
+### 16:30 - Coworking
+- Discussed looking more into the files and why we have POPhex_MCMC and POPhexagons_sf
+  - Going to look more into this tomorrow
+Decided to not meet with Paul tomorrow, as there is not much visual changes to show

@@ -122,14 +122,6 @@ species_list2 <- list(
 # NULL is later replaced by loaded MCMC file from Git
 raw_relative_abundance <- NULL
 
-palettes <- list(
-  "Viridis" = "viridis",
-  "Plasma" = "plasma",
-  "Blue-Purple" = "BuPu",
-  "Yellow-Green-Blue" = "YlGnBu",
-  "Greyscale" = "Greys"
-)
-
 # ========================= helper_functions =========================
 
 # =============== about tab ===================
