@@ -100,4 +100,4 @@
 ### 16:30 - Coworking
 - Discussed looking more into the files and why we have POPhex_MCMC and POPhexagons_sf
   - Going to look more into this tomorrow
-Decided to not meet with Paul tomorrow, as there is not much visual changes to show
+- Decided to not meet with Paul tomorrow, as there is not much visual changes to show
