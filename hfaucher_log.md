@@ -113,3 +113,16 @@
 ### 13:00 - Coworking
 - Still working through pipeline
   - Stacie provided me with a code snippet that should make it possible to only load in files as needed.
+
+## June 11th, 2026
+### 9:00 - Programming
+- Outlined changes to be made to data pipeline
+  - Ran into issue with CSV formatting, had to change it
+### 13:00 - Coworking
+- Did a small demo for Stacie to see if load speed was alright
+- After some feedback, moved scale to bottom left, added italicized latin name to map header, and removed the layer controls
+  - This may need to be added back after, as shapefiles may not be deleted by trash icon
+### 15:00 - Data Management for the Rest of Us (Stacie Koslovsky, AFSC, NMFS, Seattle)
+- Some good info on data management (good standards for my work)
+- Interesting stuff about detection models
+  - Could be a way to expand on my internship contribution
