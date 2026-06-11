@@ -82,7 +82,7 @@ ui <- shinydashboard::dashboardPage(
         wellPanel(
           tags$div(
             # Map title with species on top of page
-            textOutput("selected_species_name"),
+            uiOutput("selected_species_name"),
             style = "color: #2c3e50;
                       font-size: 20px; 
                       font-weight: bold;"

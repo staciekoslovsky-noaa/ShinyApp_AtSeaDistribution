@@ -90,17 +90,17 @@ server <- function(input, output, session) {
 
   # ============ ui/output ============
 
-  output$selected_species_name <- shiny::renderText({
+  output$selected_species_name <- shiny::renderUI({
     current_species <- selected_species()
     
     latin <- species_codes$latin[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
 
-    paste0(current_species, " (", latin, ")")
+    div(current_species, tags$i(paste0(" (", latin, ")")))
   })
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(hexagons_sf) |>
+    leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE)) |>
       leaflet::addTiles() |>
       leaflet.extras::addDrawToolbar(
         polygonOptions = leaflet.extras::drawPolygonOptions(),
@@ -115,7 +115,7 @@ server <- function(input, output, session) {
         targetGroup = "Shapes"
       ) |>
       leaflet::setView(208, 64, 3) |>
-      leaflet::addScaleBar(position = "bottomright",
+      leaflet::addScaleBar(position = "bottomleft",
                            options = leaflet::scaleBarOptions(maxWidth = 250))
 
   })
