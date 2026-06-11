@@ -14,10 +14,6 @@ server <- function(input, output, session) {
 
   drawn_shapes <- shiny::reactiveVal(NULL)
 
-  if (!exists("mcmc_cache")) {
-    mcmc_cache <- new.env(parent = emptyenv())
-  }
-
   # ============ reactives =============
 
 
@@ -45,35 +41,18 @@ server <- function(input, output, session) {
   
     code <- species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
 
-    if (exists(code, envir = mcmc_cache)) {
-      mcmc_matrix <- get(code, envir = mcmc_cache)
-      print("in cache")
-    } else {
-      # File read fallback if not cached yet
-      filename <- paste0("../data/", code, "_MCMC.RData")
+    # File read fallback if not cached yet
+    filename <- paste0("../data/", code, "_MCMC.RData")
 
-      print("not in cache")
-      
-      if (!file.exists(filename)) {
-        shiny::showNotification(paste("File not found:", filename), type = "error")
-        return(NULL)
-      }
-      
-      temp_env <- new.env()
-      load(filename, envir = temp_env)
-      
-      if (!"RelAbund_MCMC" %in% names(temp_env)) {
-        shiny::showNotification("Data object 'RelAbund_MCMC' missing.", type = "error")
-        return(NULL)
-      }
-      
-      mcmc_matrix <- temp_env$RelAbund_MCMC
-      
-      # Save to RAM cache for instant retrieval next time
-      assign(code, mcmc_matrix, envir = mcmc_cache)
+    
+    if (!file.exists(filename)) {
+      shiny::showNotification(paste("File not found:", filename), type = "error")
+      return(NULL)
     }
     
-    spec_data <- rowMeans(mcmc_matrix)
+    load(filename)
+          
+    spec_data <- rowMeans(RelAbund_MCMC)
     spec_data * selected_abund()
   })
 
@@ -112,11 +91,11 @@ server <- function(input, output, session) {
   # ============ ui/output ============
 
   output$selected_species_name <- shiny::renderText({
-    if (selected_species() == "Select" || !(selected_species() %in% species_list2)) {
-      "Base Map"  # Default text when no species is selected
-    } else {
-      selected_species()  # The selected species name
-    }
+    current_species <- selected_species()
+    
+    latin <- species_codes$latin[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    paste0(current_species, " (", latin, ")")
   })
 
   # Output leaflet map
@@ -134,10 +113,6 @@ server <- function(input, output, session) {
                                                          selectedPathOptions = FALSE,
                                                          remove = TRUE),
         targetGroup = "Shapes"
-      ) |>
-      leaflet::addLayersControl(
-        overlayGroups = c("Shapes", "Legend", "Hexagons", "Shapefile"),
-        options = leaflet::layersControlOptions(collapsed = TRUE)
       ) |>
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomright",
@@ -179,10 +154,6 @@ server <- function(input, output, session) {
     polygon_colors <- color_func(species_values)
     
     proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
-
-    proxy |> leaflet::removeControl(layerId = "my_dynamic_legend")
-
-    proxy |> leaflet::clearGroup(group = "Legend")
     
     proxy |> 
       leaflet::clearGroup(group = "Hexagons") |>
