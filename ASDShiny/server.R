@@ -5,22 +5,25 @@ server <- function(input, output, session) {
 
   # Converts starting projection to EPSG 4326 to be displayed onto base map.
   hexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
-  hex_mcmc <- sf::st_transform(POPhex_MCMC, 4326)
 
   # As Alaska is split by the international dateline, the following lines move
   # the data across the dateline for a unified view.
   hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
-  hex_mcmc$geometry <- (sf::st_geometry(hex_mcmc) + c(360, 90)) %% c(360) - c(0, 90)
 
   uploaded_shapes <- shiny::reactiveVal(NULL)
 
   drawn_shapes <- shiny::reactiveVal(NULL)
+
+  if (!exists("mcmc_cache")) {
+    mcmc_cache <- new.env(parent = emptyenv())
+  }
 
   # ============ reactives =============
 
 
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
+    shiny::req(input$mapselect != "Select" && input$mapselect != "")
     input$mapselect
   })
 
@@ -37,8 +40,40 @@ server <- function(input, output, session) {
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- species_list2[[selected_species()]]$data
+    current_species <- selected_species()
 
+  
+    code <- species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    if (exists(code, envir = mcmc_cache)) {
+      mcmc_matrix <- get(code, envir = mcmc_cache)
+      print("in cache")
+    } else {
+      # File read fallback if not cached yet
+      filename <- paste0("../data/", code, "_MCMC.RData")
+
+      print("not in cache")
+      
+      if (!file.exists(filename)) {
+        shiny::showNotification(paste("File not found:", filename), type = "error")
+        return(NULL)
+      }
+      
+      temp_env <- new.env()
+      load(filename, envir = temp_env)
+      
+      if (!"RelAbund_MCMC" %in% names(temp_env)) {
+        shiny::showNotification("Data object 'RelAbund_MCMC' missing.", type = "error")
+        return(NULL)
+      }
+      
+      mcmc_matrix <- temp_env$RelAbund_MCMC
+      
+      # Save to RAM cache for instant retrieval next time
+      assign(code, mcmc_matrix, envir = mcmc_cache)
+    }
+    
+    spec_data <- rowMeans(mcmc_matrix)
     spec_data * selected_abund()
   })
 
@@ -51,18 +86,22 @@ server <- function(input, output, session) {
   })
 
   quartiles <- shiny::reactive({
+    s_data <- scaled_species_data()
+
     switch(input$legendselect,
-                            "Quintiles" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-                            "Low and High Density Emphasis 1" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-                            "Low and High Density Emphasis 2" = raster::quantile(scaled_species_data(), probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-                            "Low Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-                            "High Density Emphasis" = raster::quantile(scaled_species_data(), probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
+                            "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+                            "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+                            "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+                            "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+                            "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
   })
 
   pal <- shiny::reactive({
+    s_data <- scaled_species_data()
+
     leaflet::colorBin(
       palette = color_palette(),
-      domain = scaled_species_data(),
+      domain = s_data,
       bins = quartiles(),
       pretty = FALSE,
       na.color = "#FFFFFF80"
@@ -73,7 +112,7 @@ server <- function(input, output, session) {
   # ============ ui/output ============
 
   output$selected_species_name <- shiny::renderText({
-    if (selected_species() == "Select" || !(selected_species() %in% names(species_list2))) {
+    if (selected_species() == "Select" || !(selected_species() %in% species_list2)) {
       "Base Map"  # Default text when no species is selected
     } else {
       selected_species()  # The selected species name
@@ -82,24 +121,13 @@ server <- function(input, output, session) {
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-
-    # Data layer obtained from selected species
-    leaflet::leaflet(hex_mcmc) |>
+    leaflet::leaflet(hexagons_sf) |>
       leaflet::addTiles() |>
-      leaflet::addPolygons(fillColor = pal()(scaled_species_data()),
-                           fillOpacity = 0.8,
-                           opacity = 0.7,
-                           color = pal()(scaled_species_data()),
-                           weight = 1,
-                           smoothFactor = 0.5,
-                           options = leaflet::pathOptions(zIndex = 5000),
-                           group = "Hexagons") |>
-
       leaflet.extras::addDrawToolbar(
         polygonOptions = leaflet.extras::drawPolygonOptions(),
         circleOptions = leaflet.extras::drawCircleOptions(),
         rectangleOptions = leaflet.extras::drawRectangleOptions(),
-        markerOptions = FALSE, # Turned off by SMK
+        markerOptions = FALSE, 
         polylineOptions = FALSE,
         circleMarkerOptions = FALSE,
         editOptions = leaflet.extras::editToolbarOptions(edit = FALSE,
@@ -107,28 +135,15 @@ server <- function(input, output, session) {
                                                          remove = TRUE),
         targetGroup = "Shapes"
       ) |>
-
-      # Adding layers to turn coordinates or shapes on and off.
       leaflet::addLayersControl(
-        overlayGroups = c("Shapes", #"Coordinates",
-                          "Legend", "Hexagons", "Shapefile"),
+        overlayGroups = c("Shapes", "Legend", "Hexagons", "Shapefile"),
         options = leaflet::layersControlOptions(collapsed = TRUE)
       ) |>
-
-      # Static set view of Alaska
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomright",
-                           options = leaflet::scaleBarOptions(maxWidth = 250)) |>
-      leaflet::addLegend(
-        "bottomright",
-        pal = pal(),
-        values = scaled_species_data(),
-        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
-        labFormat = leaflet::labelFormat(digits = 6),
-        group = "Legend"
-      )
-  })
+                           options = leaflet::scaleBarOptions(maxWidth = 250))
 
+  })
   # Download handler for shapefiles
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
@@ -155,6 +170,68 @@ server <- function(input, output, session) {
   )
 
   # ============ observers ==============
+
+  shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
+    species_values <- scaled_species_data()
+    shiny::req(species_values)
+
+    color_func <- pal()
+    polygon_colors <- color_func(species_values)
+    
+    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+
+    proxy |> leaflet::removeControl(layerId = "my_dynamic_legend")
+
+    proxy |> leaflet::clearGroup(group = "Legend")
+    
+    proxy |> 
+      leaflet::clearGroup(group = "Hexagons") |>
+      leaflet::addPolygons(
+        fillColor = polygon_colors,
+        fillOpacity = 0.8,
+        opacity = 0.7,
+        color = polygon_colors,
+        weight = 1,
+        smoothFactor = 0.5,
+        options = leaflet::pathOptions(zIndex = 5000),
+        group = "Hexagons"
+      )
+      
+    proxy |> 
+      leaflet::addLegend(
+        position = "bottomright",
+        pal = color_func,
+        values = species_values,
+        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = "Legend",
+        layerId = "dynamic"
+      )
+  })
+
+  shiny::observeEvent(input$abs_abund, {
+    species_values <- scaled_species_data()
+    shiny::req(species_values)
+
+    color_func <- pal()
+    
+    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+
+    proxy |> leaflet::removeControl(layerId = "my_dynamic_legend")
+
+    proxy |> leaflet::clearGroup(group = "Legend")
+
+    proxy |> 
+      leaflet::addLegend(
+        position = "bottomright",
+        pal = color_func,
+        values = species_values,
+        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = "Legend",
+        layerId = "dynamic"
+      )
+  })
 
   # Update reactive value when a new shape is drawn
   shiny::observeEvent(input$map_draw_new_feature, {
