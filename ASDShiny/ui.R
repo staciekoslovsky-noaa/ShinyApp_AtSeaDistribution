@@ -135,7 +135,7 @@ ui <- shinydashboard::dashboardPage(
           ),
           wellPanel(
                     bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                      bsCollapsePanel("Generated Custom Area Analysis",
+                      bsCollapsePanel("Shape Analysis",
                                       "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
                                       br(),
                                       fluidRow(
