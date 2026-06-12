@@ -126,3 +126,20 @@
 - Some good info on data management (good standards for my work)
 - Interesting stuff about detection models
   - Could be a way to expand on my internship contribution
+
+## June 12th, 2026
+### 9:00 - Programming
+- Merged data-pipeline pr
+- Began working on draw tools functionality
+  - Had to add a raw species data reactive for calculations
+  - Added helper function that generates histogram for shapes and shapefiles
+- Currently, rectangle tool works as expected (all calculations correct)
+  - Circle does not, as we may need to change the way that the data is gathered from the circle
+### 12:00 - Early Career Professional Perspective (Jessica Bunker, Norman OK)
+- Talked about CIWRO
+- Described ways to grow my career now:
+  - Finding a mentor
+  - Asking people in my desired field to review my resume
+  - Picking a specialty
+### 13:15 - Intern Orientations
+- Completed Intern and Safety Orientations for UW housing
