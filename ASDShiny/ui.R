@@ -82,7 +82,7 @@ ui <- shinydashboard::dashboardPage(
         wellPanel(
           tags$div(
             # Map title with species on top of page
-            textOutput("selected_species_name"),
+            uiOutput("selected_species_name"),
             style = "color: #2c3e50;
                       font-size: 20px; 
                       font-weight: bold;"
@@ -100,7 +100,7 @@ ui <- shinydashboard::dashboardPage(
                                              wellPanel(
                                                selectizeInput("mapselect",
                                                               "Select Marine Mammal",
-                                                              choices = c("Select", sort(names(species_list2)))),
+                                                              choices = c("Select", sort(unlist(species_list2)))),
                                                selectizeInput("legendselect",
                                                               "Select Legend",
                                                               choices = c(

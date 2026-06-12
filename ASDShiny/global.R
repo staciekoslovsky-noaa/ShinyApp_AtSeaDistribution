@@ -18,103 +18,29 @@ library(tidyverse)
 library(htmltools)
 library(tools)
 
-# likely to be deleted
 library(RColorBrewer)
 library(viridis)
 
 
 # Initialize POPhex_MCMC (used for later custom area analysis)
-load("../data/POPhex_MCMC.rda")
 load("../data/POPhexagons_sf.rda")
-
-species_links <- list(
-  "Northern Minke Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData",
-  "Fin Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData",
-  "Northern Fur Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData",
-  "Steller Sea Lion" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData",
-  "Sea Otter" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData",
-  "Gray Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData",
-  "Pacific White-Sided Dolphin" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData",
-  "Humpback Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData",
-  "Killer Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData",
-  "Walrus" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData",
-  "Dall's Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData",
-  "Sperm Whale" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData",
-  "Harbor Porpoise" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData",
-  "Harbor Seal" = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData"
-)
+species_codes <- read.csv("../data/Species_codes.csv")
 
 species_list2 <- list(
-  "Northern Minke Whale" = list(
-    data = POPhex_MCMC$Northern.Minke.Whale,
-    popdata = "Northern.Minke.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BA_MCMC.RData"
-  ),
-  "Fin Whale" = list(
-    data = POPhex_MCMC$Fin.Whale,
-    popdata = "Fin.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/BP_MCMC.RData"
-  ),
-  "Northern Fur Seal" = list(
-    data = POPhex_MCMC$Northern.Fur.Seal,
-    popdata = "Northern.Fur.Seal",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/CU_MCMC.RData"
-  ),
-  "Steller Sea Lion" = list(
-    data = POPhex_MCMC$Steller.Sea.Lion,
-    popdata = "Steller.Sea.Lion",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EJ_MCMC.RData"
-  ),
-  "Sea Otter" = list(
-    data = POPhex_MCMC$Sea.Otter,
-    popdata = "Sea.Otter",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/EL_MCMC.RData"
-  ),
-  "Gray Whale" = list(
-    data = POPhex_MCMC$Gray.Whale,
-    popdata = "Gray.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/ER_MCMC.RData"
-  ),
-  "Pacific White-Sided Dolphin" = list(
-    data = POPhex_MCMC$Pacific.White.Sided.Dolphin,
-    popdata = "Pacific.White.Sided.Dolphin",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/LO_MCMC.RData"
-  ),
-  "Humpback Whale" = list(
-    data = POPhex_MCMC$Humpback.Whale,
-    popdata = "Humpback.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/MN_MCMC.RData"
-  ),
-  "Killer Whale" = list(
-    data = POPhex_MCMC$Killer.Whale,
-    popdata = "Killer.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OO_MCMC.RData"
-  ),
-  "Walrus" = list(
-    data = POPhex_MCMC$Walrus,
-    popdata = "Walrus",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/OR_MCMC.RData"
-  ),
-  "Dall's Porpoise" = list(
-    data = POPhex_MCMC$Dall.s.Porpoise,
-    popdata = "Dall.s.Porpoise",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PD_MCMC.RData"
-  ),
-  "Sperm Whale" = list(
-    data = POPhex_MCMC$Sperm.Whale,
-    popdata = "Sperm.Whale",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PM_MCMC.RData"
-  ),
-  "Harbor Porpoise" = list(
-    data = POPhex_MCMC$Harbor.Porpoise,
-    popdata = "Harbor.Porpoise",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PP_MCMC.RData"
-  ),
-  "Harbor Seal" = list(
-    data = POPhex_MCMC$Harbor.Seal,
-    popdata = "Harbor.Seal",
-    url = "https://raw.githubusercontent.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution/main/data/PV_MCMC.RData"
-  )
+  "Northern Minke Whale",
+  "Fin Whale",
+  "Northern Fur Seal",
+  "Steller Sea Lion",
+  "Sea Otter",
+  "Gray Whale",
+  "Pacific White-Sided Dolphin",
+  "Humpback Whale",
+  "Killer Whale",
+  "Walrus",
+  "Dall's Porpoise",
+  "Sperm Whale",
+  "Harbor Porpoise",
+  "Harbor Seal"
 )
 
 
