@@ -12,7 +12,7 @@ server <- function(input, output, session) {
 
   uploaded_shapes <- shiny::reactiveVal(NULL)
 
-  drawn_shapes <- shiny::reactiveVal(NULL)
+  drawn_shape <- shiny::reactiveVal(NULL)
 
   # ============ reactives =============
 
@@ -147,7 +147,7 @@ server <- function(input, output, session) {
 
       # Unlinks all files in temp_dir for clean up
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
-      sf::st_write(drawn_shapes(), shp_file)
+      sf::st_write(drawn_shape(), shp_file)
 
       # -j Means no directory paths, just files only!
       zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
@@ -215,14 +215,16 @@ server <- function(input, output, session) {
         layerId = "dynamic"
       )
 
-    if (!is.null(drawn_shapes())) {
-      generate_custom_analysis(drawn_shapes())
+    if (!is.null(drawn_shape())) {
+      generate_custom_analysis(drawn_shape())
     }
   })
 
   # Update reactive value when a new shape is drawn
   shiny::observeEvent(input$map_draw_new_feature, {
     # Takes in new shape and sets it to variable
+    drawn_shape(NULL)
+
     proxy <- leaflet::leafletProxy("map")
   
     # When a user finishes drawing, target that shape layer and push it to the pane
@@ -250,7 +252,7 @@ server <- function(input, output, session) {
 
     drawn_shapes(rbind(drawn_shapes(), new_shape_sf))
 
-    generate_custom_analysis(drawn_shapes())
+    generate_custom_analysis(drawn_shape())
   })
 
   # when a drawfile is uploaded
@@ -322,26 +324,24 @@ server <- function(input, output, session) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
 
-    # Creates dataframe based on coordinates within the shapefile data
-    coords_df <- data.frame(sf::st_coordinates(shape_data))
-
-    max_x <- max(coords_df$X)
-    max_y <- max(coords_df$Y)
-    min_x <- min(coords_df$X)
-    min_y <- min(coords_df$Y)
-
-    # Calculates variance for RelAbund_MCMC for 1 (MCMC rows)
+    if (is.na(sf::st_crs(hexagons_sf))) { 
+      sf::st_crs(hexagons_sf) <- 4326 
+    }
+    
     row_variances <- apply(species_data(), 1, var)
 
     bound_mcmc <- cbind(hexagons_sf, species_data(), row_variances)
 
-    # Gather centroids of each hexagon in POP data
-    bound_mcmc$centroid.x <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 1]
-    bound_mcmc$centroid.y <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 2]
+    centroids <- sf::st_centroid(bound_mcmc)
 
-    # Filter only those within the shapefile coordinates
-    bound_mcmc <- bound_mcmc |>
-      dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
+    inside <- lengths(
+      sf::st_intersects(
+        centroids,
+        shape_data
+      )
+    ) > 0
+
+    bound_mcmc <- bound_mcmc[inside, ]
 
     relative_draws <- colSums(
       sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)],
