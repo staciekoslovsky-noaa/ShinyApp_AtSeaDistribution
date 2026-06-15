@@ -143,3 +143,13 @@
   - Picking a specialty
 ### 13:15 - Intern Orientations
 - Completed Intern and Safety Orientations for UW housing
+
+## June 15th, 2026
+### 9:30 - Lapenta Internship Icebreaker
+- Got introduced to Cathy Lapenta, Tim Walsh, Ray Tanabe, Dr. Jon Har, Dr. Marian Westly, and Commander Kevin Doremus
+### 13:30 - Coworking
+- Mostly talking about tools
+  - Circles were being calculated with a bounding box
+    - This was changed, now has a more accurate calculation
+  - Multiple shapes can be added, but only one has current calculation in shape generation tab
+    - Need to find a way to clear other shapes, or remove option to add more until it is deleted.
