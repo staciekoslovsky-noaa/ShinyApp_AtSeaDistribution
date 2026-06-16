@@ -121,8 +121,10 @@ server <- function(input, output, session) {
         circleMarkerOptions = FALSE,
         editOptions = leaflet.extras::editToolbarOptions(edit = FALSE,
                                                          selectedPathOptions = FALSE,
-                                                         remove = TRUE),
-        targetGroup = "Shapes"
+                                                         remove = TRUE,
+                                                         ),
+        targetGroup = "Shapes",
+        singleFeature = TRUE
       ) |>
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomleft",
@@ -214,10 +216,6 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
-
-    if (!is.null(drawn_shape())) {
-      generate_custom_analysis(drawn_shape())
-    }
   })
 
   # Update reactive value when a new shape is drawn
@@ -226,8 +224,7 @@ server <- function(input, output, session) {
     drawn_shape(NULL)
 
     proxy <- leaflet::leafletProxy("map")
-  
-    # When a user finishes drawing, target that shape layer and push it to the pane
+
     proxy |> leaflet::addLayersControl(overlayGroups = "Shapes")
     
     new_shape <- input$map_draw_new_feature
@@ -250,7 +247,13 @@ server <- function(input, output, session) {
       new_shape_sf <- sf::st_as_sf(sf::st_sfc(sf::st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
 
-    drawn_shapes(rbind(drawn_shapes(), new_shape_sf))
+    drawn_shape(rbind(drawn_shape(), new_shape_sf))
+
+    generate_custom_analysis(drawn_shape())
+  })
+
+  shiny::observeEvent(input$map_draw_deleted_features, {
+    drawn_shape(NULL)
 
     generate_custom_analysis(drawn_shape())
   })
@@ -310,6 +313,16 @@ server <- function(input, output, session) {
   })
 
   generate_custom_analysis <- function(shape_data) {
+
+    if (is.null(shape_data)) {
+      output$stat_result    <- shiny::renderTable(NULL)
+      output$small_area_hist <- shiny::renderPlot({ plot.new() })
+      output$small_area_abund <- shiny::renderText({ "" })
+      output$medmode         <- shiny::renderText({ "" })
+      output$overall_cv      <- shiny::renderText({ "" })
+      output$overall_variance_sum <- shiny::renderText({ "" })
+      return(NULL)
+    }
     
     species_name <- selected_species_code()
 
