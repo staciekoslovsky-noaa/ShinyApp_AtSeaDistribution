@@ -113,7 +113,7 @@ server <- function(input, output, session) {
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
       leaflet.extras::addDrawToolbar(
-        polygonOptions = leaflet.extras::drawPolygonOptions,
+        polygonOptions = leaflet.extras::drawPolygonOptions(),
         circleOptions = leaflet.extras::drawCircleOptions(),
         rectangleOptions = leaflet.extras::drawRectangleOptions(),
         markerOptions = FALSE, 
