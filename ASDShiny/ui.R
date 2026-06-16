@@ -100,7 +100,7 @@ ui <- shinydashboard::dashboardPage(
                                              wellPanel(
                                                selectizeInput("mapselect",
                                                               "Select Marine Mammal",
-                                                              choices = c("Select", sort(unlist(species_list2)))),
+                                                              choices = c("Select", as.list(species_codes$species))),
                                                selectizeInput("legendselect",
                                                               "Select Legend",
                                                               choices = c(

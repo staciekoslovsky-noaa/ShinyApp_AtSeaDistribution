@@ -26,28 +26,6 @@ library(viridis)
 load("../data/POPhexagons_sf.rda")
 species_codes <- read.csv("../data/Species_codes.csv")
 
-species_list2 <- list(
-  "Northern Minke Whale",
-  "Fin Whale",
-  "Northern Fur Seal",
-  "Steller Sea Lion",
-  "Sea Otter",
-  "Gray Whale",
-  "Pacific White-Sided Dolphin",
-  "Humpback Whale",
-  "Killer Whale",
-  "Walrus",
-  "Dall's Porpoise",
-  "Sperm Whale",
-  "Harbor Porpoise",
-  "Harbor Seal"
-)
-
-
-# Initialize raw_relative_abundance as object
-# NULL is later replaced by loaded MCMC file from Git
-raw_relative_abundance <- NULL
-
 # ========================= helper_functions =========================
 
 # =============== about tab ===================
