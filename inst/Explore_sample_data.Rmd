@@ -16,7 +16,7 @@ of the type we will be aiming to share via the Shiny App you are developing.
 Assuming you have successfully cloned the github repository Stacie put together \url{https://github.com/staciekoslovsky-noaa/ShinyApp_AtSeaDistribution}, you should have access to these data in the data directory.  Let's load the sample data into R and see what it includes:
 
 ```{r, message=FALSE, warning=FALSE}
-load("../data/Sample_data_for_portal.RData")
+load("../ASDShiny/data/Sample_data_for_portal.RData")
 class(Sample_data)
 names(Sample_data)
 

@@ -153,3 +153,22 @@
     - This was changed, now has a more accurate calculation
   - Multiple shapes can be added, but only one has current calculation in shape generation tab
     - Need to find a way to clear other shapes, or remove option to add more until it is deleted.
+
+## June 16th, 2026
+### 9:00 - Programming
+- Found "singleFeature = TRUE" for only added one shape at a time
+  - Now when another one is added, the first feature is removed, and the analysis updates for the most recent shape
+- Found that adding a shape and then a species doesn't work, so added in code so this works.
+- Added edge case in generate_custom_analysis that clears table and histogram if a shape is removed
+### 12:00 - NWS Deputy Director Michelle Mainelli Talks with Interns!
+- Got a MS and MBA while working for NOAA
+  - An option for me
+### 13:00 - Coworking
+- Decided to add an option for going to specified coordinates
+- Updated blueprint and tickets
+- Planned meeting with Paul
+### 15:00 - NOAA Technology Partnerships Office (Mike Kruk)
+- About the TPO and its different directives
+  - SBIR
+  - Technology Transfer
+- Also mentioned some current partnerships they have (good job opportunities)

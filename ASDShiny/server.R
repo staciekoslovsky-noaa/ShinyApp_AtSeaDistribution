@@ -42,7 +42,7 @@ server <- function(input, output, session) {
     code <- species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
 
     # File read fallback if not cached yet
-    filename <- paste0("../data/", code, "_MCMC.RData")
+    filename <- paste0("data/", code, "_MCMC.RData")
 
     
     if (!file.exists(filename)) {
