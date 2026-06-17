@@ -12,7 +12,7 @@ server <- function(input, output, session) {
 
   uploaded_shapes <- shiny::reactiveVal(NULL)
 
-  drawn_shapes <- shiny::reactiveVal(NULL)
+  drawn_shape <- shiny::reactiveVal(NULL)
 
   # ============ reactives =============
 
@@ -35,24 +35,32 @@ server <- function(input, output, session) {
 
   })
 
-  scaled_species_data <- shiny::reactive({
+  selected_species_code <- shiny::reactive({
     current_species <- selected_species()
 
-  
-    code <- species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+    species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+  })
+
+  species_data <- shiny::reactive({
+
+    code <- selected_species_code()
 
     # File read fallback if not cached yet
     filename <- paste0("data/", code, "_MCMC.RData")
-
     
     if (!file.exists(filename)) {
       shiny::showNotification(paste("File not found:", filename), type = "error")
       return(NULL)
     }
     
-    load(filename)
-          
-    spec_data <- rowMeans(RelAbund_MCMC)
+    names <- load(filename)
+
+    get(names[1])
+  })
+
+  scaled_species_data <- shiny::reactive({
+    spec_data <- rowMeans(species_data())
+
     spec_data * selected_abund()
   })
 
@@ -102,6 +110,8 @@ server <- function(input, output, session) {
   output$map <- leaflet::renderLeaflet({
     leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE)) |>
       leaflet::addTiles() |>
+      leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
+
       leaflet.extras::addDrawToolbar(
         polygonOptions = leaflet.extras::drawPolygonOptions(),
         circleOptions = leaflet.extras::drawCircleOptions(),
@@ -111,8 +121,10 @@ server <- function(input, output, session) {
         circleMarkerOptions = FALSE,
         editOptions = leaflet.extras::editToolbarOptions(edit = FALSE,
                                                          selectedPathOptions = FALSE,
-                                                         remove = TRUE),
-        targetGroup = "Shapes"
+                                                         remove = TRUE,
+                                                         ),
+        targetGroup = "Shapes",
+        singleFeature = TRUE
       ) |>
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomleft",
@@ -137,7 +149,7 @@ server <- function(input, output, session) {
 
       # Unlinks all files in temp_dir for clean up
       unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
-      sf::st_write(drawn_shapes(), shp_file)
+      sf::st_write(drawn_shape(), shp_file)
 
       # -j Means no directory paths, just files only!
       zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
@@ -164,7 +176,7 @@ server <- function(input, output, session) {
         color = polygon_colors,
         weight = 1,
         smoothFactor = 0.5,
-        options = leaflet::pathOptions(zIndex = 5000),
+        options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
         group = "Hexagons"
       )
       
@@ -188,7 +200,9 @@ server <- function(input, output, session) {
     
     proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
 
-    proxy |> leaflet::removeControl(layerId = "my_dynamic_legend")
+    proxy |> leaflet::removeControl(layerId = "dynamic")
+
+    proxy |> clearGroup("Shapes")
 
     proxy |> leaflet::clearGroup(group = "Legend")
 
@@ -206,9 +220,13 @@ server <- function(input, output, session) {
 
   # Update reactive value when a new shape is drawn
   shiny::observeEvent(input$map_draw_new_feature, {
-    drawn_shapes(NULL)
-    uploaded_shapes(NULL)
     # Takes in new shape and sets it to variable
+    drawn_shape(NULL)
+
+    proxy <- leaflet::leafletProxy("map")
+
+    proxy |> leaflet::addLayersControl(overlayGroups = "Shapes")
+    
     new_shape <- input$map_draw_new_feature
 
     if (new_shape$properties$feature_type == "circle") {
@@ -229,23 +247,20 @@ server <- function(input, output, session) {
       new_shape_sf <- sf::st_as_sf(sf::st_sfc(sf::st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
 
-    # set/update new shape to reactive value
-    existing_shapes <- drawn_shapes()
-    if (is.null(existing_shapes)) {
-      drawn_shapes(new_shape_sf)
-    } else {
-      drawn_shapes(rbind(existing_shapes, new_shape_sf))
-    }
+    drawn_shape(rbind(drawn_shape(), new_shape_sf))
 
-    uploaded_shapes(drawn_shapes())
+    generate_custom_analysis(drawn_shape())
+  })
+
+  shiny::observeEvent(input$map_draw_deleted_features, {
+    drawn_shape(NULL)
+
+    generate_custom_analysis(drawn_shape())
   })
 
   # when a drawfile is uploaded
   shiny::observeEvent(input$drawfile, {
-    shinyjs::enable("generate_button")
-
     # Null (clear) everything again in case there is something preexisting
-    uploaded_shapes(NULL)
     shapefile_data <- NULL
     temp_direc2 <- tempfile(pattern = "shapefile_temp_")
     dir.create(temp_direc2)
@@ -273,19 +288,18 @@ server <- function(input, output, session) {
         sf::st_geometry(shapefile_data) <- shifted_geometry
 
         # Sets the shapefile to uploaded shapes() reactive value
-        uploaded_shapes(shapefile_data)
+        uploaded_shapes(rbind(uploaded_shapes(), shapefile_data))
 
         # Display the shapefile on the map
         leaflet::leafletProxy("map", session) |>
           leaflet::clearGroup("Shapefile") |>
-          leaflet::clearGroup("Shapes") |>
           leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
         print("shown on map")
+        shinyjs::enable("generate_button")
       } else {
         shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
         shinyjs::reset("drawfile")
         drawfile <- NULL
-        shinyjs::disable("generate_button")
       }
     }
   })
@@ -294,103 +308,117 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$generate_button, {
 
     shapefile_data <- uploaded_shapes()
-    species_name <- species_list2[[selected_species()]]$popdata
+    
+    generate_custom_analysis(uploaded_shapes())
+  })
+
+  generate_custom_analysis <- function(shape_data) {
+
+    if (is.null(shape_data)) {
+      output$stat_result    <- shiny::renderTable(NULL)
+      output$small_area_hist <- shiny::renderPlot({ plot.new() })
+      output$small_area_abund <- shiny::renderText({ "" })
+      output$medmode         <- shiny::renderText({ "" })
+      output$overall_cv      <- shiny::renderText({ "" })
+      output$overall_variance_sum <- shiny::renderText({ "" })
+      return(NULL)
+    }
+    
+    species_name <- selected_species_code()
 
     # Coefficient of variation input
-    cv_input <- input$coeff_var
+    cv_input <- as.numeric(input$coeff_var)
 
     if (is.null(selected_species())) {
       print("selected_species is NULL")
     }
 
-    # the resulting matrix will be named RelAbund_MCMC
-    load(url(species_list2[[selected_species()]]$url))
-
-    # Processing shapefile data if crs is not provided or different
-    if (is.na(sf::st_crs(shapefile_data))) {
-      sf::st_crs(shapefile_data) <- 4326 # Assign a default CRS (EPSG:4326)
+    if (is.na(sf::st_crs(shape_data))) {
+      sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
 
-    # Creates dataframe based on coordinates within the shapefile data
-    coords_df <- data.frame(sf::st_coordinates(shapefile_data))
+    if (is.na(sf::st_crs(hexagons_sf))) { 
+      sf::st_crs(hexagons_sf) <- 4326 
+    }
+    
+    row_variances <- apply(species_data(), 1, var)
 
-    # use for debugging purposees (coordinates of shapefile area)
-    # output$coords_table <- renderTable({
-    #   coords_df})
+    bound_mcmc <- cbind(hexagons_sf, species_data(), row_variances)
 
-    max_x <- max(coords_df$X)
-    max_y <- max(coords_df$Y)
-    min_x <- min(coords_df$X)
-    min_y <- min(coords_df$Y)
+    centroids <- sf::st_centroid(bound_mcmc)
 
-    # Max X and Y value currently for debugging purposes
-    print(paste("Max X:", max_x, "Min X:", min_x))
-    print(paste("Max Y:", max_y, "Min Y:", min_y))
+    inside <- lengths(
+      sf::st_intersects(
+        centroids,
+        shape_data
+      )
+    ) > 0
 
-    # Calculates variance for RelAbund_MCMC for 1 (MCMC rows)
-    row_variances <- apply(RelAbund_MCMC, 1, var)
+    bound_mcmc <- bound_mcmc[inside, ]
 
-    bound_mcmc <- cbind(hex_mcmc, RelAbund_MCMC, row_variances)
+    relative_draws <- colSums(
+      sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)],
+      na.rm = TRUE
+    )
 
-    # Gather centroids of each hexagon in POP data
-    bound_mcmc$centroid.x <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 1]
-    bound_mcmc$centroid.y <- sf::st_coordinates(sf::st_centroid(bound_mcmc))[, 2]
+    relative_mean <- mean(relative_draws)
+    relative_variance <- var(relative_draws)
 
-    # Filter only those within the shapefile coordinates
-    bound_mcmc <- bound_mcmc |>
-      dplyr::filter(centroid.x >= !!min_x & centroid.x <= !!max_x & centroid.y >= !!min_y & centroid.y <= !!max_y)
+    if (selected_abund() == 1 ||
+        is.na(selected_abund()) ||
+        selected_abund() <= 0) {
 
-    # Gather total abundance sums by summing those columns after filter
-    total_abundance_sums <- colSums(sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)], na.rm = TRUE)
+      posterior_draws <- relative_draws
 
-    # Calculate the variance of these summed values
-    overall_variance <- var(total_abundance_sums)
-    print(overall_variance)
+    } else {
 
-    # Turns coefficient of variation input to numeric/number
-    cv_input <- as.numeric(cv_input)
+      sigma2 <- log(1 + cv_input^2)
+      sigma <- sqrt(sigma2)
 
-    # Simulating a log normal sampling distribution with`rlnorm`
-    n_sim <- rlnorm(1000, meanlog = log(selected_abund()), sdlog = sqrt(log(1 + (cv_input**2))))
+      meanlog <- log(selected_abund()) - sigma2 / 2
 
-    # previously computed total abundance sums from MCMC chains
-    total_abundance_sums <- n_sim * total_abundance_sums
+      abundance_draws <- rlnorm(
+        n = length(relative_draws),
+        meanlog = meanlog,
+        sdlog = sigma
+      )
 
-    ### GOODMAN'S FORMULA
-    # selected_abund (inputted user abundance: mu X)
-    # overall_var (calculated by just getting variance from MCMC chains only
-    # summed POP data column (containing mean for each hexagon
-    # (selected_abund*cv_input) squared
-    updated_var <- ((selected_abund())**2) * overall_variance + (sum(bound_mcmc[[species_name]])**2) * ((selected_abund() * cv_input)**2) + overall_variance * ((selected_abund() * cv_input)**2) 
-    print(updated_var)
+      posterior_draws <- relative_draws * abundance_draws
+    }
 
-    stderror <- sqrt(updated_var)
+    posterior_mean <- mean(posterior_draws)
+    posterior_median <- median(posterior_draws)
+    posterior_variance <- var(posterior_draws)
 
-    # Obtaining resulting CV using CV = (stderror / mean) formula
-    cv_result <- stderror / (selected_abund() * (sum(bound_mcmc[[species_name]])))
-
-    relative_abundance <- round(sum(bound_mcmc[[species_name]], na.rm = TRUE), digits = 3)
+    posterior_sd <- sqrt(posterior_variance)
+    posterior_cv <- posterior_sd / posterior_mean
 
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       # currently not outputted, but can be modified if renderText in UI added
       output$small_area_abund <- shiny::renderText({
-        paste0("Relative Abundance Estimate for Selected Area: ", relative_abundance)
+        paste0("Relative Abundance Estimate for Selected Area: ", relative_mean)
       })
       output$overall_variance_sum <- shiny::renderText({
-        paste0("Variance for Selected Area: ", round(overall_variance, digits = 5))
+        paste0("Variance for Selected Area: ", round(relative_variance, digits = 5))
       })
-
       # Posterior indicates Bayesian appraoch - include in output name
       output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 3))
+        paste0("Posterior Median Abundance Estimate: ", round(posterior_median, digits = 3))
       })
 
       # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Relative Abundance Estimate" = format(sum(bound_mcmc[[species_name]]), digits = 6, scientific = FALSE),
-        "Variance" = format(round(overall_variance, digits = 7), scientific = TRUE),
+        "Relative Abundance Estimate" = format(
+          relative_mean,
+          digits = 6,
+          scientific = FALSE
+        ),
+        "Variance" = format(
+          round(relative_variance, digits = 7),
+          scientific = TRUE
+        ),
         check.names = FALSE
       )
 
@@ -403,22 +431,46 @@ server <- function(input, output, session) {
     } else {
       # Same approach as above if statement
       output$small_area_abund <- shiny::renderText({
-        paste0("Posterior Mean Estimate for Selected Area: ", round(selected_abund() * sum(bound_mcmc[[species_name]]), digits = 0))
+        paste0(
+          "Posterior Mean Estimate for Selected Area: ",
+          format(round(posterior_mean), big.mark = ",")
+        )
       })
       output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", round(median(total_abundance_sums), digits = 0))
+        paste0(
+          "Posterior Median Abundance Estimate: ",
+          format(round(posterior_median), big.mark = ",")
+        )
       })
       output$overall_cv <- shiny::renderText({
-        paste0("Coefficient of Variation for Selected Area: ", cv_result)
+        paste0(
+          "Coefficient of Variation for Selected Area: ",
+          round(posterior_cv, 3)
+        )
       })
 
       # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Selected Abundance" = format(selected_abund(), big.mark = ",", scientific = FALSE),
-        "Posterior Mean Estimate" = round(selected_abund() * sum(bound_mcmc[[species_name]])),
-        "Posterior Median Abundance Estimate" = round(median(total_abundance_sums)),
-        "Coefficient of Variation" = round(cv_result, digits = 2),
+        "Selected Abundance" = format(
+          round(selected_abund()),
+          big.mark = ",",
+          scientific = FALSE
+        ),
+        "Posterior Mean Estimate" = format(
+          round(posterior_mean),
+          big.mark = ",",
+          scientific = FALSE
+        ),
+        "Posterior Median Abundance Estimate" = format(
+          round(posterior_median),
+          big.mark = ",",
+          scientific = FALSE
+        ),
+        "Coefficient of Variation" = round(
+          posterior_cv,
+          digits = 2
+        ),
         check.names = FALSE
       )
 
@@ -429,25 +481,25 @@ server <- function(input, output, session) {
       transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
 
       # Histogram that shows the possible abundance estimate simulations
-      p <- ggplot2::ggplot(data.frame(TotalAbundance = total_abundance_sums), ggplot2::aes(x = TotalAbundance)) +
+      p <- ggplot2::ggplot(data.frame(TotalAbundance = posterior_draws), ggplot2::aes(x = TotalAbundance)) +
         ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggplot2::ggtitle("Histogram of Abundance Estimates") +
         ggplot2::xlab("Total Abundance") +
         ggplot2::ylab("Frequency") +
         ggplot2::theme_minimal() +
         ggplot2::theme(plot.title = element_text(size = 20, hjust = 0.5),
-                       axis.title.x = element_text(size = 16),
-                       axis.title.y = element_text(size = 16),
-                       axis.text.x = element_text(size = 12),
-                       axis.text.y = element_text(size = 12))
+                        axis.title.x = element_text(size = 16),
+                        axis.title.y = element_text(size = 16),
+                        axis.text.x = element_text(size = 12),
+                        axis.text.y = element_text(size = 12))
       output$small_area_hist <- shiny::renderPlot({
         p
       })
 
       # Set col and row names to false, or unnecessary matrix titles will appear
       output$stat_result <- shiny::renderTable(transposed_data,
-                                               colnames = FALSE,
-                                               rownames = FALSE)
+                                                colnames = FALSE,
+                                                rownames = FALSE)
     }
-  })
+  }
 }

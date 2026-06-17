@@ -100,7 +100,7 @@ ui <- shinydashboard::dashboardPage(
                                              wellPanel(
                                                selectizeInput("mapselect",
                                                               "Select Marine Mammal",
-                                                              choices = c("Select", sort(unlist(species_list2)))),
+                                                              choices = c("Select", as.list(species_codes$species))),
                                                selectizeInput("legendselect",
                                                               "Select Legend",
                                                               choices = c(
@@ -135,7 +135,7 @@ ui <- shinydashboard::dashboardPage(
           ),
           wellPanel(
                     bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                      bsCollapsePanel("Generated Custom Area Analysis",
+                      bsCollapsePanel("Shape Analysis",
                                       "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
                                       br(),
                                       fluidRow(
