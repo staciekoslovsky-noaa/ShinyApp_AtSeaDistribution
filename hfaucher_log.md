@@ -126,3 +126,49 @@
 - Some good info on data management (good standards for my work)
 - Interesting stuff about detection models
   - Could be a way to expand on my internship contribution
+
+## June 12th, 2026
+### 9:00 - Programming
+- Merged data-pipeline pr
+- Began working on draw tools functionality
+  - Had to add a raw species data reactive for calculations
+  - Added helper function that generates histogram for shapes and shapefiles
+- Currently, rectangle tool works as expected (all calculations correct)
+  - Circle does not, as we may need to change the way that the data is gathered from the circle
+### 12:00 - Early Career Professional Perspective (Jessica Bunker, Norman OK)
+- Talked about CIWRO
+- Described ways to grow my career now:
+  - Finding a mentor
+  - Asking people in my desired field to review my resume
+  - Picking a specialty
+### 13:15 - Intern Orientations
+- Completed Intern and Safety Orientations for UW housing
+
+## June 15th, 2026
+### 9:30 - Lapenta Internship Icebreaker
+- Got introduced to Cathy Lapenta, Tim Walsh, Ray Tanabe, Dr. Jon Har, Dr. Marian Westly, and Commander Kevin Doremus
+### 13:30 - Coworking
+- Mostly talking about tools
+  - Circles were being calculated with a bounding box
+    - This was changed, now has a more accurate calculation
+  - Multiple shapes can be added, but only one has current calculation in shape generation tab
+    - Need to find a way to clear other shapes, or remove option to add more until it is deleted.
+
+## June 16th, 2026
+### 9:00 - Programming
+- Found "singleFeature = TRUE" for only added one shape at a time
+  - Now when another one is added, the first feature is removed, and the analysis updates for the most recent shape
+- Found that adding a shape and then a species doesn't work, so added in code so this works.
+- Added edge case in generate_custom_analysis that clears table and histogram if a shape is removed
+### 12:00 - NWS Deputy Director Michelle Mainelli Talks with Interns!
+- Got a MS and MBA while working for NOAA
+  - An option for me
+### 13:00 - Coworking
+- Decided to add an option for going to specified coordinates
+- Updated blueprint and tickets
+- Planned meeting with Paul
+### 15:00 - NOAA Technology Partnerships Office (Mike Kruk)
+- About the TPO and its different directives
+  - SBIR
+  - Technology Transfer
+- Also mentioned some current partnerships they have (good job opportunities)

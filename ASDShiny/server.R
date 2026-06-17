@@ -46,7 +46,7 @@ server <- function(input, output, session) {
     code <- selected_species_code()
 
     # File read fallback if not cached yet
-    filename <- paste0("../data/", code, "_MCMC.RData")
+    filename <- paste0("data/", code, "_MCMC.RData")
     
     if (!file.exists(filename)) {
       shiny::showNotification(paste("File not found:", filename), type = "error")

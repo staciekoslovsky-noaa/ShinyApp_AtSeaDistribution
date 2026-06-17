@@ -23,8 +23,8 @@ library(viridis)
 
 
 # Initialize POPhex_MCMC (used for later custom area analysis)
-load("../data/POPhexagons_sf.rda")
-species_codes <- read.csv("../data/Species_codes.csv")
+load("data/POPhexagons_sf.rda")
+species_codes <- read.csv("data/Species_codes.csv")
 
 # ========================= helper_functions =========================
 
