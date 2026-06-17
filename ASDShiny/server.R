@@ -206,10 +206,6 @@ server <- function(input, output, session) {
     
     proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
 
-    proxy |> leaflet::removeControl(layerId = "dynamic")
-
-    proxy |> clearGroup("Shapes")
-
     proxy |> leaflet::clearGroup(group = "Legend")
 
     proxy |> 
@@ -237,7 +233,10 @@ server <- function(input, output, session) {
 
     proxy <- leaflet::leafletProxy("map")
 
-    proxy |> leaflet::addLayersControl(overlayGroups = "Shapes")
+    proxy |> clearGroup("Shapefile")
+    shinyjs::reset("drawfile")
+    shinyjs::disable("generate_button")
+    shinyjs::disable("remove_button")
     
     new_shape <- input$map_draw_new_feature
 
@@ -289,11 +288,10 @@ server <- function(input, output, session) {
       utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
       all_files <- list.files(temp_direc2, full.names = TRUE)
       shape_file <- all_files[grepl("\\.shp$", all_files)]
-      message("upload succesful")
 
-      if (length(shape_file) >= 1) {
+      if (length(shape_file) == 1) {
         # Read the shapefile
-        shapefile_data <- sf::st_read(shape_file)
+        shapefile_data <- sf::st_read(shape_file, quiet = TRUE)
 
         # Transform the projection to EPSG 4326 in case it is different
         shapefile_data <- sf::st_transform(shapefile_data, 4326)
@@ -305,16 +303,17 @@ server <- function(input, output, session) {
 
         # Sets the shapefile to uploaded shapes() reactive value
         uploaded_shape(shapefile_data)
+        proxy <- leaflet::leafletProxy("map")
+
+        session$sendCustomMessage("clearDrawnShapes", list())
 
         # Display the shapefile on the map
-        leaflet::leafletProxy("map", session) |>
+        proxy |>
           leaflet::clearGroup("Shapefile") |>
-          leaflet::clearGroup("Shapes") |>
-          leaflet.extras::removeDrawToolbar() |>
-          leaflet::removeImage() |>
           leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
-        print("shown on map")
+        
         shinyjs::enable("generate_button")
+        shinyjs::enable("remove_button")
       } else {
         shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
         shinyjs::reset("drawfile")

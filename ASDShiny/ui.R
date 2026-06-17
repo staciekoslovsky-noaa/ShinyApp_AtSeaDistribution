@@ -90,7 +90,17 @@ ui <- shinydashboard::dashboardPage(
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%")
+              leafletOutput(outputId = "map", width = "100%"),
+              tags$script(HTML("
+                Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
+                  var map = HTMLWidgets.find('#map').getMap();
+                  map.eachLayer(function(layer) {
+                    if (layer instanceof L.FeatureGroup && layer.groupname === 'Shapes') {
+                      layer.clearLayers();
+                    }
+                  });
+                });
+              "))
             ),
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
@@ -127,7 +137,8 @@ ui <- shinydashboard::dashboardPage(
                                   br(),
                                   fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
                                   br(),
-                                  disabled(actionButton("generate_button", "Generate")), # nolint: line_length_linter
+                                  disabled(actionButton("generate_button", "Generate")),
+                                  disabled(actionButton("remove_button", "Remove")),
                                   style = "primary")
                 )
               )
