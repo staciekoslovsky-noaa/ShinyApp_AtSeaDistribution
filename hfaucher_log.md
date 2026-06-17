@@ -172,3 +172,23 @@
   - SBIR
   - Technology Transfer
 - Also mentioned some current partnerships they have (good job opportunities)
+
+## June 17th, 2026
+### 12:15 - Programming
+- Merged draw tools pull request
+- Worked on getting shapefile area analysis to work but ran into some bugs
+  - Shapefile doesn't update after other fields are edited
+  - You cannot remove the shape file
+  - Both a shapefile and a drawn shape are visible on the map at the same time
+- Started fixing those bugs
+  - Allowing shapefile analysis to update if a variable changes
+### 13:00 - Project Meeting
+- Demo was good, but should look into the collapsing of the tabs again (you have to scroll down quite far to see the analysis)
+- Need a way to standardize data, hopefully in a group with the data science stewards
+### 13:45 - Programming
+- Fixing the rest of the shapefile bugs
+  - Made it so only shapefile or shape can be viewed with Javascript call
+  - Added a remove button
+- Made PR
+### 15:00 - Space Weather 101 (Yaireska (Yari) Collado-Vega)
+- Intro to Space Weather Prediction Center and Office of Space Weather Observations
