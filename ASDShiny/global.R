@@ -204,17 +204,12 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                        of the entire area, can be propagated into the small
                        area estimate using Goodman's exact formula:"),
                      h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
-                     p("Where mu_x and mu_y are expected values (E[X] and E[Y])
-                     of the random variables. The following values would replace
-                     each of the components of the Goodman's exact formula (1960):"),
+                     p("where"),
                      tags$ul(
-                             tags$li("Mu (x): inputted user abundance"),
-                             tags$li("Var(Y): variance from the MCMC chains in the filtered area"),
-                             tags$li("Mu (y): sum of the posterior means of selected hexagons (between 0 and 1) in the filtered area"),
-                             tags$li("Var(X): calculated by multiplying the user
-                                     inputted abundance and the coefficient of
-                                     variance, which yields the standard error.
-                                     Squared to then obtain variance.")),
+                             tags$li("Mu(x): inputted user abundance;"),
+                             tags$li("Var(X): calculated by multiplying the user inputted abundance and the coefficient of variation and then squaring;"),
+                             tags$li("Mu(y): summed relative abundance over the area of interest (posterior mean);"),
+                             tags$li("Var(Y): variance of the sum of MCMC chains over the filtered area.")),
                      p("This will then provide the new variance that takes into
                        account both the uncertainty in the user inputted data
                        and the POP analyses. It is converted to a coefficient 
