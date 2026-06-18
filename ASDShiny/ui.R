@@ -105,7 +105,7 @@ ui <- shinydashboard::dashboardPage(
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
                 bsCollapsePanel("Customize Map", style = "success",
-                  bsCollapse(id = "species", open = "Select Species",
+                  bsCollapse(id = "species", open = "Select Species", multiple = FALSE,
                              bsCollapsePanel("Select Species",
                                              wellPanel(
                                                selectizeInput("mapselect",
@@ -121,25 +121,25 @@ ui <- shinydashboard::dashboardPage(
                                                                 "High Density Emphasis"
                                                               )),
                                                checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
-                                             ))),
-                  bsCollapsePanel("Abundance Estimate",
-                                  textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
-                                  "Enter total abundance to get an updated abundance estimate.",
-                                  br(),
-                                  br(),
-                                  textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
-                                  "Enter a coefficient of variation value. The default value is 0.2.",
-                                  style = "info"),
-                  bsCollapsePanel("Custom Area Analysis",
-                                  "Upload a shapefile for custom area analysis.",
-                                  "Only single zipped files will be accepted.",
-                                  br(),
-                                  br(),
-                                  fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
-                                  br(),
-                                  disabled(actionButton("generate_button", "Generate")),
-                                  disabled(actionButton("remove_button", "Remove")),
-                                  style = "primary")
+                                             )),
+                             bsCollapsePanel("Abundance Estimate",
+                                            textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
+                                            "Enter total abundance to get an updated abundance estimate.",
+                                            br(),
+                                            br(),
+                                            textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
+                                            "Enter a coefficient of variation value. The default value is 0.2.",
+                                            style = "info"),
+                             bsCollapsePanel("Custom Area Analysis",
+                                            "Upload a shapefile for custom area analysis.",
+                                            "Only single zipped files will be accepted.",
+                                            br(),
+                                            br(),
+                                            fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
+                                            br(),
+                                            disabled(actionButton("generate_button", "Generate")),
+                                            disabled(actionButton("remove_button", "Remove")),
+                                            style = "primary"))
                 )
               )
             )
@@ -156,7 +156,7 @@ ui <- shinydashboard::dashboardPage(
                     )),
           wellPanel(
             h3("Download Shapefile"),
-            downloadButton("downloadData", "Download Shapefile"),
+            disabled(downloadButton("downloadData", "Download Shapefile")),
           )
         )
       ),

@@ -1,4 +1,3 @@
-# Define server logic
 server <- function(input, output, session) {
 
   # ============ setup ============
@@ -13,6 +12,9 @@ server <- function(input, output, session) {
   uploaded_shape <- shiny::reactiveVal(NULL)
 
   drawn_shape <- shiny::reactiveVal(NULL)
+
+  download_shape <- NULL
+
 
   # ============ reactives =============
 
@@ -135,37 +137,32 @@ server <- function(input, output, session) {
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
       # Set the title for the shapefile
-      paste0(selected_species(), "drawn_shapes_", Sys.Date(), ".zip")
+      paste0(selected_species_code(), "_drawn_shape_", Sys.Date(), ".zip")
     },
     content = function(file) {
-      # Create temporary directory
-      temp_dir <- tempdir()
+      export_dir <- file.path(tempdir(), "vscode_shape_export")
+      dir.create(export_dir, showWarnings = FALSE)
 
-      # Manually create all the files to include in zipped file
-      shp_file <- file.path(temp_dir, "drawn_shapes.shp")
-      shx_file <- file.path(temp_dir, "drawn_shapes.shx")
-      dbf_file <- file.path(temp_dir, "drawn_shapes.dbf")
-      prj_file <- file.path(temp_dir, "drawn_shapes.prj")
+      shp_file <- file.path(export_dir, "drawn_shape.shp")
+      sf::st_write(download_shape, shp_file, delete_layer = TRUE, quiet = TRUE)      
 
-      # Unlinks all files in temp_dir for clean up
-      unlink(list.files(temp_dir, full.names = TRUE), recursive = TRUE)
-      sf::st_write(drawn_shape(), shp_file)
+      all_files <- list.files(export_dir, full.names = TRUE)
 
-      # -j Means no directory paths, just files only!
-      zip(zipfile = file, files = c(shp_file, shx_file, dbf_file, prj_file), flags = "-j")
+      zip(zipfile = file, files = all_files, flags = "-j")
+      
+      unlink(export_dir, recursive = TRUE)
     }
   )
 
   # ============ observers ==============
 
   shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
+    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+
     species_values <- scaled_species_data()
-    shiny::req(species_values)
 
     color_func <- pal()
     polygon_colors <- color_func(species_values)
-    
-    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
     
     proxy |> 
       leaflet::clearGroup(group = "Hexagons") |>
@@ -190,6 +187,10 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
+
+      if (!is.null(drawn_shape())) {
+        shinyjs::enable("downloadData")
+      }
 
       if (!is.null(uploaded_shape())) {
         generate_custom_analysis(uploaded_shape())
@@ -229,7 +230,8 @@ server <- function(input, output, session) {
   # Update reactive value when a new shape is drawn
   shiny::observeEvent(input$map_draw_new_feature, {
     # Takes in new shape and sets it to variable
-    drawn_shape(NULL)
+
+    req(input$map_draw_new_feature)
 
     proxy <- leaflet::leafletProxy("map")
 
@@ -237,6 +239,10 @@ server <- function(input, output, session) {
     shinyjs::reset("drawfile")
     shinyjs::disable("generate_button")
     shinyjs::disable("remove_button")
+    
+    if (!is.null(input$mapselect) && input$mapselect != "Select" && input$mapselect != "") {
+      shinyjs::enable("downloadData")
+    }
     
     new_shape <- input$map_draw_new_feature
 
@@ -260,11 +266,13 @@ server <- function(input, output, session) {
 
     drawn_shape(new_shape_sf)
 
-    generate_custom_analysis(drawn_shape())
+    generate_custom_analysis(new_shape_sf)
   })
 
   shiny::observeEvent(input$map_draw_deleted_features, {
     drawn_shape(NULL)
+
+    shinyjs::disable("downloadData")
 
     if (!is.null(uploaded_shape())) {
       generate_custom_analysis(uploaded_shape())
@@ -314,6 +322,7 @@ server <- function(input, output, session) {
         
         shinyjs::enable("generate_button")
         shinyjs::enable("remove_button")
+        shinyjs::disable("downloadData")
       } else {
         shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
         shinyjs::reset("drawfile")
@@ -325,6 +334,15 @@ server <- function(input, output, session) {
   # Generates custom area analysis when the "generate" button is pressed.
   shiny::observeEvent(input$generate_button, {
     generate_custom_analysis(uploaded_shape())
+  })
+
+  shiny::observeEvent(input$remove_button, {
+    proxy <- leaflet::leafletProxy("map")
+
+    proxy |> clearGroup("Shapefile")
+    shinyjs::reset("drawfile")
+    shinyjs::disable("generate_button")
+    shinyjs::disable("remove_button")
   })
 
   generate_custom_analysis <- function(shape_data) {
@@ -410,6 +428,12 @@ server <- function(input, output, session) {
 
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
+      download_shape <<- drawn_shape() |>
+        mutate(
+          "RlAbndEs" = relative_mean,
+          "Var" = relative_variance
+        )
+
       # currently not outputted, but can be modified if renderText in UI added
       output$small_area_abund <- shiny::renderText({
         paste0("Relative Abundance Estimate for Selected Area: ", relative_mean)
@@ -444,6 +468,13 @@ server <- function(input, output, session) {
       # this nulls the histogram when it is reverted to relative abundance
       output$small_area_hist <- shiny::renderPlot(NULL)
     } else {
+      download_shape <<- drawn_shape() |>
+        mutate(
+          "PstMenEs" = posterior_mean,
+          "PstMedEs" = posterior_median,
+          "CoeffVar" = posterior_cv
+        )
+
       # Same approach as above if statement
       output$small_area_abund <- shiny::renderText({
         paste0(
