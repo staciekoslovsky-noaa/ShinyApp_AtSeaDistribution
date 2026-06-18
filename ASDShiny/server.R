@@ -10,7 +10,7 @@ server <- function(input, output, session) {
   # the data across the dateline for a unified view.
   hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
 
-  uploaded_shapes <- shiny::reactiveVal(NULL)
+  uploaded_shape <- shiny::reactiveVal(NULL)
 
   drawn_shape <- shiny::reactiveVal(NULL)
 
@@ -190,6 +190,12 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
+
+      if (!is.null(uploaded_shape())) {
+        generate_custom_analysis(uploaded_shape())
+      } else {
+        generate_custom_analysis(drawn_shape())
+      }
   })
 
   shiny::observeEvent(input$abs_abund, {
@@ -199,10 +205,6 @@ server <- function(input, output, session) {
     color_func <- pal()
     
     proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
-
-    proxy |> leaflet::removeControl(layerId = "dynamic")
-
-    proxy |> clearGroup("Shapes")
 
     proxy |> leaflet::clearGroup(group = "Legend")
 
@@ -216,6 +218,12 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
+
+      if (!is.null(uploaded_shape())) {
+        generate_custom_analysis(uploaded_shape())
+      } else {
+        generate_custom_analysis(drawn_shape())
+      }
   })
 
   # Update reactive value when a new shape is drawn
@@ -225,7 +233,10 @@ server <- function(input, output, session) {
 
     proxy <- leaflet::leafletProxy("map")
 
-    proxy |> leaflet::addLayersControl(overlayGroups = "Shapes")
+    proxy |> clearGroup("Shapefile")
+    shinyjs::reset("drawfile")
+    shinyjs::disable("generate_button")
+    shinyjs::disable("remove_button")
     
     new_shape <- input$map_draw_new_feature
 
@@ -247,7 +258,7 @@ server <- function(input, output, session) {
       new_shape_sf <- sf::st_as_sf(sf::st_sfc(sf::st_polygon(list(matrix(unlist(new_shape$geometry$coordinates[[1]]), ncol = 2, byrow = TRUE)))), crs = 4326)
     }
 
-    drawn_shape(rbind(drawn_shape(), new_shape_sf))
+    drawn_shape(new_shape_sf)
 
     generate_custom_analysis(drawn_shape())
   })
@@ -255,7 +266,11 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$map_draw_deleted_features, {
     drawn_shape(NULL)
 
-    generate_custom_analysis(drawn_shape())
+    if (!is.null(uploaded_shape())) {
+      generate_custom_analysis(uploaded_shape())
+    } else {
+      generate_custom_analysis(drawn_shape())
+    }
   })
 
   # when a drawfile is uploaded
@@ -273,11 +288,10 @@ server <- function(input, output, session) {
       utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
       all_files <- list.files(temp_direc2, full.names = TRUE)
       shape_file <- all_files[grepl("\\.shp$", all_files)]
-      message("upload succesful")
 
-      if (length(shape_file) >= 1) {
+      if (length(shape_file) == 1) {
         # Read the shapefile
-        shapefile_data <- sf::st_read(shape_file)
+        shapefile_data <- sf::st_read(shape_file, quiet = TRUE)
 
         # Transform the projection to EPSG 4326 in case it is different
         shapefile_data <- sf::st_transform(shapefile_data, 4326)
@@ -288,14 +302,18 @@ server <- function(input, output, session) {
         sf::st_geometry(shapefile_data) <- shifted_geometry
 
         # Sets the shapefile to uploaded shapes() reactive value
-        uploaded_shapes(rbind(uploaded_shapes(), shapefile_data))
+        uploaded_shape(shapefile_data)
+        proxy <- leaflet::leafletProxy("map")
+
+        session$sendCustomMessage("clearDrawnShapes", list())
 
         # Display the shapefile on the map
-        leaflet::leafletProxy("map", session) |>
+        proxy |>
           leaflet::clearGroup("Shapefile") |>
           leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
-        print("shown on map")
+        
         shinyjs::enable("generate_button")
+        shinyjs::enable("remove_button")
       } else {
         shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
         shinyjs::reset("drawfile")
@@ -306,10 +324,7 @@ server <- function(input, output, session) {
 
   # Generates custom area analysis when the "generate" button is pressed.
   shiny::observeEvent(input$generate_button, {
-
-    shapefile_data <- uploaded_shapes()
-    
-    generate_custom_analysis(uploaded_shapes())
+    generate_custom_analysis(uploaded_shape())
   })
 
   generate_custom_analysis <- function(shape_data) {
