@@ -192,3 +192,15 @@
 - Made PR
 ### 15:00 - Space Weather 101 (Yaireska (Yari) Collado-Vega)
 - Intro to Space Weather Prediction Center and Office of Space Weather Observations
+
+## June 18th, 2026
+### 9:00 - Programming
+- Merged shapefile analysis pr
+- Worked on getting file attributes for shapefile download
+  - Fixed associated bugs like the download button being available at any time
+- Forgot to make a branch so reverted commit and then branched
+### 12:00 - Dr. Uccellini Speaks to Lapenta Interns (Weather Ready Nation)
+- The steps to building a weather ready nation, and some case studies
+### 13:00 - Coworking
+- Reviewed and merged pr
+- Did some chatting about changes in issues section of GitHub, all resolved now!!
