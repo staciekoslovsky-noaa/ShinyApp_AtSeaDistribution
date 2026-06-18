@@ -430,8 +430,8 @@ server <- function(input, output, session) {
 
       download_shape <<- drawn_shape() |>
         mutate(
-          "RlAbndEs" = relative_mean,
-          "Var" = relative_variance
+          "rel_abund" = relative_mean,
+          "variance" = relative_variance
         )
 
       # currently not outputted, but can be modified if renderText in UI added
@@ -470,9 +470,9 @@ server <- function(input, output, session) {
     } else {
       download_shape <<- drawn_shape() |>
         mutate(
-          "PstMenEs" = posterior_mean,
-          "PstMedEs" = posterior_median,
-          "CoeffVar" = posterior_cv
+          "post_mean" = posterior_mean,
+          "post_medf" = posterior_median,
+          "cv" = posterior_cv
         )
 
       # Same approach as above if statement
