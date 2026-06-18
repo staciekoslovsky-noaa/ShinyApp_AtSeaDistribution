@@ -156,7 +156,7 @@ ui <- shinydashboard::dashboardPage(
                     )),
           wellPanel(
             h3("Download Shapefile"),
-            disabled(downloadButton("downloadData", "Download Shapefile")),
+            downloadButton("downloadData", "Download Shapefile"),
           )
         )
       ),
