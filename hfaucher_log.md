@@ -204,3 +204,22 @@
 ### 13:00 - Coworking
 - Reviewed and merged pr
 - Did some chatting about changes in issues section of GitHub, all resolved now!!
+
+## June 22nd, 2026
+### 9:00 - ID Badge pickup
+- Picked up ID badge 
+### 10:00 - NOAA account and laptop setup
+- Set windows and updated computer
+- Set NOAA account up after some difficulty
+### 11:00 - Solo Set Up
+- Read through old gmail
+- Emailed Dr. Roohr, so I can be added to the seminar calendar
+### 12:30 - Trainings
+- Read CLC Welcome Letter
+- Did CSAT training
+### 14:00 - Installing Services
+- Had to contact help desk to install R and Git onto laptop
+- Downloaded Positron wihtout any issues
+### 15:30 - Programming
+- Began adding option for preloaded shapefiles, testing with import
+  - Button is there, but there is no server code yet.
