@@ -7,7 +7,7 @@ server <- function(input, output, session) {
 
   # As Alaska is split by the international dateline, the following lines move
   # the data across the dateline for a unified view.
-  hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  hexagons_sf <- sf::st_shift_longitude(hexagons_sf)
 
   uploaded_shape <- shiny::reactiveVal(NULL)
 
@@ -15,9 +15,9 @@ server <- function(input, output, session) {
 
   download_shape <- NULL
 
+  area <- as.numeric(sf::st_area(hexagons_sf)) / 1e6
 
   # ============ reactives =============
-
 
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
@@ -131,8 +131,18 @@ server <- function(input, output, session) {
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomleft",
                            options = leaflet::scaleBarOptions(maxWidth = 250))
+  })
+
+  output$area <- shiny::renderUI({
+    formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
+
+    tags$span(
+      style = "font-weight: bold; color: #555555;", 
+      paste0("Cell Area: ", formatted_area)
+    )
 
   })
+
   # Download handler for shapefiles
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
