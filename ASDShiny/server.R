@@ -15,7 +15,6 @@ server <- function(input, output, session) {
 
   download_shape <- NULL
 
-
   # ============ reactives =============
 
 
@@ -34,7 +33,28 @@ server <- function(input, output, session) {
     } else {
       selected_abund
     }
+  })
 
+  latitude <- shiny::reactive({
+    latitude <- as.numeric(input$latitude)
+
+    if (is.na(latitude)) {
+      latitude <- 57
+    } else {
+      max(-90, min(90, latitude))
+    }
+  })
+
+  longitude <- shiny::reactive({
+    longitude <- as.numeric(input$longitude)
+
+    if (is.na(longitude) || length(longitude) == 0) {
+      return(208)
+    }
+    
+    transformed_lng <- (longitude + 360) %% 360
+  
+    return(transformed_lng)
   })
 
   selected_species_code <- shiny::reactive({
@@ -110,7 +130,7 @@ server <- function(input, output, session) {
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE)) |>
+    leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
       leaflet::addTiles() |>
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
@@ -128,7 +148,7 @@ server <- function(input, output, session) {
         targetGroup = "Shapes",
         singleFeature = TRUE
       ) |>
-      leaflet::setView(208, 64, 3) |>
+      leaflet::setView(lat = 57, lng = 208, zoom = 3) |>
       leaflet::addScaleBar(position = "bottomleft",
                            options = leaflet::scaleBarOptions(maxWidth = 250))
 
@@ -225,6 +245,12 @@ server <- function(input, output, session) {
       } else {
         generate_custom_analysis(drawn_shape())
       }
+  })
+
+  shiny::observeEvent(input$zoom, {
+    proxy <- leaflet::leafletProxy("map")
+
+    proxy |> leaflet::flyTo(lat = latitude(), lng = longitude(), zoom = 6)
   })
 
   # Update reactive value when a new shape is drawn

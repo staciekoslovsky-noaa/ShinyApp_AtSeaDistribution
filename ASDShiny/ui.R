@@ -139,7 +139,15 @@ ui <- shinydashboard::dashboardPage(
                                             br(),
                                             disabled(actionButton("generate_button", "Generate")),
                                             disabled(actionButton("remove_button", "Remove")),
-                                            style = "primary"))
+                                            style = "primary"),
+                             bsCollapsePanel("Zoom to",
+                                             "Enter latitude and longitude to zoom",
+                                             br(),
+                                             br(),
+                                             textInput("latitude", "Latitude", placeholder = "e.g. 57"),
+                                             textInput("longitude", "Longitude", placeholder = "e.g. -152"),
+                                             actionButton("zoom", "Zoom")
+                            ))
                 )
               )
             )
