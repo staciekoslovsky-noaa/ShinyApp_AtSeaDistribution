@@ -133,16 +133,6 @@ server <- function(input, output, session) {
                            options = leaflet::scaleBarOptions(maxWidth = 250))
   })
 
-  output$area <- shiny::renderUI({
-    formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
-
-    tags$span(
-      style = "font-weight: bold; color: #555555;", 
-      paste0("Cell Area: ", formatted_area)
-    )
-
-  })
-
   # Download handler for shapefiles
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
@@ -197,6 +187,16 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
+
+      output$area <- shiny::renderUI({
+        formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
+
+        tags$span(
+          style = "font-weight: bold; color: #555555;", 
+          paste0("Cell Area: ", formatted_area)
+        )
+
+      })
 
       if (!is.null(drawn_shape())) {
         shinyjs::enable("downloadData")
