@@ -223,3 +223,26 @@
 ### 15:30 - Programming
 - Began adding option for preloaded shapefiles, testing with import
   - Button is there, but there is no server code yet.
+
+## June 23rd, 2026
+### 8:00 - Programming
+- Added server logic to preloaded shapefiles, with a reactiveVal that holds the path of the file
+  - Removed for-loop logic, because only one shapefile can be on the map at all times
+### 9:00 - Howard Diamond (OAR) - OAR's Air Resources Laboratory Intro
+- Talked about different divisions, and one of the lab's products
+  - HYSPLIT
+### 10:00 - Programming
+- Fixed some more small bugs in the preloaded shapefiles, making sure everything is removed when one is chosen
+- Made pr for preloaded shapefiles
+- Added an output underneath the map that shows the cell area (static now, but with changing data types, we will see how it changes)
+  - Made pr
+### 13:00 - Programming
+- Worked on new zoom-to feature
+  - The center is set to 208 which was giving some issues 
+    - Thought about cleaning data as hexagons were also applied around 208
+  - Got latitude to work with a reactive, but longitude was not working as the centering issue was weird
+### 14:00 - Walk with Paul
+- Walked around campus a bit, and talked about different calculations we will have to do with the different data types
+### 15:00 - Programming
+- Figured out the longitude issue (typo :/)
+  - Made draft pr, as I want Stacie's opinion on the aesthetics of the UI
