@@ -16,6 +16,7 @@ server <- function(input, output, session) {
   download_shape <- NULL
 
   area <- as.numeric(sf::st_area(hexagons_sf)) / 1e6
+  active_shapefile <- shiny::reactiveVal(NULL)
 
   # ============ reactives =============
 
@@ -203,9 +204,7 @@ server <- function(input, output, session) {
       }
 
       if (!is.null(uploaded_shape())) {
-        generate_custom_analysis(uploaded_shape())
-      } else {
-        generate_custom_analysis(drawn_shape())
+        shinyjs::enable("generate_button")
       }
   })
 
@@ -293,53 +292,29 @@ server <- function(input, output, session) {
 
   # when a drawfile is uploaded
   shiny::observeEvent(input$drawfile, {
-    # Null (clear) everything again in case there is something preexisting
-    shapefile_data <- NULL
-    temp_direc2 <- tempfile(pattern = "shapefile_temp_")
-    dir.create(temp_direc2)
+    active_shapefile(input$drawfile$datapath)
 
-    # Take in inputted shapefile and set to variable
-    drawfile <- input$drawfile
+    shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
+    uploaded_shape(NULL)
+    generate_custom_analysis(NULL)
 
-    # Unzips the file
-    for (i in seq_len(nrow(drawfile))) {
-      utils::unzip(input$drawfile$datapath, exdir = temp_direc2)
-      all_files <- list.files(temp_direc2, full.names = TRUE)
-      shape_file <- all_files[grepl("\\.shp$", all_files)]
-
-      if (length(shape_file) == 1) {
-        # Read the shapefile
-        shapefile_data <- sf::st_read(shape_file, quiet = TRUE)
-
-        # Transform the projection to EPSG 4326 in case it is different
-        shapefile_data <- sf::st_transform(shapefile_data, 4326)
-
-        shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
-
-        # Shifts the geometry taking the dateline into account
-        sf::st_geometry(shapefile_data) <- shifted_geometry
-
-        # Sets the shapefile to uploaded shapes() reactive value
-        uploaded_shape(shapefile_data)
-        proxy <- leaflet::leafletProxy("map")
-
-        session$sendCustomMessage("clearDrawnShapes", list())
-
-        # Display the shapefile on the map
-        proxy |>
-          leaflet::clearGroup("Shapefile") |>
-          leaflet::addPolygons(data = shapefile_data, color = "red", weight = 1, group = "Shapefile")
-        
-        shinyjs::enable("generate_button")
-        shinyjs::enable("remove_button")
-        shinyjs::disable("downloadData")
-      } else {
-        shiny::showNotification("Uploaded zip file does not contain a valid .shp file.", type = "error")
-        shinyjs::reset("drawfile")
-        drawfile <- NULL
-      }
-    }
+    show_shapefile(shape_file)
   })
+
+  shiny::observeEvent(input$shapefile_select, {
+    if (input$shapefile_select == "Select") {
+      return(NULL)
+    }
+
+    shape_name <- loaded_shapefiles$filename[tolower(trimws(loaded_shapefiles$name)) == tolower(trimws(input$shapefile_select))]
+
+    shapefile_name <- paste0("shapefiles/", shape_name)
+
+    active_shapefile(shapefile_name)
+
+    show_shapefile(shapefile_name)
+
+  }, ignoreInit = TRUE)
 
   # Generates custom area analysis when the "generate" button is pressed.
   shiny::observeEvent(input$generate_button, {
@@ -348,12 +323,55 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(input$remove_button, {
     proxy <- leaflet::leafletProxy("map")
-
     proxy |> clearGroup("Shapefile")
+
+    active_shapefile(NULL)
+    uploaded_shape(NULL)
+
+    shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
+    
     shinyjs::reset("drawfile")
     shinyjs::disable("generate_button")
     shinyjs::disable("remove_button")
+    generate_custom_analysis(uploaded_shape())
   })
+
+  show_shapefile <- function(drawfile) {
+    shapefile_data <- NULL
+    temp_direc2 <- tempfile(pattern = "shapefile_temp_")
+    dir.create(temp_direc2)
+
+    utils::unzip(active_shapefile(), exdir = temp_direc2)
+    shape_file <- list.files(temp_direc2, pattern = "\\.shp$", full.names = TRUE)
+
+    shapefile_data <- sf::st_read(shape_file, quiet = TRUE)
+  
+    # Transform the projection to EPSG 4326 in case it is different
+    shapefile_data <- sf::st_transform(shapefile_data, 4326)
+
+    shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+
+    # Shifts the geometry taking the dateline into account
+    sf::st_geometry(shapefile_data) <- shifted_geometry
+
+    # Sets the shapefile to uploaded shapes() reactive value
+    uploaded_shape(shapefile_data)
+
+    proxy <- leaflet::leafletProxy("map")
+
+    session$sendCustomMessage("clearDrawnShapes", list())
+
+    # Display the shapefile on the map
+    proxy |>
+      leaflet::clearGroup("Shapefile") |>
+      leaflet::addPolygons(data = shapefile_data, color = "black", weight = 3, group = "Shapefile")
+
+    shinyjs::enable("remove_button")
+    shinyjs::disable("downloadData")
+
+    shiny::req(selected_species())
+    shinyjs::enable("generate_button")
+  }
 
   generate_custom_analysis <- function(shape_data) {
 
@@ -438,11 +456,13 @@ server <- function(input, output, session) {
 
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
-      download_shape <<- drawn_shape() |>
-        mutate(
+      if (!is.null(drawn_shape())) {
+        download_shape <<- drawn_shape() |>
+        dplyr::mutate(
           "rel_abund" = relative_mean,
           "variance" = relative_variance
         )
+      }
 
       # currently not outputted, but can be modified if renderText in UI added
       output$small_area_abund <- shiny::renderText({
@@ -478,12 +498,14 @@ server <- function(input, output, session) {
       # this nulls the histogram when it is reverted to relative abundance
       output$small_area_hist <- shiny::renderPlot(NULL)
     } else {
-      download_shape <<- drawn_shape() |>
-        mutate(
+      if (!is.null(drawn_shape())) {
+        download_shape <<- drawn_shape() |>
+        dplyr::mutate(
           "post_mean" = posterior_mean,
           "post_medf" = posterior_median,
           "cv" = posterior_cv
         )
+      }
 
       # Same approach as above if statement
       output$small_area_abund <- shiny::renderText({
