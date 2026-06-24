@@ -236,7 +236,6 @@
 - Made pr for preloaded shapefiles
 - Added an output underneath the map that shows the cell area (static now, but with changing data types, we will see how it changes)
   - Made pr
-### 13:00 - Programming
 - Worked on new zoom-to feature
   - The center is set to 208 which was giving some issues 
     - Thought about cleaning data as hexagons were also applied around 208
@@ -246,3 +245,25 @@
 ### 15:00 - Programming
 - Figured out the longitude issue (typo :/)
   - Made draft pr, as I want Stacie's opinion on the aesthetics of the UI
+
+## June 24th, 2026
+### 8:00 - s3 Classes
+- Read Hadley textbook about s3 classes
+  - Sent Paul a message about how this could look for us
+### 8:30 - Merging
+- Merged in preloaded shapefiles, and cell-area branches
+  - Had to resolve some merge conflicts, but otherwise okay
+- Worked on zoom-to-coordinates function, and redesigned the UI a bit
+### 10:30 - Chat with Dr. Roohr
+- Talked about housing, mentors, presentations, etc
+- Also mentioned Direct Hire, which was a great surprise
+### 11:00 - Lit Reviews
+- Read year-round potential exposure of ringed seals to vessel traffic in the Pacitic Arctic
+  - CRAWL could be something good to talk about with Josh during an interview?
+- Also read quantifying species-specific aircraft disturbance probability to support pinniped population monitoring and management
+### 14:30 - Coworking
+- Renamed Download Shapefile to Download Results, and merged in
+### 15:00 - New Species Programming
+- Was able to get the example data file loaded in
+  - Wasn't able to visualize, as its a different format. 
+    - My plan here is to create a different script? that visualizes it on the map, and see what overlap there is with what we already have
