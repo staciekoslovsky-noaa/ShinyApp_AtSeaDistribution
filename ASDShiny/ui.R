@@ -159,7 +159,7 @@ ui <- shinydashboard::dashboardPage(
                                             br(),
                                             disabled(actionButton("generate_button", "Generate")),
                                             disabled(actionButton("remove_button", "Remove")),
-                                            disabled(downloadButton("downloadData", "Download Shapefile")),
+                                            disabled(downloadButton("downloadData", "Download Results")),
                                             style = "primary"),
                              bsCollapsePanel("Zoom to",
                                              "Enter latitude and longitude to zoom",
