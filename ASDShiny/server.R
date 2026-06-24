@@ -7,7 +7,7 @@ server <- function(input, output, session) {
 
   # As Alaska is split by the international dateline, the following lines move
   # the data across the dateline for a unified view.
-  hexagons_sf$geometry <- (sf::st_geometry(hexagons_sf) + c(360, 90)) %% c(360) - c(0, 90)
+  hexagons_sf <- sf::st_shift_longitude(hexagons_sf)
 
   uploaded_shape <- shiny::reactiveVal(NULL)
 
@@ -15,11 +15,10 @@ server <- function(input, output, session) {
 
   download_shape <- NULL
 
+  area <- as.numeric(sf::st_area(hexagons_sf)) / 1e6
   active_shapefile <- shiny::reactiveVal(NULL)
 
-
   # ============ reactives =============
-
 
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
@@ -133,8 +132,8 @@ server <- function(input, output, session) {
       leaflet::setView(208, 64, 3) |>
       leaflet::addScaleBar(position = "bottomleft",
                            options = leaflet::scaleBarOptions(maxWidth = 250))
-
   })
+
   # Download handler for shapefiles
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
@@ -190,6 +189,16 @@ server <- function(input, output, session) {
         layerId = "dynamic"
       )
 
+      output$area <- shiny::renderUI({
+        formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
+
+        tags$span(
+          style = "font-weight: bold; color: #555555;", 
+          paste0("Cell Area: ", formatted_area)
+        )
+
+      })
+
       if (!is.null(drawn_shape())) {
         shinyjs::enable("downloadData")
       }
@@ -237,6 +246,7 @@ server <- function(input, output, session) {
 
     proxy |> clearGroup("Shapefile")
     shinyjs::reset("drawfile")
+    shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
     shinyjs::disable("generate_button")
     shinyjs::disable("remove_button")
     
@@ -297,6 +307,8 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
+    shinyjs::reset("drawfile")
+
     shape_name <- loaded_shapefiles$filename[tolower(trimws(loaded_shapefiles$name)) == tolower(trimws(input$shapefile_select))]
 
     shapefile_name <- paste0("shapefiles/", shape_name)
@@ -340,10 +352,11 @@ server <- function(input, output, session) {
     # Transform the projection to EPSG 4326 in case it is different
     shapefile_data <- sf::st_transform(shapefile_data, 4326)
 
-    shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    # shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    shapefile_data <- sf::st_shift_longitude(shapefile_data)
 
     # Shifts the geometry taking the dateline into account
-    sf::st_geometry(shapefile_data) <- shifted_geometry
+    #sf::st_geometry(shapefile_data) <- shifted_geometry
 
     # Sets the shapefile to uploaded shapes() reactive value
     uploaded_shape(shapefile_data)
@@ -355,7 +368,7 @@ server <- function(input, output, session) {
     # Display the shapefile on the map
     proxy |>
       leaflet::clearGroup("Shapefile") |>
-      leaflet::addPolygons(data = shapefile_data, color = "black", weight = 3, group = "Shapefile")
+      leaflet::addPolygons(data = shapefile_data, color = "red", weight = 3, group = "Shapefile")
 
     shinyjs::enable("remove_button")
     shinyjs::disable("downloadData")

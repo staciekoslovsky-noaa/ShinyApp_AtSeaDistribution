@@ -100,7 +100,14 @@ ui <- shinydashboard::dashboardPage(
                     }
                   });
                 });
-              "))
+              ")),
+              br(),
+              tags$div(
+                uiOutput("area"),
+                style = "color: #2c3e50;
+                      font-size: 20px; 
+                      font-weight: bold;"
+              )
             ),
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
