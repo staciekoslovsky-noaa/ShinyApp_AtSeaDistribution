@@ -246,6 +246,7 @@ server <- function(input, output, session) {
 
     proxy |> clearGroup("Shapefile")
     shinyjs::reset("drawfile")
+    shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
     shinyjs::disable("generate_button")
     shinyjs::disable("remove_button")
     
