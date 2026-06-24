@@ -306,6 +306,8 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
+    shinyjs::reset("drawfile")
+
     shape_name <- loaded_shapefiles$filename[tolower(trimws(loaded_shapefiles$name)) == tolower(trimws(input$shapefile_select))]
 
     shapefile_name <- paste0("shapefiles/", shape_name)
@@ -349,10 +351,11 @@ server <- function(input, output, session) {
     # Transform the projection to EPSG 4326 in case it is different
     shapefile_data <- sf::st_transform(shapefile_data, 4326)
 
-    shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    # shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    shapefile_data <- sf::st_shift_longitude(shapefile_data)
 
     # Shifts the geometry taking the dateline into account
-    sf::st_geometry(shapefile_data) <- shifted_geometry
+    #sf::st_geometry(shapefile_data) <- shifted_geometry
 
     # Sets the shapefile to uploaded shapes() reactive value
     uploaded_shape(shapefile_data)
@@ -364,7 +367,7 @@ server <- function(input, output, session) {
     # Display the shapefile on the map
     proxy |>
       leaflet::clearGroup("Shapefile") |>
-      leaflet::addPolygons(data = shapefile_data, color = "black", weight = 3, group = "Shapefile")
+      leaflet::addPolygons(data = shapefile_data, color = "red", weight = 3, group = "Shapefile")
 
     shinyjs::enable("remove_button")
     shinyjs::disable("downloadData")
