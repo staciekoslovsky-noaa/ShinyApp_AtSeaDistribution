@@ -169,7 +169,8 @@ ui <- shinydashboard::dashboardPage(
                                              textInput("longitude", "Longitude", placeholder = "e.g. -155"),
                                              actionButton("zoom", "Zoom"),
                                              disabled(actionButton("remove_marker", "Remove Marker"))
-                            ))
+                            )
+                  )
                 )
               )
             )

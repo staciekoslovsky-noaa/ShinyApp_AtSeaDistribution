@@ -270,6 +270,7 @@ server <- function(input, output, session) {
     proxy <- leaflet::leafletProxy("map")
 
     proxy |> clearGroup("manual_markers")
+    shinyjs::disable("remove_marker")
   })
 
   # Update reactive value when a new shape is drawn
