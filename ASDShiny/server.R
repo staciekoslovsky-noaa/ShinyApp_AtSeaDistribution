@@ -41,7 +41,7 @@ server <- function(input, output, session) {
     latitude <- as.numeric(input$latitude)
 
     if (is.na(latitude)) {
-      latitude <- 57
+      latitude <- 60
     } else {
       max(-90, min(90, latitude))
     }
@@ -51,7 +51,7 @@ server <- function(input, output, session) {
     longitude <- as.numeric(input$longitude)
 
     if (is.na(longitude) || length(longitude) == 0) {
-      return(208)
+      return(205)
     }
     
     transformed_lng <- (longitude + 360) %% 360
@@ -150,7 +150,7 @@ server <- function(input, output, session) {
         targetGroup = "Shapes",
         singleFeature = TRUE
       ) |>
-      leaflet::setView(lat = 57, lng = 208, zoom = 3) |>
+      leaflet::setView(lat = 60, lng = 205, zoom = 4) |>
       leaflet::addScaleBar(position = "bottomleft",
                            options = leaflet::scaleBarOptions(maxWidth = 250))
   })
@@ -260,7 +260,16 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$zoom, {
     proxy <- leaflet::leafletProxy("map")
 
-    proxy |> leaflet::flyTo(lat = latitude(), lng = longitude(), zoom = 6)
+    proxy |> leaflet::flyTo(lat = latitude(), lng = longitude(), zoom = 8) |>
+      addMarkers(lat = latitude(), lng = longitude(), group = "manual_markers")
+    
+    shinyjs::enable("remove_marker")
+  })
+
+  shiny::observeEvent(input$remove_marker, {
+    proxy <- leaflet::leafletProxy("map")
+
+    proxy |> clearGroup("manual_markers")
   })
 
   # Update reactive value when a new shape is drawn

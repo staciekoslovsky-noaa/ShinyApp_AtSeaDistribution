@@ -90,7 +90,7 @@ ui <- shinydashboard::dashboardPage(
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%"),
+              leafletOutput(outputId = "map", width = "100%", height = "77vh"),
               tags$script(HTML("
                 Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
                   var map = HTMLWidgets.find('#map').getMap();
@@ -107,12 +107,23 @@ ui <- shinydashboard::dashboardPage(
                 style = "color: #2c3e50;
                       font-size: 20px; 
                       font-weight: bold;"
-              )
+              ),
+              br(),
+              wellPanel(
+                    bsCollapse(id = "collapseanalysis", open = "Panel 3",
+                      bsCollapsePanel("Shape Analysis",
+                                      "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
+                                      br(),
+                                      fluidRow(
+                                               column(5, h4(tableOutput("stat_result"))),
+                                               column(7, plotOutput("small_area_hist"))),
+                                      style = "primary")
+                    )),
             ),
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
                 bsCollapsePanel("Customize Map", style = "success",
-                  bsCollapse(id = "species", open = "Select Species", multiple = FALSE,
+                  bsCollapse(id = "species", open = "Select Species", multiple = TRUE,
                              bsCollapsePanel("Select Species",
                                              wellPanel(
                                                selectizeInput("mapselect",
@@ -148,33 +159,22 @@ ui <- shinydashboard::dashboardPage(
                                             br(),
                                             disabled(actionButton("generate_button", "Generate")),
                                             disabled(actionButton("remove_button", "Remove")),
+                                            disabled(downloadButton("downloadData", "Download Shapefile")),
                                             style = "primary"),
                              bsCollapsePanel("Zoom to",
                                              "Enter latitude and longitude to zoom",
                                              br(),
                                              br(),
-                                             textInput("latitude", "Latitude", placeholder = "e.g. 57"),
-                                             textInput("longitude", "Longitude", placeholder = "e.g. -152"),
-                                             actionButton("zoom", "Zoom")
+                                             textInput("latitude", "Latitude", placeholder = "e.g. 60"),
+                                             textInput("longitude", "Longitude", placeholder = "e.g. -155"),
+                                             actionButton("zoom", "Zoom"),
+                                             disabled(actionButton("remove_marker", "Remove Marker"))
                             ))
                 )
               )
             )
           ),
-          wellPanel(
-                    bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                      bsCollapsePanel("Shape Analysis",
-                                      "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
-                                      br(),
-                                      fluidRow(
-                                               column(5, h4(tableOutput("stat_result"))),
-                                               column(7, plotOutput("small_area_hist"))),
-                                      style = "primary")
-                    )),
-          wellPanel(
-            h3("Download Shapefile"),
-            disabled(downloadButton("downloadData", "Download Shapefile")),
-          )
+
         )
       ),
 
