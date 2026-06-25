@@ -2,20 +2,12 @@ server <- function(input, output, session) {
 
   # ============ setup ============
 
-  # Converts starting projection to EPSG 4326 to be displayed onto base map.
-  hexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
-
-  # As Alaska is split by the international dateline, the following lines move
-  # the data across the dateline for a unified view.
-  hexagons_sf <- sf::st_shift_longitude(hexagons_sf)
-
   uploaded_shape <- shiny::reactiveVal(NULL)
 
   drawn_shape <- shiny::reactiveVal(NULL)
 
   download_shape <- NULL
 
-  area <- as.numeric(sf::st_area(hexagons_sf)) / 1e6
   active_shapefile <- shiny::reactiveVal(NULL)
 
   # ============ reactives =============
@@ -132,7 +124,7 @@ server <- function(input, output, session) {
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
+    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
       leaflet::addTiles() |>
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
@@ -179,7 +171,28 @@ server <- function(input, output, session) {
   # ============ observers ==============
 
   shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
-    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+    current_species <- selected_species()
+    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    data_file_name <- paste0("data/", file_name)
+
+    # 1. Create a temporary isolated environment
+    env <- new.env()
+
+    # 2. Load the file into that specific environment
+    loaded_names <- load(data_file_name, envir = env)
+
+    # 3. Extract the actual spatial object (the first item loaded)
+    base_data <- env[[loaded_names[1]]]
+
+     # Converts starting projection to EPSG 4326 to be displayed onto base map.
+    base_data <- sf::st_transform(base_data, 4326)
+
+    # As Alaska is split by the international dateline, the following lines move
+    # the data across the dateline for a unified view.
+    base_data <- sf::st_shift_longitude(base_data)
+      
+    proxy <- leaflet::leafletProxy("map", data = base_data)
 
     species_values <- scaled_species_data()
 
@@ -209,6 +222,8 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
+
+      area <- as.numeric(sf::st_area(base_data)) / 1e6
 
       output$area <- shiny::renderUI({
         formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
