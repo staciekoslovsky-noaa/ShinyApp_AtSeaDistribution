@@ -75,9 +75,14 @@ server <- function(input, output, session) {
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- rowMeans(species_data())
+    raw_data <- species_data()
 
-    spec_data * selected_abund()
+    if (is.matrix(raw_data) || is.data.frame(raw_data)) {
+    return(rowMeans(raw_data, na.rm = TRUE)) 
+    
+  } else {
+    return(as.numeric(raw_data))
+  }
   })
 
   color_palette <- shiny::reactive({
@@ -111,6 +116,23 @@ server <- function(input, output, session) {
     )
   })
 
+  base_data <- shiny::reactive({
+    current_species <- selected_species()
+    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    data_file_name <- paste0("data/", file_name)
+
+    env <- new.env()
+
+    loaded_names <- load(data_file_name, envir = env)
+
+    base_data <- env[[loaded_names[1]]]
+
+    base_data <- sf::st_transform(base_data, 4326)
+
+    base_data <- sf::st_shift_longitude(base_data)
+  })
+
 
   # ============ ui/output ============
 
@@ -124,7 +146,7 @@ server <- function(input, output, session) {
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
+    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE, preferCanvas = TRUE)) |>
       leaflet::addTiles() |>
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
@@ -170,29 +192,8 @@ server <- function(input, output, session) {
 
   # ============ observers ==============
 
-  shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
-    current_species <- selected_species()
-    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
-
-    data_file_name <- paste0("data/", file_name)
-
-    # 1. Create a temporary isolated environment
-    env <- new.env()
-
-    # 2. Load the file into that specific environment
-    loaded_names <- load(data_file_name, envir = env)
-
-    # 3. Extract the actual spatial object (the first item loaded)
-    base_data <- env[[loaded_names[1]]]
-
-     # Converts starting projection to EPSG 4326 to be displayed onto base map.
-    base_data <- sf::st_transform(base_data, 4326)
-
-    # As Alaska is split by the international dateline, the following lines move
-    # the data across the dateline for a unified view.
-    base_data <- sf::st_shift_longitude(base_data)
-      
-    proxy <- leaflet::leafletProxy("map", data = base_data)
+  shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), { 
+    proxy <- leaflet::leafletProxy("map", data = base_data())
 
     species_values <- scaled_species_data()
 
@@ -223,7 +224,7 @@ server <- function(input, output, session) {
         layerId = "dynamic"
       )
 
-      area <- as.numeric(sf::st_area(base_data)) / 1e6
+      area <- as.numeric(sf::st_area(base_data())) / 1e6
 
       output$area <- shiny::renderUI({
         formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
@@ -453,14 +454,10 @@ server <- function(input, output, session) {
     if (is.na(sf::st_crs(shape_data))) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
-
-    if (is.na(sf::st_crs(hexagons_sf))) { 
-      sf::st_crs(hexagons_sf) <- 4326 
-    }
     
     row_variances <- apply(species_data(), 1, var)
 
-    bound_mcmc <- cbind(hexagons_sf, species_data(), row_variances)
+    bound_mcmc <- cbind(base_data(), species_data(), row_variances)
 
     centroids <- sf::st_centroid(bound_mcmc)
 
