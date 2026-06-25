@@ -267,3 +267,21 @@
 - Was able to get the example data file loaded in
   - Wasn't able to visualize, as its a different format. 
     - My plan here is to create a different script? that visualizes it on the map, and see what overlap there is with what we already have
+
+## June 25th, 2026
+### 8:00 - New Species Data
+- Trying to find any similarities between the new data and the old data
+  - grid_sf is essentially hexagon_sf, so retrieving that should be the same
+### 9:00 - Melissa Cook (NMFS) - Uncrewed Aircraft Systems (UAS) to study protected species
+- Applied photogrammetry to sperm whale counts and tagging Rice whales in Gulf of Mexico / Mississippi area
+### 10:00 - Project Meeting
+- Gave Paul a demo of new features and got a few recommendations
+  - Make a preloaded shapefile for the Navy area in the Gulf of Alaska
+### 10:45 - New Species Data
+- Separated grid_sf from the example data
+  - Tried to do the same with the N column (actual species data), and it was all zeroes, so the whole map was green
+    - But the squares did show up!
+  - Paul resent the data with correct values, and it worked
+    - Utilized 97% of the CPU to get colors for all cells
+    - Made panning VERY slow on the ap
+      - Need to find a better way to get the color data, or store the data differently
