@@ -285,3 +285,17 @@
     - Utilized 97% of the CPU to get colors for all cells
     - Made panning VERY slow on the ap
       - Need to find a better way to get the color data, or store the data differently
+
+## June 26th, 2026
+### 8:00 - New Species
+- The size of the data and the way it is organized is why the app was so slow
+  - Reverted commit to work out different data storage strategy
+### 9:00 - Brian Montgomery - The 101 of the NWS Operations Center
+### 10:00 - New Species Data
+- I turned the flat vector with 144720 entries into a matrix
+  - Custom area analysis was not working
+  - I added NA seasons and years to all other data files to standardize
+  - Sent Paul an email to clarify data representation
+- Figured out the data organization and was able to display one season at a time (hardcoded)
+  - Before it was the overall averages for each cell
+  - Got the custom area analysis to not crash and just output the selected abundance (no variance)
