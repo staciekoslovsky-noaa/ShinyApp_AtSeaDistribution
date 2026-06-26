@@ -139,6 +139,13 @@ ui <- shinydashboard::dashboardPage(
                                                                 "High Density Emphasis"
                                                               )),
                                                checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
+                                               conditionalPanel(
+                                                condition = "output.is_temporal == true",
+                                                selectizeInput("season", 
+                                                               "Select Season",
+                                                               choices = NULL
+                                                )
+                                               )
                                              )),
                              bsCollapsePanel("Abundance Estimate",
                                             textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),

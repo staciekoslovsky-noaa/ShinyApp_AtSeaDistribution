@@ -10,6 +10,8 @@ server <- function(input, output, session) {
 
   active_shapefile <- shiny::reactiveVal(NULL)
 
+  has_temporal <- shiny::reactiveVal(FALSE)
+
   # ============ reactives =============
 
   selected_species <- shiny::reactive({
@@ -71,13 +73,28 @@ server <- function(input, output, session) {
     
     names <- load(filename)
 
-    get(names[1])
+    abundance <- get(names[1])
+
+    if (!all(is.na(abundance$years)) || !all(is.na(abundance$seasons))) {
+      has_temporal(TRUE)
+
+      return(abundance$N[, 1])
+    } else {
+      has_temporal(FALSE)
+      return(abundance$N)
+    }
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- rowMeans(species_data())
+    spec_data <- species_data()
 
-    spec_data * selected_abund()
+    if (is.matrix(spec_data) || is.array(spec_data)) {
+      final_data <- rowMeans(spec_data)
+    } else {
+      final_data <- spec_data
+    }
+
+    final_data * selected_abund()
   })
 
   color_palette <- shiny::reactive({
@@ -88,15 +105,30 @@ server <- function(input, output, session) {
     }
   })
 
-  quartiles <- shiny::reactive({
-    s_data <- scaled_species_data()
+  quartiles <- shiny::reactive({ 
+    s_data <- scaled_species_data() 
+    
+    raw_breaks <- switch(input$legendselect,
+                        "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+                        "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+                        "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+                        "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+                        "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
 
-    switch(input$legendselect,
-                            "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-                            "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-                            "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-                            "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-                            "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
+    if (any(duplicated(raw_breaks))) {
+      
+      sorted_breaks <- sort(raw_breaks)
+      
+      for (i in 2:length(sorted_breaks)) {
+        if (sorted_breaks[i] <= sorted_breaks[i - 1]) {
+          sorted_breaks[i] <- sorted_breaks[i - 1] + 0.00001
+        }
+      }
+      return(sorted_breaks)
+      
+    } else {
+      return(raw_breaks)
+    }
   })
 
   pal <- shiny::reactive({
@@ -111,6 +143,22 @@ server <- function(input, output, session) {
     )
   })
 
+  base_data <- shiny::reactive({
+    current_species <- selected_species()
+    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    data_file_name <- paste0("data/", file_name)
+
+    env <- new.env()
+
+    loaded_names <- load(data_file_name, envir = env)
+
+    base_data <- env[[loaded_names[1]]]
+
+    base_data <- sf::st_transform(base_data, 4326)
+
+    base_data <- sf::st_shift_longitude(base_data)
+  })
 
   # ============ ui/output ============
 
@@ -122,9 +170,15 @@ server <- function(input, output, session) {
     div(current_species, tags$i(paste0(" (", latin, ")")))
   })
 
+  output$is_temporal <- shiny::reactive({
+    has_temporal()
+  })
+
+  shiny::outputOptions(output, "is_temporal", suspendWhenHidden = FALSE)
+
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
+    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE, preferCanvas = TRUE)) |>
       leaflet::addTiles() |>
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
@@ -171,33 +225,10 @@ server <- function(input, output, session) {
   # ============ observers ==============
 
   shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
-    current_species <- selected_species()
-    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
-
-    data_file_name <- paste0("data/", file_name)
-
-    # 1. Create a temporary isolated environment
-    env <- new.env()
-
-    # 2. Load the file into that specific environment
-    loaded_names <- load(data_file_name, envir = env)
-
-    # 3. Extract the actual spatial object (the first item loaded)
-    base_data <- env[[loaded_names[1]]]
-
-     # Converts starting projection to EPSG 4326 to be displayed onto base map.
-    base_data <- sf::st_transform(base_data, 4326)
-
-    # As Alaska is split by the international dateline, the following lines move
-    # the data across the dateline for a unified view.
-    base_data <- sf::st_shift_longitude(base_data)
-      
-    proxy <- leaflet::leafletProxy("map", data = base_data)
-
-    species_values <- scaled_species_data()
+    proxy <- leaflet::leafletProxy("map", data = base_data())
 
     color_func <- pal()
-    polygon_colors <- color_func(species_values)
+    polygon_colors <- color_func(scaled_species_data())
     
     proxy |> 
       leaflet::clearGroup(group = "Hexagons") |>
@@ -216,14 +247,14 @@ server <- function(input, output, session) {
       leaflet::addLegend(
         position = "bottomright",
         pal = color_func,
-        values = species_values,
+        values = scaled_species_data(),
         title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
         labFormat = leaflet::labelFormat(digits = 6),
         group = "Legend",
         layerId = "dynamic"
       )
 
-      area <- as.numeric(sf::st_area(base_data)) / 1e6
+      area <- as.numeric(sf::st_area(base_data())) / 1e6
 
       output$area <- shiny::renderUI({
         formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
@@ -250,7 +281,7 @@ server <- function(input, output, session) {
 
     color_func <- pal()
     
-    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+    proxy <- leaflet::leafletProxy("map")
 
     proxy |> leaflet::clearGroup(group = "Legend")
 
@@ -453,14 +484,9 @@ server <- function(input, output, session) {
     if (is.na(sf::st_crs(shape_data))) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
-
-    if (is.na(sf::st_crs(hexagons_sf))) { 
-      sf::st_crs(hexagons_sf) <- 4326 
-    }
-    
     row_variances <- apply(species_data(), 1, var)
 
-    bound_mcmc <- cbind(hexagons_sf, species_data(), row_variances)
+    bound_mcmc <- cbind(base_data(), species_data(), row_variances)
 
     centroids <- sf::st_centroid(bound_mcmc)
 
