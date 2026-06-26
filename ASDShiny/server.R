@@ -243,13 +243,25 @@ server <- function(input, output, session) {
         options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
         group = "Hexagons"
       )
+
+    if (has_temporal()) {
+      label = "Abundance Estimate"
+      shinyjs::disable("abs_abund")
+    } else {
+      shinyjs::enable("abs_abund")
+      if (selected_abund() == 1) {
+        label = "Relative Abundance"
+      } else {
+        label = "Abundance Estimate"
+      }
+    }
       
     proxy |> 
       leaflet::addLegend(
         position = "bottomright",
         pal = color_func,
         values = scaled_species_data(),
-        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
+        title = label,
         labFormat = leaflet::labelFormat(digits = 6),
         group = "Legend",
         layerId = "dynamic"
@@ -485,7 +497,12 @@ server <- function(input, output, session) {
     if (is.na(sf::st_crs(shape_data))) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
-    row_variances <- apply(species_data(), 1, var)
+    
+    if (!has_temporal()) {
+      row_variances <- apply(species_data(), 1, var)
+    } else {
+      row_variances <- rep(0, length(species_data())) 
+    }
 
     bound_mcmc <- cbind(base_data(), species_data(), row_variances)
 
@@ -500,10 +517,17 @@ server <- function(input, output, session) {
 
     bound_mcmc <- bound_mcmc[inside, ]
 
-    relative_draws <- colSums(
-      sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)],
-      na.rm = TRUE
-    )
+    df_no_geom <- sf::st_drop_geometry(bound_mcmc)
+    total_cols <- ncol(df_no_geom)
+
+    last_data_idx  <- total_cols - 1 
+    first_data_idx <- ncol(sf::st_drop_geometry(base_data())) + 1
+
+    relative_draws <- bound_mcmc |> 
+      sf::st_drop_geometry() |>
+      select(all_of(first_data_idx:last_data_idx)) |>
+      summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
+      as.numeric()
 
     relative_mean <- mean(relative_draws)
     relative_variance <- var(relative_draws)
