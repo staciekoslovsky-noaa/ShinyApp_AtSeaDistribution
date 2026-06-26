@@ -60,7 +60,8 @@ server <- function(input, output, session) {
   })
 
   species_data <- shiny::reactive({
-
+    shiny::req(input$mapselect)
+    
     code <- selected_species_code()
 
     # File read fallback if not cached yet
@@ -70,11 +71,11 @@ server <- function(input, output, session) {
       shiny::showNotification(paste("File not found:", filename), type = "error")
       return(NULL)
     }
-    
+
     names <- load(filename)
-
+    
     abundance <- get(names[1])
-
+    
     if (!all(is.na(abundance$years)) || !all(is.na(abundance$seasons))) {
       has_temporal(TRUE)
 
@@ -121,7 +122,7 @@ server <- function(input, output, session) {
       
       for (i in 2:length(sorted_breaks)) {
         if (sorted_breaks[i] <= sorted_breaks[i - 1]) {
-          sorted_breaks[i] <- sorted_breaks[i - 1] + 0.00001
+          sorted_breaks[i] <- sorted_breaks[i - 1] + 0.1
         }
       }
       return(sorted_breaks)
