@@ -23,19 +23,19 @@ ui <- shinydashboard::dashboardPage(
 
                    # Various tabs inclued in sidebar menu
                    sidebarMenu(
-                     menuItem("About This Tool",
+                     shinydashboard::menuItem("About This Tool",
                               tabName = "aboutpg",
                               icon = icon("info-circle")),
-                     menuItem("How to Use",
+                     shinydashboard::menuItem("How to Use",
                               tabName = "how_to",
                               icon = icon("th")),
-                     menuItem("Explore Data",
+                     shinydashboard::menuItem("Explore Data",
                               tabName = "specmap",
                               icon = icon("map")),
-                     menuItem("Methods",
+                     shinydashboard::menuItem("Methods",
                               tabName = "method",
                               icon = icon("clipboard")),
-                     menuItem("Reference Information",
+                     shinydashboard::menuItem("Reference Information",
                               tabName = "reference",
                               icon = icon("book"))
                    )),
@@ -141,11 +141,15 @@ ui <- shinydashboard::dashboardPage(
                                                checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
                                                conditionalPanel(
                                                 condition = "output.is_temporal == true",
-                                                selectizeInput("season", 
-                                                               "Select Season",
-                                                               choices = NULL
-                                                )
-                                               )
+                                                sliderTextInput(
+                                                              inputId = "selected_index",   # Keep the same ID so your server code doesn't break
+                                                              label = "Selected Season:", 
+                                                              choices = "Loading...",       # Placeholder until your reactive data loads
+                                                              grid = FALSE,                  # Prints the season names cleanly below the slider bar
+                                                              width = "100%",
+                                                              force_edges = TRUE
+                                                            )
+                                              )
                                              )),
                              bsCollapsePanel("Abundance Estimate",
                                             textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),

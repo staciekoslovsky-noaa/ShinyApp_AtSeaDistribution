@@ -14,6 +14,8 @@ server <- function(input, output, session) {
 
   # ============ reactives =============
 
+  debounced_index <- shiny::reactive({ input$selected_index }) %>% shiny::debounce(500)
+
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
     shiny::req(input$mapselect != "Select" && input$mapselect != "")
@@ -74,20 +76,26 @@ server <- function(input, output, session) {
 
     names <- load(filename)
     
-    abundance <- get(names[1])
-    
-    if (!all(is.na(abundance$years)) || !all(is.na(abundance$seasons))) {
-      has_temporal(TRUE)
-
-      return(abundance$N[, 1])
-    } else {
-      has_temporal(FALSE)
-      return(abundance$N)
-    }
+    get(names[1])
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- species_data()
+    abundance <- species_data()
+
+    if (!all(is.na(abundance$years)) || !all(is.na(abundance$seasons))) {
+      has_temporal(TRUE)
+
+      debounced_index <- debounced_index()
+
+      if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance$N))) {
+        spec_data <- abundance$N[, debounced_index]
+      } else {
+        spec_data <- abundance$N[, 1]
+      }
+    } else {
+      has_temporal(FALSE)
+      spec_data <- abundance$N
+    }
 
     if (is.matrix(spec_data) || is.array(spec_data)) {
       final_data <- rowMeans(spec_data)
@@ -286,6 +294,45 @@ server <- function(input, output, session) {
       if (!is.null(uploaded_shape())) {
         shinyjs::enable("generate_button")
       }
+  })
+
+  shiny::observeEvent(species_data(), {
+     s_data <- species_data()
+  
+    if (has_temporal()) {
+      column_names <- colnames(s_data$N)
+
+      shinyWidgets::updateSliderTextInput(
+        session = session,
+        inputId = "selected_index",
+        choices = column_names,       
+        selected = column_names[1] # Explicitly select the first column element
+      )
+    
+    }
+  })
+
+  shiny::observe({
+    req(debounced_index())
+    target <- debounced_index()
+
+    proxy <- leaflet::leafletProxy("map", data = base_data())
+
+    color_func <- pal()
+    polygon_colors <- color_func(scaled_species_data())
+    
+    proxy |> 
+      leaflet::clearGroup(group = "Hexagons") |>
+      leaflet::addPolygons(
+        fillColor = polygon_colors,
+        fillOpacity = 0.8,
+        opacity = 0.7,
+        color = polygon_colors,
+        weight = 1,
+        smoothFactor = 0.5,
+        options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
+        group = "Hexagons"
+      )
   })
 
   shiny::observeEvent(input$abs_abund, {
@@ -499,12 +546,12 @@ server <- function(input, output, session) {
     }
     
     if (!has_temporal()) {
-      row_variances <- apply(species_data(), 1, var)
+      row_variances <- apply(species_data()$N, 1, var)
     } else {
-      row_variances <- rep(0, length(species_data())) 
+      row_variances <- rep(0, nrow(species_data()$N)) 
     }
 
-    bound_mcmc <- cbind(base_data(), species_data(), row_variances)
+    bound_mcmc <- cbind(base_data(), species_data()$N, row_variances)
 
     centroids <- sf::st_centroid(bound_mcmc)
 
@@ -525,8 +572,8 @@ server <- function(input, output, session) {
 
     relative_draws <- bound_mcmc |> 
       sf::st_drop_geometry() |>
-      select(all_of(first_data_idx:last_data_idx)) |>
-      summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
+      dplyr::select(all_of(first_data_idx:last_data_idx)) |>
+      dplyr::summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
       as.numeric()
 
     relative_mean <- mean(relative_draws)
