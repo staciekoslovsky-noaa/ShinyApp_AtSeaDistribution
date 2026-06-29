@@ -299,3 +299,31 @@
 - Figured out the data organization and was able to display one season at a time (hardcoded)
   - Before it was the overall averages for each cell
   - Got the custom area analysis to not crash and just output the selected abundance (no variance)
+
+## June 29th, 2026
+### 8:00 - Emails
+- Reading and responding to emails about seminars/networking
+  - Intro to a couple cool software products within NWS
+### 8:30 - New Species Data
+  - Populating season dropdown with correct years and seasons
+### 9:00 - NWS Joint EMC/MDL (Hendrik Tolman, Dan Holdaway)
+- Process of software dev
+  - Current products and trajectory for new ones/updates
+### 10:15 - New Species Data
+- Got dropdown to work as expected, it's populating dynamically
+  - Had issue where it doesn't say the default data being shown
+### 10:30 - Monday Meeting
+- Decided to make dropdown option into a slider
+  - Need to send Paul an email to see if the winters start on the correct dates
+    - I.E. winter 2004 starts in 2004, not in 2003
+- Aim to finish with slider, custom area calculations, and documentation of adding new species by end of the week
+  - Leaving some of Thursday for bug fixes identified by Stacie
+### 12:00 - OMAO - Mar/Av/Uxs Operations (LCDR Rachel Pryor, CDR Kevin Doremus, Caitlin Wilson)
+- Intro to the NOAA Fleet
+  - 15 ships
+    - One stationed in New Castle, NH
+  - 10 aircraft
+### 1:15 - New Species Data
+- Making the dropdown into a slider
+  - Got functionality working but labeling was a but of a mess
+    - Decided to just remove all intermediate labels, but keeping the edge labels and the one currently selected
