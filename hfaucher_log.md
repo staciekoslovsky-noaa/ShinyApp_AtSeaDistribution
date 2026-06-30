@@ -327,3 +327,29 @@
 - Making the dropdown into a slider
   - Got functionality working but labeling was a but of a mess
     - Decided to just remove all intermediate labels, but keeping the edge labels and the one currently selected
+
+## June 30th, 2026
+### 8:00 - New Species Data
+- Reworking columns to represent the chronology better (winter comes before summer)
+  - Renaming and reordering winter columns
+- Reworking map and legend for temporal so it doesn't flicker as much 
+  - Did not get anywhere with this
+### 9:00 - Implementing Electronic Monitoring in Alaska's Largest Fishery (Joel Kraski, NMFS, AKRO)
+- Talked about different camera systems and how they are helping observers
+  - Policy process behind the change
+### 9:45 - Email to Kevin Doremus
+- Asking for more information of post-storm imagery, as it could be very helpful for my senior thesis
+### 10:00 - New Species Data
+- Random bug fixes and reworks of stuff I have identified while making changes
+  - Figuring out best method for custom area analysis (if else vs. function delegation)
+  - Experimenting with what custom area analysis could look like for frequentist data
+    - Absolute abundance makes showing a figure difficult, as bearded seals disables this input, making the histogram delete
+### 11:30 - Intern Lunch
+### 1:30 - Quick Demo for Stacie
+- Talked about what we will discuss in our meeting with Paul tommorrow
+  - What we want to be shown for the frequentist calculations
+### 2:00 - MML Meeting
+- Quick introduction of myself and other new interns at the lab
+### 2:30 - Documentation for New Species
+- Writing the documentation of how adding new species to the app might look
+  - Located in Blueprint in Google Docs
