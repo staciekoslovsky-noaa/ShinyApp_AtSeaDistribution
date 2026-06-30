@@ -14,7 +14,7 @@ server <- function(input, output, session) {
 
   # ============ reactives =============
 
-  debounced_index <- shiny::reactive({ input$selected_index }) %>% shiny::debounce(500)
+  debounced_index <- shiny::reactive({ input$selected_index }) %>% shiny::debounce(250)
 
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
@@ -251,9 +251,10 @@ server <- function(input, output, session) {
         options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
         group = "Hexagons"
       )
-
+    
     if (has_temporal()) {
       label = "Abundance Estimate"
+      shinyjs::reset("abs_abund")
       shinyjs::disable("abs_abund")
     } else {
       shinyjs::enable("abs_abund")
@@ -289,6 +290,8 @@ server <- function(input, output, session) {
 
       if (!is.null(drawn_shape())) {
         shinyjs::enable("downloadData")
+        generate_custom_analysis(NULL)
+        generate_custom_analysis(drawn_shape())
       }
 
       if (!is.null(uploaded_shape())) {
@@ -332,6 +335,17 @@ server <- function(input, output, session) {
         smoothFactor = 0.5,
         options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
         group = "Hexagons"
+      )
+
+    proxy |> 
+      leaflet::addLegend(
+        position = "bottomright",
+        pal = color_func,
+        values = scaled_species_data(),
+        title = "Abundance Estimate",
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = "Legend",
+        layerId = "dynamic"
       )
   })
 
@@ -384,6 +398,7 @@ server <- function(input, output, session) {
     # Takes in new shape and sets it to variable
 
     req(input$map_draw_new_feature)
+    generate_custom_analysis(NULL)
 
     proxy <- leaflet::leafletProxy("map")
 
@@ -732,6 +747,6 @@ server <- function(input, output, session) {
       output$stat_result <- shiny::renderTable(transposed_data,
                                                 colnames = FALSE,
                                                 rownames = FALSE)
+}
     }
-  }
 }

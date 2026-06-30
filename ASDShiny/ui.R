@@ -90,7 +90,7 @@ ui <- shinydashboard::dashboardPage(
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%", height = "77vh"),
+              leafletOutput(outputId = "map", width = "100%", height = "80vh"),
               tags$script(HTML("
                 Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
                   var map = HTMLWidgets.find('#map').getMap();
