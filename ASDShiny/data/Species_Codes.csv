@@ -1,16 +1,16 @@
-code,species,latin,base_file
-BA,Northern minke whale,Balaenoptera acutorostrata,POPhexagons_sf.rda
-BP,Fin whale,Balaenoptera physalus,POPhexagons_sf.rda
-CU,Northern fur seal,Callorhinus ursinus,POPhexagons_sf.rda
-EJ,Steller sea lion,Eumetopias jubatus,POPhexagons_sf.rda
-EL,Sea otter,Enhydra lutris,POPhexagons_sf.rda
-ER,Gray whale,Eschrichtius robustus,POPhexagons_sf.rda
-LO,Pacific white-sided dolphin,Lagenorhynchus obliquidens,POPhexagons_sf.rda
-MN,Humpback whale,Megaptera novaeangliae,POPhexagons_sf.rda
-OO,Killer whale,Orcinus orca,POPhexagons_sf.rda
-OR,Walrus,Odobenus rosmarus,POPhexagons_sf.rda
-PD,Dall's porpoise,Phocoenoides dalli dalli,POPhexagons_sf.rda
-PM,Sperm whale,Physeter macrocephalus,POPhexagons_sf.rda
-PP,Harbor porpoise,Phocoena phocoena,POPhexagons_sf.rda
-PV,Harbor seal,Phoca vitulina,POPhexagons_sf.rda
-EB,Bearded seal,Erignathus barbatus,grid_sf.RData
+code,species,latin,base_file,absolute_relative, has_temporal,
+BA,Northern minke whale,Balaenoptera acutorostrata,POPhexagons_sf.rda, relative, FALSE
+BP,Fin whale,Balaenoptera physalus,POPhexagons_sf.rda, relative, FALSE
+CU,Northern fur seal,Callorhinus ursinus,POPhexagons_sf.rda, relative, FALSE
+EJ,Steller sea lion,Eumetopias jubatus,POPhexagons_sf.rda, relative, FALSE
+EL,Sea otter,Enhydra lutris,POPhexagons_sf.rda, relative, FALSE
+ER,Gray whale,Eschrichtius robustus,POPhexagons_sf.rda, relative, FALSE
+LO,Pacific white-sided dolphin,Lagenorhynchus obliquidens,POPhexagons_sf.rda, relative, FALSE
+MN,Humpback whale,Megaptera novaeangliae,POPhexagons_sf.rda, relative, FALSE
+OO,Killer whale,Orcinus orca,POPhexagons_sf.rda, relative, FALSE
+OR,Walrus,Odobenus rosmarus,POPhexagons_sf.rda, relative, FALSE
+PD,Dall's porpoise,Phocoenoides dalli dalli,POPhexagons_sf.rda,relative,FALSE
+PM,Sperm whale,Physeter macrocephalus,POPhexagons_sf.rda,relative,FALSE
+PP,Harbor porpoise,Phocoena phocoena,POPhexagons_sf.rda,relative,FALSE
+PV,Harbor seal,Phoca vitulina,POPhexagons_sf.rda,relative,FALSE
+EB,Bearded seal,Erignathus barbatus,grid_sf.RData,absolute,TRUE

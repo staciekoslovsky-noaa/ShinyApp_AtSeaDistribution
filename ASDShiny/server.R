@@ -58,6 +58,10 @@ server <- function(input, output, session) {
   selected_species_code <- shiny::reactive({
     current_species <- selected_species()
 
+    idx <- match(tolower(trimws(current_species)), tolower(trimws(species_codes$species)))
+
+    has_temporal(species_codes$has_temporal[idx] == "TRUE")
+
     species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
   })
 
@@ -82,8 +86,7 @@ server <- function(input, output, session) {
   scaled_species_data <- shiny::reactive({
     abundance <- species_data()
 
-    if (!all(is.na(abundance$years)) || !all(is.na(abundance$seasons))) {
-      has_temporal(TRUE)
+    if (has_temporal()) {
 
       debounced_index <- debounced_index()
 
@@ -93,7 +96,6 @@ server <- function(input, output, session) {
         spec_data <- abundance$N[, 1]
       }
     } else {
-      has_temporal(FALSE)
       spec_data <- abundance$N
     }
 
