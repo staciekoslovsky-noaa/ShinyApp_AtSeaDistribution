@@ -88,14 +88,6 @@ server <- function(input, output, session) {
     spec_data * selected_abund()
   })
 
-  color_palette <- shiny::reactive({
-    if (input$greyscale) {
-      "Greys"
-    } else {
-      "turbo"
-    }
-  })
-
   quartiles <- shiny::reactive({
     s_data <- scaled_species_data()
 
@@ -111,7 +103,7 @@ server <- function(input, output, session) {
     s_data <- scaled_species_data()
 
     leaflet::colorBin(
-      palette = color_palette(),
+      palette = "Greys",
       domain = s_data,
       bins = quartiles(),
       pretty = FALSE,

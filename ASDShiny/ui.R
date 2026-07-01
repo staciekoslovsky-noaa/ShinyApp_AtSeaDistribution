@@ -117,6 +117,7 @@ ui <- shinydashboard::dashboardPage(
                                       fluidRow(
                                                column(5, h4(tableOutput("stat_result"))),
                                                column(7, plotOutput("small_area_hist"))),
+                                      disabled(actionButton("generate_button", "Generate")),
                                       disabled(downloadButton("downloadData", "Download Results")),
                                       style = "primary")
                     )
@@ -138,8 +139,7 @@ ui <- shinydashboard::dashboardPage(
                                                                 "Low and High Density Emphasis 2",
                                                                 "Low Density Emphasis",
                                                                 "High Density Emphasis"
-                                                              )),
-                                               checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL)
+                                                              ))
                                               ),
                                               style = "info"
                                             ),
@@ -154,7 +154,6 @@ ui <- shinydashboard::dashboardPage(
                              bsCollapsePanel("Custom Area Analysis",
                                             fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
                                             selectizeInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
-                                            disabled(actionButton("generate_button", "Generate")),
                                             disabled(actionButton("remove_button", "Remove Shapefile")),
                                             style = "info"),
                              bsCollapsePanel("Zoom To",
@@ -164,7 +163,7 @@ ui <- shinydashboard::dashboardPage(
                                              textInput("latitude", "Latitude", placeholder = "e.g. 60"),
                                              textInput("longitude", "Longitude", placeholder = "e.g. -155"),
                                              actionButton("zoom", "Zoom"),
-                                             disabled(actionButton("remove_marker", "Remove Marker")),
+                                             disabled(actionButton("remove_marker", "Remove Markers")),
                                              style = "info"
                             )
                   )
