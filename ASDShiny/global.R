@@ -17,6 +17,7 @@ library(tidyverse)
 #misc. tools
 library(htmltools)
 library(tools)
+library(zip)
 
 library(RColorBrewer)
 library(viridis)
@@ -100,23 +101,22 @@ about_info4 <- div("The potential benefits of these analytical approaches are
 
 # ============== how to use tab ====================
 tool_info1 <- div("This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.", style = "color: #005b96")
-tool_info2 <- div("To access species density maps, click the Species button in the sidebar. Use the right panel to toggle between different marine mammal species.", style = "color: #005b96")
+tool_info2 <- div("To access species density maps, use the Select Species sidebar panel. Use the Select Marine Mammal dropdown menu to select a species.", style = "color: #005b96")
 
 tool_descript1 <- div(h3("Using the Draw Toolbar"),
                       p("The toolbar on the left of the map contains various
                         tools to work with select data shown on the map
                         (for instance to perform small area calculations,
                         as when the user is interested in the number of animals
-                        or fraction of a population in an area of interest). 
-                        The polygon, rectangle, and circle options on the
-                        toolbar can be used to draw shapes corresponding to
-                        areas of interest; The marker can be used to obtain
-                        coordinates of the selected location; The trash bin will
-                        delete any shapes or lines that are not necessary; 
-                        The bottom panel allows users to download a shapefile
-                        of the drawn polygons and upload a user's own shapefile
-                        for analysis in one of the following formats: 
-                        zipped .kmz or .shp file."),
+                        or fraction of a population in an area of interest.", 
+                        tags$ul(
+                          tags$li("polygon, rectangle, and circle options on the toolbar can be used to draw shapes around areas of interest."),
+                          tags$li("trash bin can be used to delete any shape that is no longer desired.")
+                        ),
+                        br(),
+                        "The Custom Area Analysis sidebar panel allows users to download a shapefile
+                        of the drawn polygons including summary statistics and upload a user's own shapefile
+                        for analysis."),
 
                       h3("Customizing the Legend"),
                       "The legend can be customized using the 'Select Legend'
@@ -125,41 +125,33 @@ tool_descript1 <- div(h3("Using the Draw Toolbar"),
                       species are clustered in small areas. The options are:",
                       tags$ul(
                               tags$li("'Quintiles' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 1"),
-                              tags$li("'Low and High Density Emphasis 1' divides them into the following: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1"),
-                              tags$li("'Low and High Density Emphasis 2' divides them into the following: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1"),
-                              tags$li("'Low Density Emphasis' divides them into the following: 0, 0.01, 0.05, 0.6, 0.8, 1"),
-                              tags$li("'High Density Emphasis' divides them into the following: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1")), 
+                              tags$li("'Low and High Density Emphasis 1' divides them into the following percentiles: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1"),
+                              tags$li("'Low and High Density Emphasis 2' divides them into the following percentiles: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1"),
+                              tags$li("'Low Density Emphasis' divides them into the following percentiles: 0, 0.01, 0.05, 0.6, 0.8, 1"),
+                              tags$li("'High Density Emphasis' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1")), 
                       style = "color: #005b96")
 
 tool_descript2 <- div(h3("Generating Analysis"),
-                      p("Additional options exist for analysis and abundance
-                        estimates for a specific area. For example, all of
-                        the initial maps we have made available only provide
-                        relative abundance (defined as the proportion of the
-                        population in a specific region). In order to make
-                        inferences about absolute abundance, one must specify
-                        the total abundance of the population. For instance,
-                        such estimates could be taken from NMFS stock assessment reports."),
                       p("Within the panel 'Abundance Estimate', the user can
-                        input a population-wide abundance estimate, along with a
-                        coefficient of variation value (CV), to get an updated
-                        abundance estimate and legend. If no CV value is input,
-                        the default value is 0.2."),
-                      p("If the user has a shapefile to upload containing an
-                        area of interest, the panel 'Custom Area Analysis'
-                        provides an upload button for the shapefile. The
-                        shapefile must contain a single polygon and must be
-                        in .zip format. The user can also designate the polygon 
-                         manually using the toolbar on the left of the map"),
-                      p("Once the shape is uploaded or drawn, the button
-                        'Generate Analysis' in the 'Custom Area Analysis'
-                        panel can be pressed, at which the the bottom tab below
-                        the map, 'Generated Custom Area Analysis', will output
-                        summary statistics, as well as a histogram that simulates possible abundances with the included uncertainty."),
-                      p("If no abundance estimate value is inputted by the user,
-                        or an invalid value is inputted, it will default to the
-                        relative abundance estimates (abundance = 1), 
-                        and a histogram will not be provided in the generated analysis."),
+                        input:",
+                        tags$ul(
+                          tags$li("a population-wide abundance estimate"),
+                          tags$li("a coefficient of variation value (CV)"),
+                        ),
+                        "to get an updated abundance estimate and legend. 
+                        If no CV value is input, the default value is 0.2."),
+                      br(),
+                      p("In addition to the draw toolbar, a user can:",
+                        tags$ul(
+                          tags$li("upload a custom shapefile"),
+                          tags$li("select from a list of preloaded shapefiles"),
+                          tags$li("remove any currently uploaded or selected shapefile")
+                        ),
+                        "to generate a custom area analysis."
+                      ),
+                      br(),
+                      p("Once a shape is uploaded, selected, or drawn, the Shape Analysis tab below
+                        the map will output summary statistics."),
                       style = "color: #005b96")
 
 # ============== methods tab ==================
