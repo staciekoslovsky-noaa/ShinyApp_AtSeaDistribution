@@ -628,11 +628,19 @@ server <- function(input, output, session) {
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       if (!is.null(drawn_shape())) {
+        if (has_temporal()) {
+          download_shape <<- drawn_shape() |>
+          dplyr::mutate(
+            "est_abund" = relative_mean,
+            "variance" = relative_variance
+          )
+        } else {
         download_shape <<- drawn_shape() |>
         dplyr::mutate(
           "rel_abund" = relative_mean,
           "variance" = relative_variance
         )
+        }
       }
 
       # currently not outputted, but can be modified if renderText in UI added
@@ -661,6 +669,10 @@ server <- function(input, output, session) {
         ),
         check.names = FALSE
       )
+
+      if (has_temporal()) {
+        colnames(summary_data)[2] <- "Abundance Estimate"
+      }
 
       # This just renders as regular table, because there is no histogram
       output$stat_result <- shiny::renderTable(summary_data)
