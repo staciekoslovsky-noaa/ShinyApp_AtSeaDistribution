@@ -353,3 +353,31 @@
 ### 2:30 - Documentation for New Species
 - Writing the documentation of how adding new species to the app might look
   - Located in Blueprint in Google Docs
+
+## July 1st, 2026
+### 7:30 - Emails
+- Reading emails and chats
+  - Getting up to date on current bugfixes
+### 8:00 - Addressing Git Issues
+- Giving all Git issues made by Stacie a label and assigning myself to them.
+- Making a branch to make the needed changes
+  - Some need to be addressed on the new species data branch, so that will be edited on there
+  - Other issues I could not duplicate, so I left them for now
+  - Still need clarification on the coordinate markers issue
+### 10:00 - Meeting with Paul
+- Demo of new bearded seal data
+- Talking about what we want to display for custom area analysis with absolute abundance
+  - As a placeholder, add the abundance number with variance as NA
+### 10:30 - Addressing Git Issues and Meeting Feedback
+- Pushed commit removing color palette, just greyscale now
+- Made output of dates different in new-species-data
+### 12:00 - Overview of the National Hurricane Center (Mike Brennan)
+### 1:30 - Changing Relative Abundance Labels for Absolute Abundance Species
+- Making sure generated shapefile displays the correct label
+  - Same for custom area analysis output
+### 2:00 - CliftonStrengths Assessment for Lapenta
+- Prep for a Lapenta Seminar later this month
+### 2:30 - Addressing Meeting Feedback
+- Working on abundance panel toggle with absolute abundance data
+  - Reworking the has temporal data flag, to include in CSV
+    - This will continue into the panel work, as I added another flag for absolute or relative, to make these more separate from the get-go
