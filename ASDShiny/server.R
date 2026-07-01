@@ -254,10 +254,7 @@ server <- function(input, output, session) {
     
     if (has_temporal()) {
       label = "Abundance Estimate"
-      shinyjs::reset("abs_abund")
-      shinyjs::disable("abs_abund")
     } else {
-      shinyjs::enable("abs_abund")
       if (selected_abund() == 1) {
         label = "Relative Abundance"
       } else {
@@ -592,7 +589,12 @@ server <- function(input, output, session) {
       as.numeric()
 
     relative_mean <- mean(relative_draws)
-    relative_variance <- var(relative_draws)
+
+    if (has_temporal()) {
+      relative_variance <- NA
+    } else {
+      relative_variance <- var(relative_draws)
+    }
 
     if (selected_abund() == 1 ||
         is.na(selected_abund()) ||
