@@ -151,14 +151,22 @@ ui <- shinydashboard::dashboardPage(
                                                             )
                                               )
                                              )),
-                             bsCollapsePanel("Abundance Estimate",
-                                            textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
-                                            "Enter total abundance to get an updated abundance estimate.",
-                                            br(),
-                                            br(),
-                                            textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
-                                            "Enter a coefficient of variation value. The default value is 0.2.",
-                                            style = "info"),
+                             bsCollapsePanel("Abundance Estimate", style = "info",
+                                            conditionalPanel( 
+                                              condition = "output.is_relative == 'true'", 
+                                              textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), 
+                                              "Enter total abundance to get an updated abundance estimate.", 
+                                              br(), 
+                                              br(), 
+                                              textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), 
+                                              "Enter a coefficient of variation value. The default value is 0.2.",
+                                              style = "info"
+                                            ),
+                                            conditionalPanel(
+                                              condition = "output.is_relative != 'true'",
+                                              tags$em("This option is only available for relative abundance datasets.")
+                                            )
+                                          ), 
                              bsCollapsePanel("Custom Area Analysis",
                                             "Upload or choose a preselected shapefile for custom area analysis.",
                                             br(),

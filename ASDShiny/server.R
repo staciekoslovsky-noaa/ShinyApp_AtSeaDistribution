@@ -12,6 +12,8 @@ server <- function(input, output, session) {
 
   has_temporal <- shiny::reactiveVal(FALSE)
 
+  is_relative <- shiny::reactiveVal(TRUE)
+
   # ============ reactives =============
 
   debounced_index <- shiny::reactive({ input$selected_index }) %>% shiny::debounce(250)
@@ -61,6 +63,8 @@ server <- function(input, output, session) {
     idx <- match(tolower(trimws(current_species)), tolower(trimws(species_codes$species)))
 
     has_temporal(species_codes$has_temporal[idx] == "TRUE")
+    is_relative(species_codes$absolute_relative[idx] == "relative")
+    print(is_relative())
 
     species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
   })
@@ -86,7 +90,7 @@ server <- function(input, output, session) {
   scaled_species_data <- shiny::reactive({
     abundance <- species_data()
 
-    if (has_temporal()) {
+    if (!is_relative()) {
 
       debounced_index <- debounced_index()
 
@@ -186,6 +190,13 @@ server <- function(input, output, session) {
   })
 
   shiny::outputOptions(output, "is_temporal", suspendWhenHidden = FALSE)
+  
+  output$is_relative <- shiny::renderText({
+    # Returns the string "true" or "false" to the JS frontend
+    if (isTRUE(is_relative())) "true" else "false"
+  })
+
+  shiny::outputOptions(output, "is_relative", suspendWhenHidden = FALSE)
 
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
@@ -254,7 +265,7 @@ server <- function(input, output, session) {
         group = "Hexagons"
       )
     
-    if (has_temporal()) {
+    if (!is_relative()) {
       label = "Abundance Estimate"
     } else {
       if (selected_abund() == 1) {
@@ -630,7 +641,7 @@ server <- function(input, output, session) {
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       if (!is.null(drawn_shape())) {
-        if (has_temporal()) {
+        if (!is_relative()) {
           download_shape <<- drawn_shape() |>
           dplyr::mutate(
             "est_abund" = relative_mean,
@@ -672,7 +683,7 @@ server <- function(input, output, session) {
         check.names = FALSE
       )
 
-      if (has_temporal()) {
+      if (!is_relative()) {
         colnames(summary_data)[2] <- "Abundance Estimate"
       }
 
