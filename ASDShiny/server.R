@@ -64,7 +64,6 @@ server <- function(input, output, session) {
 
     has_temporal(species_codes$has_temporal[idx] == "TRUE")
     is_relative(species_codes$absolute_relative[idx] == "relative")
-    print(is_relative())
 
     species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
   })
@@ -561,10 +560,6 @@ server <- function(input, output, session) {
 
     # Coefficient of variation input
     cv_input <- as.numeric(input$coeff_var)
-
-    if (is.null(selected_species())) {
-      print("selected_species is NULL")
-    }
 
     if (is.na(sf::st_crs(shape_data))) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)

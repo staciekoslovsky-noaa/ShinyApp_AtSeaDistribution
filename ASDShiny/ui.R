@@ -142,10 +142,10 @@ ui <- shinydashboard::dashboardPage(
                                                conditionalPanel(
                                                 condition = "output.is_temporal == true",
                                                 sliderTextInput(
-                                                              inputId = "selected_index",   # Keep the same ID so your server code doesn't break
-                                                              label = "Selected Season:", 
-                                                              choices = "Loading...",       # Placeholder until your reactive data loads
-                                                              grid = FALSE,                  # Prints the season names cleanly below the slider bar
+                                                              inputId = "selected_index",
+                                                              label = "Selected Season:",
+                                                              choices = "Loading...",   
+                                                              grid = FALSE,
                                                               width = "100%",
                                                               force_edges = TRUE
                                                             )
