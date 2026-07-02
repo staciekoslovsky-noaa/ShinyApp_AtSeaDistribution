@@ -381,3 +381,19 @@
 - Working on abundance panel toggle with absolute abundance data
   - Reworking the has temporal data flag, to include in CSV
     - This will continue into the panel work, as I added another flag for absolute or relative, to make these more separate from the get-go
+
+### July 2nd, 2026
+### 8:00 - New Species Data
+- Working on getting abundance estimate panel to be unavailable for absolute data
+  - Had to make some more changes to csv
+- Separating logic for has_temporal and is_relative, as a new dataset could be absolute but not be temporal
+### 9:00 - NWS Weather Prediction Center Operations (Dave Novak)
+### 10:00 - Quick Merge
+- Merging pull request of Stacie's bugs into the main branch and then up to the new specie data branch
+  - Ran into some weird stuff on the new species data branch
+### 10:30 - Mid-week Check-in
+- Talked about getting the merges in
+  - More testing by Stacie will be done next week (pushing back harbor seal abundance work)
+  - Also some of the problems I ran into
+### 11:00 - Integrated Data Analysis Working Group
+- Presentation by Devin Johnson about acoustic abundance
