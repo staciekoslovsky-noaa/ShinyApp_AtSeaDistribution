@@ -23,19 +23,19 @@ ui <- shinydashboard::dashboardPage(
 
                    # Various tabs inclued in sidebar menu
                    sidebarMenu(
-                     menuItem("About This Tool",
+                     shinydashboard::menuItem("About This Tool",
                               tabName = "aboutpg",
                               icon = icon("info-circle")),
-                     menuItem("How to Use",
+                     shinydashboard::menuItem("How to Use",
                               tabName = "how_to",
                               icon = icon("th")),
-                     menuItem("Explore Data",
+                     shinydashboard::menuItem("Explore Data",
                               tabName = "specmap",
                               icon = icon("map")),
-                     menuItem("Methods",
+                     shinydashboard::menuItem("Methods",
                               tabName = "method",
                               icon = icon("clipboard")),
-                     menuItem("Reference Information",
+                     shinydashboard::menuItem("Reference Information",
                               tabName = "reference",
                               icon = icon("book"))
                    )),
@@ -90,7 +90,7 @@ ui <- shinydashboard::dashboardPage(
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%", height = "77vh"),
+              leafletOutput(outputId = "map", width = "100%", height = "80vh"),
               tags$script(HTML("
                 Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
                   var map = HTMLWidgets.find('#map').getMap();
@@ -139,15 +139,34 @@ ui <- shinydashboard::dashboardPage(
                                                                 "High Density Emphasis"
                                                               )),
                                                checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
+                                               conditionalPanel(
+                                                condition = "output.is_temporal == true",
+                                                sliderTextInput(
+                                                              inputId = "selected_index",
+                                                              label = "Selected Season:",
+                                                              choices = "Loading...",   
+                                                              grid = FALSE,
+                                                              width = "100%",
+                                                              force_edges = TRUE
+                                                            )
+                                              )
                                              )),
-                             bsCollapsePanel("Abundance Estimate",
-                                            textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"),
-                                            "Enter total abundance to get an updated abundance estimate.",
-                                            br(),
-                                            br(),
-                                            textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL),
-                                            "Enter a coefficient of variation value. The default value is 0.2.",
-                                            style = "info"),
+                             bsCollapsePanel("Abundance Estimate", style = "info",
+                                            conditionalPanel( 
+                                              condition = "output.is_relative == 'true'", 
+                                              textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), 
+                                              "Enter total abundance to get an updated abundance estimate.", 
+                                              br(), 
+                                              br(), 
+                                              textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), 
+                                              "Enter a coefficient of variation value. The default value is 0.2.",
+                                              style = "info"
+                                            ),
+                                            conditionalPanel(
+                                              condition = "output.is_relative != 'true'",
+                                              tags$em("This option is only available for relative abundance datasets.")
+                                            )
+                                          ), 
                              bsCollapsePanel("Custom Area Analysis",
                                             "Upload or choose a preselected shapefile for custom area analysis.",
                                             br(),

@@ -2,23 +2,21 @@ server <- function(input, output, session) {
 
   # ============ setup ============
 
-  # Converts starting projection to EPSG 4326 to be displayed onto base map.
-  hexagons_sf <- sf::st_transform(POPhexagons_sf, 4326)
-
-  # As Alaska is split by the international dateline, the following lines move
-  # the data across the dateline for a unified view.
-  hexagons_sf <- sf::st_shift_longitude(hexagons_sf)
-
   uploaded_shape <- shiny::reactiveVal(NULL)
 
   drawn_shape <- shiny::reactiveVal(NULL)
 
   download_shape <- NULL
 
-  area <- as.numeric(sf::st_area(hexagons_sf)) / 1e6
   active_shapefile <- shiny::reactiveVal(NULL)
 
+  has_temporal <- shiny::reactiveVal(FALSE)
+
+  is_relative <- shiny::reactiveVal(TRUE)
+
   # ============ reactives =============
+
+  debounced_index <- shiny::reactive({ input$selected_index }) %>% shiny::debounce(250)
 
   selected_species <- shiny::reactive({
     shiny::req(input$mapselect)
@@ -62,11 +60,17 @@ server <- function(input, output, session) {
   selected_species_code <- shiny::reactive({
     current_species <- selected_species()
 
+    idx <- match(tolower(trimws(current_species)), tolower(trimws(species_codes$species)))
+
+    has_temporal(species_codes$has_temporal[idx] == "TRUE")
+    is_relative(species_codes$absolute_relative[idx] == "relative")
+
     species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
   })
 
   species_data <- shiny::reactive({
-
+    shiny::req(input$mapselect)
+    
     code <- selected_species_code()
 
     # File read fallback if not cached yet
@@ -76,16 +80,35 @@ server <- function(input, output, session) {
       shiny::showNotification(paste("File not found:", filename), type = "error")
       return(NULL)
     }
-    
-    names <- load(filename)
 
+    names <- load(filename)
+    
     get(names[1])
   })
 
   scaled_species_data <- shiny::reactive({
-    spec_data <- rowMeans(species_data())
+    abundance <- species_data()
 
-    spec_data * selected_abund()
+    if (!is_relative()) {
+
+      debounced_index <- debounced_index()
+
+      if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance$N))) {
+        spec_data <- abundance$N[, debounced_index]
+      } else {
+        spec_data <- abundance$N[, 1]
+      }
+    } else {
+      spec_data <- abundance$N
+    }
+
+    if (is.matrix(spec_data) || is.array(spec_data)) {
+      final_data <- rowMeans(spec_data)
+    } else {
+      final_data <- spec_data
+    }
+
+    final_data * selected_abund()
   })
 
   color_palette <- shiny::reactive({
@@ -96,15 +119,30 @@ server <- function(input, output, session) {
     }
   })
 
-  quartiles <- shiny::reactive({
-    s_data <- scaled_species_data()
+  quartiles <- shiny::reactive({ 
+    s_data <- scaled_species_data() 
+    
+    raw_breaks <- switch(input$legendselect,
+                        "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
+                        "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
+                        "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
+                        "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
+                        "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
 
-    switch(input$legendselect,
-                            "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-                            "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-                            "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-                            "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-                            "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
+    if (any(duplicated(raw_breaks))) {
+      
+      sorted_breaks <- sort(raw_breaks)
+      
+      for (i in 2:length(sorted_breaks)) {
+        if (sorted_breaks[i] <= sorted_breaks[i - 1]) {
+          sorted_breaks[i] <- sorted_breaks[i - 1] + 0.1
+        }
+      }
+      return(sorted_breaks)
+      
+    } else {
+      return(raw_breaks)
+    }
   })
 
   pal <- shiny::reactive({
@@ -119,6 +157,22 @@ server <- function(input, output, session) {
     )
   })
 
+  base_data <- shiny::reactive({
+    current_species <- selected_species()
+    file_name <- species_codes$base_file[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
+
+    data_file_name <- paste0("data/", file_name)
+
+    env <- new.env()
+
+    loaded_names <- load(data_file_name, envir = env)
+
+    base_data <- env[[loaded_names[1]]]
+
+    base_data <- sf::st_transform(base_data, 4326)
+
+    base_data <- sf::st_shift_longitude(base_data)
+  })
 
   # ============ ui/output ============
 
@@ -130,9 +184,22 @@ server <- function(input, output, session) {
     div(current_species, tags$i(paste0(" (", latin, ")")))
   })
 
+  output$is_temporal <- shiny::reactive({
+    has_temporal()
+  })
+
+  shiny::outputOptions(output, "is_temporal", suspendWhenHidden = FALSE)
+  
+  output$is_relative <- shiny::renderText({
+    # Returns the string "true" or "false" to the JS frontend
+    if (isTRUE(is_relative())) "true" else "false"
+  })
+
+  shiny::outputOptions(output, "is_relative", suspendWhenHidden = FALSE)
+
   # Output leaflet map
   output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(hexagons_sf, options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE)) |>
+    leaflet::leaflet(options = leafletOptions(attributionControl = FALSE, worldCopyJump = FALSE, preferCanvas = TRUE)) |>
       leaflet::addTiles() |>
       leaflet::addMapPane("hexagon_pane", zIndex = 350) |>
 
@@ -179,12 +246,10 @@ server <- function(input, output, session) {
   # ============ observers ==============
 
   shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
-    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
-
-    species_values <- scaled_species_data()
+    proxy <- leaflet::leafletProxy("map", data = base_data())
 
     color_func <- pal()
-    polygon_colors <- color_func(species_values)
+    polygon_colors <- color_func(scaled_species_data())
     
     proxy |> 
       leaflet::clearGroup(group = "Hexagons") |>
@@ -198,17 +263,29 @@ server <- function(input, output, session) {
         options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
         group = "Hexagons"
       )
+    
+    if (!is_relative()) {
+      label = "Abundance Estimate"
+    } else {
+      if (selected_abund() == 1) {
+        label = "Relative Abundance"
+      } else {
+        label = "Abundance Estimate"
+      }
+    }
       
     proxy |> 
       leaflet::addLegend(
         position = "bottomright",
         pal = color_func,
-        values = species_values,
-        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
+        values = scaled_species_data(),
+        title = label,
         labFormat = leaflet::labelFormat(digits = 6),
         group = "Legend",
         layerId = "dynamic"
       )
+
+      area <- as.numeric(sf::st_area(base_data())) / 1e6
 
       output$area <- shiny::renderUI({
         formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
@@ -222,11 +299,63 @@ server <- function(input, output, session) {
 
       if (!is.null(drawn_shape())) {
         shinyjs::enable("downloadData")
+        generate_custom_analysis(NULL)
+        generate_custom_analysis(drawn_shape())
       }
 
       if (!is.null(uploaded_shape())) {
         shinyjs::enable("generate_button")
       }
+  })
+
+  shiny::observeEvent(species_data(), {
+     s_data <- species_data()
+  
+    if (has_temporal()) {
+      column_names <- colnames(s_data$N)
+
+      shinyWidgets::updateSliderTextInput(
+        session = session,
+        inputId = "selected_index",
+        choices = column_names,       
+        selected = column_names[1] # Explicitly select the first column element
+      )
+    
+    }
+  })
+
+  shiny::observe({
+    req(debounced_index())
+    target <- debounced_index()
+
+    proxy <- leaflet::leafletProxy("map", data = base_data())
+
+    color_func <- pal()
+    polygon_colors <- color_func(scaled_species_data())
+    
+    proxy |> 
+      leaflet::clearGroup(group = "Hexagons") |>
+      leaflet::addPolygons(
+        fillColor = polygon_colors,
+        fillOpacity = 0.8,
+        opacity = 0.7,
+        color = polygon_colors,
+        weight = 1,
+        smoothFactor = 0.5,
+        options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
+        group = "Hexagons"
+      )
+
+    proxy |> 
+      leaflet::addLegend(
+        position = "bottomright",
+        pal = color_func,
+        values = scaled_species_data(),
+        title = "Abundance Estimate",
+        labFormat = leaflet::labelFormat(digits = 6),
+        group = "Legend",
+        layerId = "dynamic"
+      )
   })
 
   shiny::observeEvent(input$abs_abund, {
@@ -235,7 +364,7 @@ server <- function(input, output, session) {
 
     color_func <- pal()
     
-    proxy <- leaflet::leafletProxy("map", data = hexagons_sf)
+    proxy <- leaflet::leafletProxy("map")
 
     proxy |> leaflet::clearGroup(group = "Legend")
 
@@ -278,6 +407,7 @@ server <- function(input, output, session) {
     # Takes in new shape and sets it to variable
 
     req(input$map_draw_new_feature)
+    generate_custom_analysis(NULL)
 
     proxy <- leaflet::leafletProxy("map")
 
@@ -431,21 +561,17 @@ server <- function(input, output, session) {
     # Coefficient of variation input
     cv_input <- as.numeric(input$coeff_var)
 
-    if (is.null(selected_species())) {
-      print("selected_species is NULL")
-    }
-
     if (is.na(sf::st_crs(shape_data))) {
       sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
     }
-
-    if (is.na(sf::st_crs(hexagons_sf))) { 
-      sf::st_crs(hexagons_sf) <- 4326 
-    }
     
-    row_variances <- apply(species_data(), 1, var)
+    if (!has_temporal()) {
+      row_variances <- apply(species_data()$N, 1, var)
+    } else {
+      row_variances <- rep(0, nrow(species_data()$N)) 
+    }
 
-    bound_mcmc <- cbind(hexagons_sf, species_data(), row_variances)
+    bound_mcmc <- cbind(base_data(), species_data()$N, row_variances)
 
     centroids <- sf::st_centroid(bound_mcmc)
 
@@ -458,13 +584,25 @@ server <- function(input, output, session) {
 
     bound_mcmc <- bound_mcmc[inside, ]
 
-    relative_draws <- colSums(
-      sf::st_drop_geometry(bound_mcmc)[, paste0("X", 1:1000)],
-      na.rm = TRUE
-    )
+    df_no_geom <- sf::st_drop_geometry(bound_mcmc)
+    total_cols <- ncol(df_no_geom)
+
+    last_data_idx  <- total_cols - 1 
+    first_data_idx <- ncol(sf::st_drop_geometry(base_data())) + 1
+
+    relative_draws <- bound_mcmc |> 
+      sf::st_drop_geometry() |>
+      dplyr::select(all_of(first_data_idx:last_data_idx)) |>
+      dplyr::summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
+      as.numeric()
 
     relative_mean <- mean(relative_draws)
-    relative_variance <- var(relative_draws)
+
+    if (has_temporal()) {
+      relative_variance <- NA
+    } else {
+      relative_variance <- var(relative_draws)
+    }
 
     if (selected_abund() == 1 ||
         is.na(selected_abund()) ||
@@ -498,11 +636,19 @@ server <- function(input, output, session) {
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       if (!is.null(drawn_shape())) {
+        if (!is_relative()) {
+          download_shape <<- drawn_shape() |>
+          dplyr::mutate(
+            "est_abund" = relative_mean,
+            "variance" = relative_variance
+          )
+        } else {
         download_shape <<- drawn_shape() |>
         dplyr::mutate(
           "rel_abund" = relative_mean,
           "variance" = relative_variance
         )
+        }
       }
 
       # currently not outputted, but can be modified if renderText in UI added
@@ -531,6 +677,10 @@ server <- function(input, output, session) {
         ),
         check.names = FALSE
       )
+
+      if (!is_relative()) {
+        colnames(summary_data)[2] <- "Abundance Estimate"
+      }
 
       # This just renders as regular table, because there is no histogram
       output$stat_result <- shiny::renderTable(summary_data)
@@ -619,6 +769,6 @@ server <- function(input, output, session) {
       output$stat_result <- shiny::renderTable(transposed_data,
                                                 colnames = FALSE,
                                                 rownames = FALSE)
+}
     }
-  }
 }
