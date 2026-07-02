@@ -111,14 +111,6 @@ server <- function(input, output, session) {
     final_data * selected_abund()
   })
 
-  color_palette <- shiny::reactive({
-    if (input$greyscale) {
-      "Greys"
-    } else {
-      "turbo"
-    }
-  })
-
   quartiles <- shiny::reactive({ 
     s_data <- scaled_species_data() 
     
@@ -149,7 +141,7 @@ server <- function(input, output, session) {
     s_data <- scaled_species_data()
 
     leaflet::colorBin(
-      palette = color_palette(),
+      palette = "Greys",
       domain = s_data,
       bins = quartiles(),
       pretty = FALSE,
@@ -191,7 +183,6 @@ server <- function(input, output, session) {
   shiny::outputOptions(output, "is_temporal", suspendWhenHidden = FALSE)
   
   output$is_relative <- shiny::renderText({
-    # Returns the string "true" or "false" to the JS frontend
     if (isTRUE(is_relative())) "true" else "false"
   })
 
@@ -212,7 +203,7 @@ server <- function(input, output, session) {
         circleMarkerOptions = FALSE,
         editOptions = leaflet.extras::editToolbarOptions(edit = FALSE,
                                                          selectedPathOptions = FALSE,
-                                                         remove = TRUE,
+                                                         remove = TRUE
                                                          ),
         targetGroup = "Shapes",
         singleFeature = TRUE
@@ -235,9 +226,12 @@ server <- function(input, output, session) {
       shp_file <- file.path(export_dir, "drawn_shape.shp")
       sf::st_write(download_shape, shp_file, delete_layer = TRUE, quiet = TRUE)      
 
-      all_files <- list.files(export_dir, full.names = TRUE)
+      all_files <- list.files(export_dir)
 
-      zip(zipfile = file, files = all_files, flags = "-j")
+      old_wd <- setwd(export_dir)
+      on.exit(setwd(old_wd), add = TRUE)
+
+      zip::zipr(zipfile = file, files = all_files)
       
       unlink(export_dir, recursive = TRUE)
     }
@@ -297,15 +291,9 @@ server <- function(input, output, session) {
 
       })
 
-      if (!is.null(drawn_shape())) {
-        shinyjs::enable("downloadData")
-        generate_custom_analysis(NULL)
-        generate_custom_analysis(drawn_shape())
-      }
-
-      if (!is.null(uploaded_shape())) {
+      if (!is.null(uploaded_shape()) || !is.null(drawn_shape())) {
         shinyjs::enable("generate_button")
-      }
+      } 
   })
 
   shiny::observeEvent(species_data(), {
@@ -378,12 +366,6 @@ server <- function(input, output, session) {
         group = "Legend",
         layerId = "dynamic"
       )
-
-      if (!is.null(uploaded_shape())) {
-        generate_custom_analysis(uploaded_shape())
-      } else {
-        generate_custom_analysis(drawn_shape())
-      }
   })
 
   shiny::observeEvent(input$zoom, {
@@ -413,13 +395,10 @@ server <- function(input, output, session) {
 
     proxy |> clearGroup("Shapefile")
     shinyjs::reset("drawfile")
+    uploaded_shape(NULL)
     shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
-    shinyjs::disable("generate_button")
+    shinyjs::enable("generate_button")
     shinyjs::disable("remove_button")
-    
-    if (!is.null(input$mapselect) && input$mapselect != "Select" && input$mapselect != "") {
-      shinyjs::enable("downloadData")
-    }
     
     new_shape <- input$map_draw_new_feature
 
@@ -442,20 +421,14 @@ server <- function(input, output, session) {
     }
 
     drawn_shape(new_shape_sf)
-
-    generate_custom_analysis(new_shape_sf)
   })
 
   shiny::observeEvent(input$map_draw_deleted_features, {
+    download_shape <<- NULL
+    generate_custom_analysis(NULL)
     drawn_shape(NULL)
-
+    shinyjs::disable("generate_button")
     shinyjs::disable("downloadData")
-
-    if (!is.null(uploaded_shape())) {
-      generate_custom_analysis(uploaded_shape())
-    } else {
-      generate_custom_analysis(drawn_shape())
-    }
   })
 
   # when a drawfile is uploaded
@@ -466,7 +439,7 @@ server <- function(input, output, session) {
     uploaded_shape(NULL)
     generate_custom_analysis(NULL)
 
-    show_shapefile(shape_file)
+    show_shapefile(active_shapefile())
   })
 
   shiny::observeEvent(input$shapefile_select, {
@@ -488,7 +461,11 @@ server <- function(input, output, session) {
 
   # Generates custom area analysis when the "generate" button is pressed.
   shiny::observeEvent(input$generate_button, {
-    generate_custom_analysis(uploaded_shape())
+    if (!is.null(uploaded_shape())) {
+        generate_custom_analysis(uploaded_shape())
+      } else {
+        generate_custom_analysis(drawn_shape())
+      }
   })
 
   shiny::observeEvent(input$remove_button, {
@@ -497,13 +474,15 @@ server <- function(input, output, session) {
 
     active_shapefile(NULL)
     uploaded_shape(NULL)
+    download_shape <<- NULL
 
     shiny::updateSelectInput(session, "shapefile_select", selected = "Select")
     
     shinyjs::reset("drawfile")
     shinyjs::disable("generate_button")
     shinyjs::disable("remove_button")
-    generate_custom_analysis(uploaded_shape())
+    shinyjs::disable("downloadData")
+    generate_custom_analysis(NULL)
   })
 
   show_shapefile <- function(drawfile) {
@@ -538,7 +517,6 @@ server <- function(input, output, session) {
       leaflet::addPolygons(data = shapefile_data, color = "red", weight = 3, group = "Shapefile")
 
     shinyjs::enable("remove_button")
-    shinyjs::disable("downloadData")
 
     shiny::req(selected_species())
     shinyjs::enable("generate_button")
@@ -636,19 +614,20 @@ server <- function(input, output, session) {
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
 
       if (!is.null(drawn_shape())) {
-        if (!is_relative()) {
-          download_shape <<- drawn_shape() |>
-          dplyr::mutate(
-            "est_abund" = relative_mean,
-            "variance" = relative_variance
-          )
-        } else {
+        # Choose the correct column name based on is_relative()
+        col_name <- if (is_relative()) "rel_abund" else "est_abund"
+        
         download_shape <<- drawn_shape() |>
-        dplyr::mutate(
-          "rel_abund" = relative_mean,
-          "variance" = relative_variance
-        )
-        }
+          dplyr::mutate(
+            !!col_name := relative_mean,
+            "variance"  = relative_variance
+          )
+      } else {
+        download_shape <<- uploaded_shape() |>
+          dplyr::mutate(
+            "rel_abund" = relative_mean,
+            "variance"  = relative_variance
+          )
       }
 
       # currently not outputted, but can be modified if renderText in UI added
@@ -691,6 +670,13 @@ server <- function(input, output, session) {
     } else {
       if (!is.null(drawn_shape())) {
         download_shape <<- drawn_shape() |>
+        dplyr::mutate(
+          "post_mean" = posterior_mean,
+          "post_medf" = posterior_median,
+          "cv" = posterior_cv
+        )
+      } else {
+        download_shape <<- uploaded_shape() |>
         dplyr::mutate(
           "post_mean" = posterior_mean,
           "post_medf" = posterior_median,
@@ -769,6 +755,7 @@ server <- function(input, output, session) {
       output$stat_result <- shiny::renderTable(transposed_data,
                                                 colnames = FALSE,
                                                 rownames = FALSE)
-}
     }
+    shinyjs::enable("downloadData")
+  }
 }

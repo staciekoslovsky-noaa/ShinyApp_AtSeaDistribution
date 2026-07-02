@@ -90,7 +90,7 @@ ui <- shinydashboard::dashboardPage(
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%", height = "80vh"),
+              leafletOutput(outputId = "map", width = "100%", height = "60vh"),
               tags$script(HTML("
                 Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
                   var map = HTMLWidgets.find('#map').getMap();
@@ -109,20 +109,23 @@ ui <- shinydashboard::dashboardPage(
                       font-weight: bold;"
               ),
               br(),
-              wellPanel(
-                    bsCollapse(id = "collapseanalysis", open = "Panel 3",
-                      bsCollapsePanel("Shape Analysis",
-                                      "Small Area Analysis will be provided once a shapefile is uploaded and the button 'Generate Shapes' is pressed in the Custom Area Analysis section within Additional Options.",
+                    bsCollapse(id = "collapseanalysis", open = "Custom Area Analysis Results",
+                      bsCollapsePanel("Custom Area Analysis Results",
+                                      "Results are available after a custom area is defined and are further expanded when a Total Abundance is entered.",
                                       br(),
                                       fluidRow(
                                                column(5, h4(tableOutput("stat_result"))),
                                                column(7, plotOutput("small_area_hist"))),
+         
                                       style = "primary")
-                    )),
-            ),
+                    
+                  )),
             column(4,
               bsCollapse(id = "customize_map", open = "Customize Map",
                 bsCollapsePanel("Customize Map", style = "success",
+                disabled(actionButton("generate_button", "Generate")),
+                        disabled(downloadButton("downloadData", "Download Results")),
+                        br(),br(),
                   bsCollapse(id = "species", open = "Select Species", multiple = TRUE,
                              bsCollapsePanel("Select Species",
                                              wellPanel(
@@ -155,7 +158,7 @@ ui <- shinydashboard::dashboardPage(
                                             conditionalPanel( 
                                               condition = "output.is_relative == 'true'", 
                                               textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), 
-                                              "Enter total abundance to get an updated abundance estimate.", 
+                                              "Enter total abundance to generate an abundance estimate for each grid cell.",
                                               br(), 
                                               br(), 
                                               textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), 
@@ -168,26 +171,19 @@ ui <- shinydashboard::dashboardPage(
                                             )
                                           ), 
                              bsCollapsePanel("Custom Area Analysis",
-                                            "Upload or choose a preselected shapefile for custom area analysis.",
-                                            br(),
-                                            br(),
                                             fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
-                                            br(),
                                             selectizeInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
-                                            br(),
-                                            br(),
-                                            disabled(actionButton("generate_button", "Generate")),
-                                            disabled(actionButton("remove_button", "Remove")),
-                                            disabled(downloadButton("downloadData", "Download Results")),
-                                            style = "primary"),
-                             bsCollapsePanel("Zoom to",
+                                            disabled(actionButton("remove_button", "Remove Shapefile")),
+                                            style = "info"),
+                             bsCollapsePanel("Zoom To",
                                              "Enter latitude and longitude to zoom",
                                              br(),
                                              br(),
                                              textInput("latitude", "Latitude", placeholder = "e.g. 60"),
                                              textInput("longitude", "Longitude", placeholder = "e.g. -155"),
                                              actionButton("zoom", "Zoom"),
-                                             disabled(actionButton("remove_marker", "Remove Marker"))
+                                             disabled(actionButton("remove_marker", "Remove Markers")),
+                                             style = "info"
                             )
                   )
                 )

@@ -267,3 +267,117 @@
 - Was able to get the example data file loaded in
   - Wasn't able to visualize, as its a different format. 
     - My plan here is to create a different script? that visualizes it on the map, and see what overlap there is with what we already have
+
+## June 25th, 2026
+### 8:00 - New Species Data
+- Trying to find any similarities between the new data and the old data
+  - grid_sf is essentially hexagon_sf, so retrieving that should be the same
+### 9:00 - Melissa Cook (NMFS) - Uncrewed Aircraft Systems (UAS) to study protected species
+- Applied photogrammetry to sperm whale counts and tagging Rice whales in Gulf of Mexico / Mississippi area
+### 10:00 - Project Meeting
+- Gave Paul a demo of new features and got a few recommendations
+  - Make a preloaded shapefile for the Navy area in the Gulf of Alaska
+### 10:45 - New Species Data
+- Separated grid_sf from the example data
+  - Tried to do the same with the N column (actual species data), and it was all zeroes, so the whole map was green
+    - But the squares did show up!
+  - Paul resent the data with correct values, and it worked
+    - Utilized 97% of the CPU to get colors for all cells
+    - Made panning VERY slow on the ap
+      - Need to find a better way to get the color data, or store the data differently
+
+## June 26th, 2026
+### 8:00 - New Species
+- The size of the data and the way it is organized is why the app was so slow
+  - Reverted commit to work out different data storage strategy
+### 9:00 - Brian Montgomery - The 101 of the NWS Operations Center
+### 10:00 - New Species Data
+- I turned the flat vector with 144720 entries into a matrix
+  - Custom area analysis was not working
+  - I added NA seasons and years to all other data files to standardize
+  - Sent Paul an email to clarify data representation
+- Figured out the data organization and was able to display one season at a time (hardcoded)
+  - Before it was the overall averages for each cell
+  - Got the custom area analysis to not crash and just output the selected abundance (no variance)
+
+## June 29th, 2026
+### 8:00 - Emails
+- Reading and responding to emails about seminars/networking
+  - Intro to a couple cool software products within NWS
+### 8:30 - New Species Data
+  - Populating season dropdown with correct years and seasons
+### 9:00 - NWS Joint EMC/MDL (Hendrik Tolman, Dan Holdaway)
+- Process of software dev
+  - Current products and trajectory for new ones/updates
+### 10:15 - New Species Data
+- Got dropdown to work as expected, it's populating dynamically
+  - Had issue where it doesn't say the default data being shown
+### 10:30 - Monday Meeting
+- Decided to make dropdown option into a slider
+  - Need to send Paul an email to see if the winters start on the correct dates
+    - I.E. winter 2004 starts in 2004, not in 2003
+- Aim to finish with slider, custom area calculations, and documentation of adding new species by end of the week
+  - Leaving some of Thursday for bug fixes identified by Stacie
+### 12:00 - OMAO - Mar/Av/Uxs Operations (LCDR Rachel Pryor, CDR Kevin Doremus, Caitlin Wilson)
+- Intro to the NOAA Fleet
+  - 15 ships
+    - One stationed in New Castle, NH
+  - 10 aircraft
+### 1:15 - New Species Data
+- Making the dropdown into a slider
+  - Got functionality working but labeling was a but of a mess
+    - Decided to just remove all intermediate labels, but keeping the edge labels and the one currently selected
+
+## June 30th, 2026
+### 8:00 - New Species Data
+- Reworking columns to represent the chronology better (winter comes before summer)
+  - Renaming and reordering winter columns
+- Reworking map and legend for temporal so it doesn't flicker as much 
+  - Did not get anywhere with this
+### 9:00 - Implementing Electronic Monitoring in Alaska's Largest Fishery (Joel Kraski, NMFS, AKRO)
+- Talked about different camera systems and how they are helping observers
+  - Policy process behind the change
+### 9:45 - Email to Kevin Doremus
+- Asking for more information of post-storm imagery, as it could be very helpful for my senior thesis
+### 10:00 - New Species Data
+- Random bug fixes and reworks of stuff I have identified while making changes
+  - Figuring out best method for custom area analysis (if else vs. function delegation)
+  - Experimenting with what custom area analysis could look like for frequentist data
+    - Absolute abundance makes showing a figure difficult, as bearded seals disables this input, making the histogram delete
+### 11:30 - Intern Lunch
+### 1:30 - Quick Demo for Stacie
+- Talked about what we will discuss in our meeting with Paul tommorrow
+  - What we want to be shown for the frequentist calculations
+### 2:00 - MML Meeting
+- Quick introduction of myself and other new interns at the lab
+### 2:30 - Documentation for New Species
+- Writing the documentation of how adding new species to the app might look
+  - Located in Blueprint in Google Docs
+
+## July 1st, 2026
+### 7:30 - Emails
+- Reading emails and chats
+  - Getting up to date on current bugfixes
+### 8:00 - Addressing Git Issues
+- Giving all Git issues made by Stacie a label and assigning myself to them.
+- Making a branch to make the needed changes
+  - Some need to be addressed on the new species data branch, so that will be edited on there
+  - Other issues I could not duplicate, so I left them for now
+  - Still need clarification on the coordinate markers issue
+### 10:00 - Meeting with Paul
+- Demo of new bearded seal data
+- Talking about what we want to display for custom area analysis with absolute abundance
+  - As a placeholder, add the abundance number with variance as NA
+### 10:30 - Addressing Git Issues and Meeting Feedback
+- Pushed commit removing color palette, just greyscale now
+- Made output of dates different in new-species-data
+### 12:00 - Overview of the National Hurricane Center (Mike Brennan)
+### 1:30 - Changing Relative Abundance Labels for Absolute Abundance Species
+- Making sure generated shapefile displays the correct label
+  - Same for custom area analysis output
+### 2:00 - CliftonStrengths Assessment for Lapenta
+- Prep for a Lapenta Seminar later this month
+### 2:30 - Addressing Meeting Feedback
+- Working on abundance panel toggle with absolute abundance data
+  - Reworking the has temporal data flag, to include in CSV
+    - This will continue into the panel work, as I added another flag for absolute or relative, to make these more separate from the get-go

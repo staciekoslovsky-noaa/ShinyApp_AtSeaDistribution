@@ -1,4 +1,4 @@
-code,species,latin,base_file,absolute_relative,has_temporal,
+code,species,latin,base_file,absolute_relative,has_temporal
 BA,Northern minke whale,Balaenoptera acutorostrata,POPhexagons_sf.rda,relative,FALSE
 BP,Fin whale,Balaenoptera physalus,POPhexagons_sf.rda,relative,FALSE
 CU,Northern fur seal,Callorhinus ursinus,POPhexagons_sf.rda,relative,FALSE
