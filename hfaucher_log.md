@@ -397,3 +397,30 @@
   - Also some of the problems I ran into
 ### 11:00 - Integrated Data Analysis Working Group
 - Presentation by Devin Johnson about acoustic abundance
+
+### July 6th, 2026
+### 8:00 - New Species Data
+- Working on miscellaneous things for new species data
+  - Making tab system for UI to reduce scrolling
+    - Testing
+  - Minor UI fixes, renaming, coloring buttons, getting histogram to be conditional
+### 10:30 - Monday Meeting
+- Talking about UI update I made
+  - Potential improvements to be made
+  - Bearded seal shows inaccurate histogram due to inputted abundance not cleared after a relative species was picked
+    - Have to "maually" reset it to be 1
+### 12:00 - Private Industry Opportunities
+- Talks from Amy Metz, Bunmi Olukaya, Dave Jones, and Betsy Kling about opportunities outside of government work
+### 2:00 - Redoing Data Shape
+- Removing seasons and years from list of data (easier indexing)
+  - Was unused as the flags for temporal and relative data exist
+  - Testing each species' ability to render and have custom area analysis (all worked)
+- Updated documentation regarding adding more new species (for maintenance)
+### 3:00 - Merge
+- Stacie and I decided to merge in the new species data as it currently stands:
+  - Not sure when we will decide on custom area analysis output
+  - Not sure if we will get new data
+- Deleted old branch, and tested on main
+  - All new data and UI fixes seem to be present!
+### For tomorrow
+- Begin to take a look at HarborSealAbundance app while waiting for custom area analysis and new species
