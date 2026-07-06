@@ -29,10 +29,8 @@ server <- function(input, output, session) {
 
     # If not inputted, set it to 1
     if (is.na(selected_abund) || selected_abund <= 0) {
-      print(1)
       selected_abund <- 1
     } else {
-      print(selected_abund)
       selected_abund
     }
   })
@@ -99,13 +97,13 @@ server <- function(input, output, session) {
 
       debounced_index <- debounced_index()
 
-      if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance$N))) {
-        spec_data <- abundance$N[, debounced_index]
+      if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance))) {
+        spec_data <- abundance[, debounced_index]
       } else {
-        spec_data <- abundance$N[, 1]
+        spec_data <- abundance[, 1]
       }
     } else {
-      spec_data <- abundance$N
+      spec_data <- abundance
     }
 
     if (is.matrix(spec_data) || is.array(spec_data)) {
@@ -306,7 +304,7 @@ server <- function(input, output, session) {
      s_data <- species_data()
   
     if (has_temporal()) {
-      column_names <- colnames(s_data$N)
+      column_names <- colnames(s_data)
 
       shinyWidgets::updateSliderTextInput(
         session = session,
@@ -528,7 +526,7 @@ server <- function(input, output, session) {
     shinyjs::enable("generate_button")
   }
 
-  generate_custom_analysis <- function(shape_data) {
+ generate_custom_analysis <- function(shape_data) {
 
     if (is.null(shape_data)) {
       output$stat_result    <- shiny::renderTable(NULL)
@@ -541,207 +539,140 @@ server <- function(input, output, session) {
     }
     
     species_name <- selected_species_code()
-
-    # Coefficient of variation input
     cv_input <- as.numeric(input$coeff_var)
 
     if (is.na(sf::st_crs(shape_data))) {
-      sf::st_crs(shape_data) <- 4326 # Assign a default CRS (EPSG:4326)
+      sf::st_crs(shape_data) <- 4326 
     }
     
-    if (!has_temporal()) {
-      row_variances <- apply(species_data()$N, 1, var)
+    raw_abundance <- species_data()
+    
+    if (!is_relative()) {
+      target_layer <- debounced_index()
+      if (!is.null(target_layer) && (target_layer %in% colnames(raw_abundance))) {
+        active_data <- raw_abundance[, target_layer, drop = FALSE]
+      } else {
+        active_data <- raw_abundance[, 1, drop = FALSE]
+      }
+      row_variances <- rep(0, nrow(raw_abundance))
     } else {
-      row_variances <- rep(0, nrow(species_data()$N)) 
+      active_data   <- raw_abundance
+      row_variances <- apply(raw_abundance, 1, var)
     }
 
-    bound_mcmc <- cbind(base_data(), species_data()$N, row_variances)
+    bound_mcmc <- cbind(base_data(), active_data, row_variances)
+    centroids  <- sf::st_centroid(bound_mcmc)
 
-    centroids <- sf::st_centroid(bound_mcmc)
-
-    inside <- lengths(
-      sf::st_intersects(
-        centroids,
-        shape_data
-      )
-    ) > 0
-
+    inside <- lengths(sf::st_intersects(centroids, shape_data)) > 0
     bound_mcmc <- bound_mcmc[inside, ]
+
+    if (nrow(bound_mcmc) == 0) {
+      shiny::showNotification("No data cells found inside the selected area.", type = "warning")
+      return(NULL)
+    }
 
     df_no_geom <- sf::st_drop_geometry(bound_mcmc)
     total_cols <- ncol(df_no_geom)
-
     last_data_idx  <- total_cols - 1 
     first_data_idx <- ncol(sf::st_drop_geometry(base_data())) + 1
 
-    relative_draws <- bound_mcmc |> 
-      sf::st_drop_geometry() |>
+    relative_draws <- df_no_geom |> 
       dplyr::select(all_of(first_data_idx:last_data_idx)) |>
       dplyr::summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
       as.numeric()
 
-    relative_mean <- mean(relative_draws)
-
-    if (has_temporal()) {
+    if (!is_relative()) {
+      relative_mean <- relative_draws[1] 
       relative_variance <- NA
     } else {
+      relative_mean     <- mean(relative_draws)
       relative_variance <- var(relative_draws)
     }
 
-    if (selected_abund() == 1 ||
-        is.na(selected_abund()) ||
-        selected_abund() <= 0) {
-
+    if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
       posterior_draws <- relative_draws
-
     } else {
-
       sigma2 <- log(1 + cv_input^2)
       sigma <- sqrt(sigma2)
-
       meanlog <- log(selected_abund()) - sigma2 / 2
-
-      abundance_draws <- rlnorm(
-        n = length(relative_draws),
-        meanlog = meanlog,
-        sdlog = sigma
-      )
-
+      abundance_draws <- rlnorm(n = length(relative_draws), meanlog = meanlog, sdlog = sigma)
       posterior_draws <- relative_draws * abundance_draws
     }
 
     posterior_mean <- mean(posterior_draws)
     posterior_median <- median(posterior_draws)
     posterior_variance <- var(posterior_draws)
-
     posterior_sd <- sqrt(posterior_variance)
     posterior_cv <- posterior_sd / posterior_mean
 
     if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
-
       if (!is.null(drawn_shape())) {
-        # Choose the correct column name based on is_relative()
         col_name <- if (is_relative()) "rel_abund" else "est_abund"
-        
         download_shape <<- drawn_shape() |>
-          dplyr::mutate(
-            !!col_name := relative_mean,
-            "variance"  = relative_variance
-          )
+          dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
       } else {
+        col_name <- if (is_relative()) "rel_abund" else "est_abund"
         download_shape <<- uploaded_shape() |>
-          dplyr::mutate(
-            "rel_abund" = relative_mean,
-            "variance"  = relative_variance
-          )
+          dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
       }
 
-      # currently not outputted, but can be modified if renderText in UI added
       output$small_area_abund <- shiny::renderText({
-        paste0("Relative Abundance Estimate for Selected Area: ", relative_mean)
+        label_prefix <- if (is_relative()) "Relative Abundance Estimate" else "Absolute Abundance Sum"
+        paste0(label_prefix, " for Selected Area: ", format(round(relative_mean, 2), big.mark = ","))
       })
+      
       output$overall_variance_sum <- shiny::renderText({
-        paste0("Variance for Selected Area: ", round(relative_variance, digits = 5))
+        if (is.na(relative_variance)) "" else paste0("Variance for Selected Area: ", round(relative_variance, digits = 5))
       })
-      # Posterior indicates Bayesian appraoch - include in output name
+      
       output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", round(posterior_median, digits = 3))
+        if (!is_relative()) "" else paste0("Posterior Median Abundance Estimate: ", round(posterior_median, digits = 3))
       })
 
-      # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Relative Abundance Estimate" = format(
-          relative_mean,
-          digits = 6,
-          scientific = FALSE
-        ),
-        "Variance" = format(
-          round(relative_variance, digits = 7),
-          scientific = TRUE
-        ),
+        "Abundance Value" = format(relative_mean, digits = 6, big.mark = ",", scientific = FALSE),
+        "Variance" = if (is.na(relative_variance)) "N/A" else format(round(relative_variance, digits = 7), scientific = TRUE),
         check.names = FALSE
       )
+      colnames(summary_data)[2] <- if (is_relative()) "Relative Abundance Estimate" else "Total Abundance (Sum)"
 
-      if (!is_relative()) {
-        colnames(summary_data)[2] <- "Abundance Estimate"
-      }
-
-      # This just renders as regular table, because there is no histogram
       output$stat_result <- shiny::renderTable(summary_data)
-
-      # This line is necessary if switching between the two analyses
-      # this nulls the histogram when it is reverted to relative abundance
       output$small_area_hist <- shiny::renderPlot(NULL)
+      
     } else {
+      # Log-normal scaled pipeline configuration blocks
       if (!is.null(drawn_shape())) {
         download_shape <<- drawn_shape() |>
-        dplyr::mutate(
-          "post_mean" = posterior_mean,
-          "post_medf" = posterior_median,
-          "cv" = posterior_cv
-        )
+          dplyr::mutate("post_mean" = posterior_mean, "post_medf" = posterior_median, "cv" = posterior_cv)
       } else {
         download_shape <<- uploaded_shape() |>
-        dplyr::mutate(
-          "post_mean" = posterior_mean,
-          "post_medf" = posterior_median,
-          "cv" = posterior_cv
-        )
+          dplyr::mutate("post_mean" = posterior_mean, "post_medf" = posterior_median, "cv" = posterior_cv)
       }
 
-      # Same approach as above if statement
       output$small_area_abund <- shiny::renderText({
-        paste0(
-          "Posterior Mean Estimate for Selected Area: ",
-          format(round(posterior_mean), big.mark = ",")
-        )
+        paste0("Posterior Mean Estimate for Selected Area: ", format(round(posterior_mean), big.mark = ","))
       })
       output$medmode <- shiny::renderText({
-        paste0(
-          "Posterior Median Abundance Estimate: ",
-          format(round(posterior_median), big.mark = ",")
-        )
+        paste0("Posterior Median Abundance Estimate: ", format(round(posterior_median), big.mark = ","))
       })
       output$overall_cv <- shiny::renderText({
-        paste0(
-          "Coefficient of Variation for Selected Area: ",
-          round(posterior_cv, 3)
-        )
+        paste0("Coefficient of Variation for Selected Area: ", round(posterior_cv, 3))
       })
 
-      # Summary data frame
       summary_data <- data.frame(
         Species = selected_species(),
-        "Selected Abundance" = format(
-          round(selected_abund()),
-          big.mark = ",",
-          scientific = FALSE
-        ),
-        "Posterior Mean Estimate" = format(
-          round(posterior_mean),
-          big.mark = ",",
-          scientific = FALSE
-        ),
-        "Posterior Median Abundance Estimate" = format(
-          round(posterior_median),
-          big.mark = ",",
-          scientific = FALSE
-        ),
-        "Coefficient of Variation" = round(
-          posterior_cv,
-          digits = 2
-        ),
+        "Selected Abundance" = format(round(selected_abund()), big.mark = ",", scientific = FALSE),
+        "Posterior Mean Estimate" = format(round(posterior_mean), big.mark = ",", scientific = FALSE),
+        "Posterior Median Abundance Estimate" = format(round(posterior_median), big.mark = ",", scientific = FALSE),
+        "Coefficient of Variation" = round(posterior_cv, digits = 2),
         check.names = FALSE
       )
 
-      # Turn the data into a data frame and then
-      # Transpose data so it is aligned and can include histogram on same plot
       transposed_data <- as.data.frame(t(summary_data))
       transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
       transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
 
-      # Histogram that shows the possible abundance estimate simulations
       p <- ggplot2::ggplot(data.frame(TotalAbundance = posterior_draws), ggplot2::aes(x = TotalAbundance)) +
         ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
         ggplot2::ggtitle("Histogram of Abundance Estimates") +
@@ -749,18 +680,13 @@ server <- function(input, output, session) {
         ggplot2::ylab("Frequency") +
         ggplot2::theme_minimal() +
         ggplot2::theme(plot.title = element_text(size = 20, hjust = 0.5),
-                        axis.title.x = element_text(size = 16),
-                        axis.title.y = element_text(size = 16),
-                        axis.text.x = element_text(size = 12),
-                        axis.text.y = element_text(size = 12))
-      output$small_area_hist <- shiny::renderPlot({
-        p
-      })
-
-      # Set col and row names to false, or unnecessary matrix titles will appear
-      output$stat_result <- shiny::renderTable(transposed_data,
-                                                colnames = FALSE,
-                                                rownames = FALSE)
+                       axis.title.x = element_text(size = 16),
+                       axis.title.y = element_text(size = 16),
+                       axis.text.x = element_text(size = 12),
+                       axis.text.y = element_text(size = 12))
+                       
+      output$small_area_hist <- shiny::renderPlot({ p })
+      output$stat_result <- shiny::renderTable(transposed_data, colnames = FALSE, rownames = FALSE)
     }
     shinyjs::enable("downloadData")
   }
