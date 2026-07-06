@@ -29,8 +29,10 @@ server <- function(input, output, session) {
 
     # If not inputted, set it to 1
     if (is.na(selected_abund) || selected_abund <= 0) {
+      print(1)
       selected_abund <- 1
     } else {
+      print(selected_abund)
       selected_abund
     }
   })
@@ -64,6 +66,10 @@ server <- function(input, output, session) {
 
     has_temporal(species_codes$has_temporal[idx] == "TRUE")
     is_relative(species_codes$absolute_relative[idx] == "relative")
+
+    if (!is_relative()) {
+      updateTextInput(session, "abs_abund", value = "")
+    }
 
     species_codes$code[tolower(trimws(species_codes$species)) == tolower(trimws(current_species))]
   })
@@ -239,7 +245,7 @@ server <- function(input, output, session) {
 
   # ============ observers ==============
 
-  shiny::observeEvent(c(input$mapselect, input$legendselect, input$greyscale), {
+  shiny::observeEvent(c(input$mapselect, input$legendselect), {
     proxy <- leaflet::leafletProxy("map", data = base_data())
 
     color_func <- pal()

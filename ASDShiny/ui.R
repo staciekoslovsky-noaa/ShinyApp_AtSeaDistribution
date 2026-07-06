@@ -113,8 +113,7 @@ ui <- shinydashboard::dashboardPage(
                 
                 tabPanel("Customize Map",
                   wellPanel(
-                    br(),
-                  disabled(actionButton("generate_button", "Generate", class = "btn-success", style = "width: 100%; margin-bottom: 15px;")),
+                  disabled(actionButton("generate_button", "Generate", class = "btn-primary", style = "width: 100%; margin-bottom: 15px;")),
 
                       bsCollapse(id = "species", open = "Select Species", multiple = FALSE,
                         bsCollapsePanel("Select Species",
@@ -129,7 +128,6 @@ ui <- shinydashboard::dashboardPage(
                                              "Low Density Emphasis",
                                              "High Density Emphasis"
                                            )),
-                            checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
                             
                             conditionalPanel(
                               condition = "typeof output.is_temporal !== 'undefined' && output.is_temporal == true",
@@ -181,8 +179,6 @@ ui <- shinydashboard::dashboardPage(
                 
                 tabPanel("Analysis Results",
                   wellPanel(
-                      p("Results are available after a custom area is defined and are further expanded when a Total Abundance is entered."),
-                      
                       disabled(downloadButton("downloadData", "Download Results", class = "btn-primary", style = "width: 100%; margin-bottom: 15px;")),
                       hr(),
                       
@@ -199,7 +195,6 @@ ui <- shinydashboard::dashboardPage(
                     conditionalPanel(
                       condition = "input.abs_abund === ''",
                       tags$div(
-                      
                         tags$em("Abundance distribution plot will be available once a Total Abundance value is entered in the Customize Map settings.")
                       )
                     )
@@ -209,7 +204,7 @@ ui <- shinydashboard::dashboardPage(
             )
           )
         )
-),
+      ),
 
       # Methods tab detailing POP data and how estimates were calculated
       tabItem(tabName = "method",
