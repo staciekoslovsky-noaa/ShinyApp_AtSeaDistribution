@@ -24,7 +24,6 @@ library(viridis)
 
 
 # Initialize POPhex_MCMC (used for later custom area analysis)
-load("data/POPhexagons_sf.rda")
 species_codes <- read.csv("data/Species_codes.csv")
 loaded_shapefiles <- read.csv("shapefiles/shapefiles.csv")
 
@@ -150,8 +149,7 @@ tool_descript2 <- div(h3("Generating Analysis"),
                         "to generate a custom area analysis."
                       ),
                       br(),
-                      p("Once a shape is uploaded, selected, or drawn, the Shape Analysis tab below
-                        the map will output summary statistics."),
+                      p("Once a shape is uploaded, selected, or drawn, and the generate button pressed, the Analysis Results tab will output summary statistics."),
                       style = "color: #005b96")
 
 # ============== methods tab ==================
