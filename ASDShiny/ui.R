@@ -83,14 +83,12 @@ ui <- shinydashboard::dashboardPage(
           tags$div(
             # Map title with species on top of page
             uiOutput("selected_species_name"),
-            style = "color: #2c3e50;
-                      font-size: 20px; 
-                      font-weight: bold;"
+            style = "color: #2c3e50; font-size: 20px; font-weight: bold;"
           ),
           br(),
           fluidRow(
             column(8,
-              leafletOutput(outputId = "map", width = "100%", height = "60vh"),
+              leafletOutput(outputId = "map", width = "100%", height = "75vh"),
               tags$script(HTML("
                 Shiny.addCustomMessageHandler('clearDrawnShapes', function(message) {
                   var map = HTMLWidgets.find('#map').getMap();
@@ -104,95 +102,114 @@ ui <- shinydashboard::dashboardPage(
               br(),
               tags$div(
                 uiOutput("area"),
-                style = "color: #2c3e50;
-                      font-size: 20px; 
-                      font-weight: bold;"
-              ),
-              br(),
-                    bsCollapse(id = "collapseanalysis", open = "Custom Area Analysis Results",
-                      bsCollapsePanel("Custom Area Analysis Results",
-                                      "Results are available after a custom area is defined and are further expanded when a Total Abundance is entered.",
-                                      br(),
-                                      fluidRow(
-                                               column(5, h4(tableOutput("stat_result"))),
-                                               column(7, plotOutput("small_area_hist"))),
-         
-                                      style = "primary")
-                    
-                  )),
+                style = "color: #2c3e50; font-size: 20px; font-weight: bold;"
+              )
+            ),
+            
             column(4,
-              bsCollapse(id = "customize_map", open = "Customize Map",
-                bsCollapsePanel("Customize Map", style = "success",
-                disabled(actionButton("generate_button", "Generate")),
-                        disabled(downloadButton("downloadData", "Download Results")),
-                        br(),br(),
-                  bsCollapse(id = "species", open = "Select Species", multiple = TRUE,
-                             bsCollapsePanel("Select Species",
-                                             wellPanel(
-                                               selectizeInput("mapselect",
-                                                              "Select Marine Mammal",
-                                                              choices = c("Select", as.list(species_codes$species))),
-                                               selectizeInput("legendselect",
-                                                              "Select Legend",
-                                                              choices = c(
-                                                                "Quintiles",
-                                                                "Low and High Density Emphasis 1",
-                                                                "Low and High Density Emphasis 2",
-                                                                "Low Density Emphasis",
-                                                                "High Density Emphasis"
-                                                              )),
-                                               checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
-                                               conditionalPanel(
-                                                condition = "output.is_temporal == true",
-                                                sliderTextInput(
-                                                              inputId = "selected_index",
-                                                              label = "Selected Season:",
-                                                              choices = "Loading...",   
-                                                              grid = FALSE,
-                                                              width = "100%",
-                                                              force_edges = TRUE
-                                                            )
-                                              )
-                                             )),
-                             bsCollapsePanel("Abundance Estimate", style = "info",
-                                            conditionalPanel( 
-                                              condition = "output.is_relative == 'true'", 
-                                              textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), 
-                                              "Enter total abundance to generate an abundance estimate for each grid cell.",
-                                              br(), 
-                                              br(), 
-                                              textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), 
-                                              "Enter a coefficient of variation value. The default value is 0.2.",
-                                              style = "info"
-                                            ),
-                                            conditionalPanel(
-                                              condition = "output.is_relative != 'true'",
-                                              tags$em("This option is only available for relative abundance datasets.")
-                                            )
-                                          ), 
-                             bsCollapsePanel("Custom Area Analysis",
-                                            fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
-                                            selectizeInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
-                                            disabled(actionButton("remove_button", "Remove Shapefile")),
-                                            style = "info"),
-                             bsCollapsePanel("Zoom To",
-                                             "Enter latitude and longitude to zoom",
-                                             br(),
-                                             br(),
-                                             textInput("latitude", "Latitude", placeholder = "e.g. 60"),
-                                             textInput("longitude", "Longitude", placeholder = "e.g. -155"),
-                                             actionButton("zoom", "Zoom"),
-                                             disabled(actionButton("remove_marker", "Remove Markers")),
-                                             style = "info"
+              tabsetPanel(
+                id = "sidebar_toggle",
+                type = "tabs", 
+                
+                tabPanel("Customize Map",
+                  wellPanel(
+                    br(),
+                  disabled(actionButton("generate_button", "Generate", class = "btn-success", style = "width: 100%; margin-bottom: 15px;")),
+
+                      bsCollapse(id = "species", open = "Select Species", multiple = FALSE,
+                        bsCollapsePanel("Select Species",
+                          wellPanel(
+                            selectizeInput("mapselect", "Select Marine Mammal",
+                                           choices = c("Select", as.list(species_codes$species))),
+                            selectizeInput("legendselect", "Select Legend",
+                                           choices = c(
+                                             "Quintiles",
+                                             "Low and High Density Emphasis 1",
+                                             "Low and High Density Emphasis 2",
+                                             "Low Density Emphasis",
+                                             "High Density Emphasis"
+                                           )),
+                            checkboxInput("greyscale", "Change to Greyscale", value = FALSE, width = NULL),
+                            
+                            conditionalPanel(
+                              condition = "typeof output.is_temporal !== 'undefined' && output.is_temporal == true",
+                              sliderTextInput(
+                                inputId = "selected_index",
+                                label = "Selected Season:",
+                                choices = "Loading...",   
+                                grid = FALSE,
+                                width = "100%",
+                                force_edges = TRUE
+                              )
                             )
+                          ), style = "info"
+                        ),
+                        bsCollapsePanel("Abundance Estimate", style = "info",
+                          conditionalPanel( 
+                            condition = "typeof output.is_relative !== 'undefined' && output.is_relative == 'true'", 
+                            textInput("abs_abund", "Total Abundance", width = NULL, placeholder = "e.g. 5000"), 
+                            "Enter total abundance to generate an abundance estimate for each grid cell.",
+                            br(), br(), 
+                            textInput("coeff_var", "Coefficient of Variation", value = 0.2, placeholder = "e.g. = 0.2", width = NULL), 
+                            "Enter a coefficient of variation value. The default value is 0.2.",
+                            style = "info"
+                          ),
+                          conditionalPanel(
+                            condition = "typeof output.is_relative !== 'undefined' && output.is_relative != 'true'",
+                            tags$em("This option is only available for relative abundance datasets.")
+                          )
+                        ), 
+                        bsCollapsePanel("Custom Area Analysis",
+                          fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
+                          selectizeInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
+                          disabled(actionButton("remove_button", "Remove Shapefile")),
+                          style = "info"
+                        ),
+                        bsCollapsePanel("Zoom To",
+                          "Enter latitude and longitude to zoom",
+                          br(), br(),
+                          textInput("latitude", "Latitude", placeholder = "e.g. 60"),
+                          textInput("longitude", "Longitude", placeholder = "e.g. -155"),
+                          actionButton("zoom", "Zoom"),
+                          disabled(actionButton("remove_marker", "Remove Markers")),
+                          style = "info"
+                        )
+                    
+                        )  
+                  )
+                ),
+                
+                tabPanel("Analysis Results",
+                  wellPanel(
+                      p("Results are available after a custom area is defined and are further expanded when a Total Abundance is entered."),
+                      
+                      disabled(downloadButton("downloadData", "Download Results", class = "btn-primary", style = "width: 100%; margin-bottom: 15px;")),
+                      hr(),
+                      
+                      h5("Summary Statistics", style = "font-weight: bold;"),
+                      tableOutput("stat_result"),
+                      
+                      br(), hr(),
+                      h5("Abundance Distribution", style = "font-weight: bold;"),
+                      conditionalPanel(
+                      condition = "input.abs_abund !== ''",
+                      plotOutput("small_area_hist", height = "250px")
+                    ),
+
+                    conditionalPanel(
+                      condition = "input.abs_abund === ''",
+                      tags$div(
+                      
+                        tags$em("Abundance distribution plot will be available once a Total Abundance value is entered in the Customize Map settings.")
+                      )
+                    )
                   )
                 )
               )
             )
-          ),
-
+          )
         )
-      ),
+),
 
       # Methods tab detailing POP data and how estimates were calculated
       tabItem(tabName = "method",
