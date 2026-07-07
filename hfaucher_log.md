@@ -424,3 +424,28 @@
   - All new data and UI fixes seem to be present!
 ### For tomorrow
 - Begin to take a look at HarborSealAbundance app while waiting for custom area analysis and new species
+
+## July 7th, 2026
+### 8:00 - Paul's Email
+- Read through an email Paul sent after doing a stress test
+  - Went through each item, and addressed/responded
+### 9:00 - Weather Program Office: Research and Life Transitions (Gina Eosco)
+### 10:00 - Paul's Email
+- Polishing up the last parts of new code and pushing to branch
+  - Sent email response
+### 10:30 - Harbor Seal App Review
+- Briefly looked over ui, server, and global to see any improvements
+  - Anything I found was put into my meeting notes document
+  - Not much to speed up processing time, as I dont have access to the data yet
+### 12:00 - NWS Forecast Operations, Minneapolis St. Paul (Eric Ahasic)
+- Cool intro to being a meteorologist/working for NWS
+  - Great guy to connect with
+### 1:00 - Stress Test with Stacie
+- Sat down with Stacie and looked over the app
+  - Noting down anything we may want to change
+- Also now have access to the data for Harbor Seal app to do better review
+### 2:00 - Stress Test Fixes
+- Working more on stress test fixes, beginning to look great! 
+###  For tomorrow
+- Keep making stress test fixes
+- Project Check-in with Paul
