@@ -100,7 +100,7 @@ server <- function(input, output, session) {
       if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance))) {
         spec_data <- abundance[, debounced_index]
       } else {
-        spec_data <- abundance[, 1]
+        spec_data <- abundance[, ncol(abundance)]
       }
     } else {
       spec_data <- abundance
@@ -145,7 +145,7 @@ server <- function(input, output, session) {
     s_data <- scaled_species_data()
 
     leaflet::colorBin(
-      palette = "Greys",
+      palette = "Blues",
       domain = s_data,
       bins = quartiles(),
       pretty = FALSE,
@@ -313,7 +313,7 @@ server <- function(input, output, session) {
         session = session,
         inputId = "selected_index",
         choices = column_names,       
-        selected = column_names[1] # Explicitly select the first column element
+        selected = tail(column_names, 1)
       )
     
     }
@@ -324,25 +324,63 @@ server <- function(input, output, session) {
     species_values <- scaled_species_data()
     shiny::req(species_values)
 
+    abund <- suppressWarnings(as.numeric(input$abs_abund))
+    
+    if (is.na(abund)) {
+      showNotification("Warning: Absolute abundace input must be numeric", type = "warning", duration = 5)
+      shinyjs::reset("abs_abund")
+      return(NULL)
+    }
+
     color_func <- pal()
     
     proxy <- leaflet::leafletProxy("map")
 
     proxy |> leaflet::clearGroup(group = "Legend")
 
+     if (!is_relative()) {
+      label <- "Abundance Estimate"
+      digits <- 2
+    } else {
+      if (selected_abund() == 1) {
+        label = "Relative Abundance"
+        digits <- 6
+      } else {
+        label = "Abundance Estimate"
+        digits <- 2
+      }
+    }
+
     proxy |> 
       leaflet::addLegend(
         position = "bottomright",
         pal = color_func,
         values = species_values,
-        title = ifelse(selected_abund() == 1, "Relative Abundance:", "Abundance Estimate"),
-        labFormat = leaflet::labelFormat(digits = 6),
+        title = label,
+        labFormat = leaflet::labelFormat(digits = digits),
         group = "Legend",
         layerId = "dynamic"
       )
   })
 
   shiny::observeEvent(input$zoom, {
+
+    long <- suppressWarnings(as.numeric(input$longitude))
+    
+    if (is.na(long)) {
+      showNotification("Warning: Longitude input must be numeric", type = "warning", duration = 5)
+      shinyjs::reset("longitude")
+      return(NULL)
+    }
+
+    lat <- suppressWarnings(as.numeric(input$latitude))
+    
+    if (is.na(lat)) {
+      showNotification("Warning: Latitude input must be numeric", type = "warning", duration = 5)
+      shinyjs::reset("latitude")
+      return(NULL)
+    }
+
     proxy <- leaflet::leafletProxy("map")
 
     proxy |> leaflet::flyTo(lat = latitude(), lng = longitude(), zoom = 8) |>
@@ -614,10 +652,10 @@ server <- function(input, output, session) {
       # Log-normal scaled pipeline configuration blocks
       if (!is.null(drawn_shape())) {
         download_shape <<- drawn_shape() |>
-          dplyr::mutate("post_mean" = posterior_mean, "post_medf" = posterior_median, "cv" = posterior_cv)
+          dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
       } else {
         download_shape <<- uploaded_shape() |>
-          dplyr::mutate("post_mean" = posterior_mean, "post_medf" = posterior_median, "cv" = posterior_cv)
+          dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
       }
 
       output$small_area_abund <- shiny::renderText({
@@ -659,5 +697,6 @@ server <- function(input, output, session) {
       output$stat_result <- shiny::renderTable(transposed_data, colnames = FALSE, rownames = FALSE)
     }
     shinyjs::enable("downloadData")
+    shiny::showNotification("Custom Analysis Results shown in Analysis results tab.", type = "message", duration = 5)
   }
 }

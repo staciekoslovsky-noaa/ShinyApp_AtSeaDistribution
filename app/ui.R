@@ -119,7 +119,7 @@ ui <- shinydashboard::dashboardPage(
                         bsCollapsePanel("Select Species",
                           wellPanel(
                             selectizeInput("mapselect", "Select Marine Mammal",
-                                           choices = c("Select", as.list(species_codes$species))),
+                                           choices = c("Select", as.list(sort(species_codes$species)))),
                             selectizeInput("legendselect", "Select Legend",
                                            choices = c(
                                              "Quintiles",
