@@ -243,7 +243,7 @@ server <- function(input, output, session) {
 
   # ============ observers ==============
 
-  shiny::observeEvent(c(input$mapselect, input$legendselect), {
+  shiny::observeEvent(c(input$mapselect, input$legendselect, input$selected_index), {
     proxy <- leaflet::leafletProxy("map", data = base_data())
 
     color_func <- pal()
@@ -263,12 +263,15 @@ server <- function(input, output, session) {
       )
     
     if (!is_relative()) {
-      label = "Abundance Estimate"
+      label <- "Abundance Estimate"
+      digits <- 2
     } else {
       if (selected_abund() == 1) {
         label = "Relative Abundance"
+        digits <- 6
       } else {
         label = "Abundance Estimate"
+        digits <- 2
       }
     }
       
@@ -278,7 +281,7 @@ server <- function(input, output, session) {
         pal = color_func,
         values = scaled_species_data(),
         title = label,
-        labFormat = leaflet::labelFormat(digits = 6),
+        labFormat = leaflet::labelFormat(digits = digits),
         group = "Legend",
         layerId = "dynamic"
       )
@@ -316,39 +319,6 @@ server <- function(input, output, session) {
     }
   })
 
-  shiny::observe({
-    req(debounced_index())
-    target <- debounced_index()
-
-    proxy <- leaflet::leafletProxy("map", data = base_data())
-
-    color_func <- pal()
-    polygon_colors <- color_func(scaled_species_data())
-    
-    proxy |> 
-      leaflet::clearGroup(group = "Hexagons") |>
-      leaflet::addPolygons(
-        fillColor = polygon_colors,
-        fillOpacity = 0.8,
-        opacity = 0.7,
-        color = polygon_colors,
-        weight = 1,
-        smoothFactor = 0.5,
-        options = leaflet::pathOptions(pane = "hexagon_pane", pointerEvents = "none"),
-        group = "Hexagons"
-      )
-
-    proxy |> 
-      leaflet::addLegend(
-        position = "bottomright",
-        pal = color_func,
-        values = scaled_species_data(),
-        title = "Abundance Estimate",
-        labFormat = leaflet::labelFormat(digits = 6),
-        group = "Legend",
-        layerId = "dynamic"
-      )
-  })
 
   shiny::observeEvent(input$abs_abund, {
     species_values <- scaled_species_data()
