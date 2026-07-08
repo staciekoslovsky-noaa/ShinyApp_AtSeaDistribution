@@ -72,8 +72,32 @@ ui <- shinydashboard::dashboardPage(
              style = "color: #011f4b"),
           p(tool_info1),
           p(tool_info2),
-          p(tool_descript1),
-          p(tool_descript2)
+          bsCollapse(id = "data_types", open = "Using the Draw Toolbar", multiple = FALSE,
+            bsCollapsePanel("Using the Draw Toolbar", style = "primary",
+              p(tool_descript1)
+            ),
+            bsCollapsePanel("Customizing the Legend", style = "primary",
+              p(tool_descript2)
+            ),
+            bsCollapsePanel("Generating a Custom Analysis", style = "primary",
+              p(tool_descript3)
+            ),
+            bsCollapsePanel("Relative vs. Absolute Abundance", style = "primary",
+              column(6, 
+                p(relative_description)
+              ),
+              column(6, 
+                p(absolute_description))
+            ),
+            bsCollapsePanel("Spatial vs. Temporal", style = "primary",
+              column(6, 
+                p(spatial_description)
+              ),
+              column(6, 
+                p(temporal_description))
+            )
+
+          )
         )
       ),
 
