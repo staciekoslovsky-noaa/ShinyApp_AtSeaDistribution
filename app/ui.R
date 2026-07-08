@@ -214,7 +214,13 @@ ui <- shinydashboard::dashboardPage(
           withMathJax(), # LaTex-like equation formatting
           p(methods_info1),
           br(),
-          p(methods_info2)
+          p(methods_info2),
+          br(),
+          p(methods_info3),
+          br(),
+          p(methods_info4),
+          br(),
+          p(methods_info5)
         )
       ),
 
@@ -234,6 +240,8 @@ ui <- shinydashboard::dashboardPage(
           wellPanel(
             h3(strong("References"), style = "color: #011f4b"),
             p("Goodman, L. A. (1960). On the exact variance of products. Journal of the American Statistical Association, 55, 708-713.", style = "color: #005b96"),
+            p("Conn, P. B., Shelden, K. E. W., Brower, A. A., Christman, C. L., & Goetz, K. T. (2026). Abundance and distribution of eastern Bering Sea belugas from 2024 aerial line-transect surveys. NOAA Technical Memorandum NMFS-AFSC-510.", style = "color: #005b96"),
+            p("Ferguson, M. C., Conn, P. B., & Thorson, J. T. (2025). Spatially explicit models of density improve estimates of Eastern Bering Sea beluga (Delphinapterus leucas) abundance and distribution from line-transect surveys. PeerJ, 13, e20077.", style = "color: #005b96"),
             p("Ver Hoef, J. M., Johnson, D., Angliss, R., & Higham, M. (2021). Species density models from opportunistic citizen science data. Methods in Ecology and Evolution, 12, 1911-1925.", style = "color: #005b96")
           ),
           wellPanel(

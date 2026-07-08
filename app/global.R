@@ -157,22 +157,27 @@ methods_title <- div("Methods", style = "#011f4b")
 
 methods_info1 <- div("The statistical approaches for different data integration
                      sub-projects differ depending on species and the types of
-                     data available. For select cetacean species, POP
+                     data available. For select cetacean stocks, POP
                      constitutes the only data available and existing models
                      developed with previous NMFS Protected Resources Toolbox
                      funding can be applied directly to estimate species 
-                     distributions (Ver Hoef et al., 2021). For species with
-                     more data sources (e.g., bearded seals,
+                     distributions (Ver Hoef et al., 2021). For stocks with
+                     aerial survey data only (e.g., eastern Bering Sea beluga whales), 
+                     spatially explicit maps are available for years and times surveys were 
+                     conducted (typically summer).  For other species with more data sources 
+                     (e.g., bearded seals,
                      Cook Inlet beluga whales), partially or fully integrated
-                     species distribution models are needed, as described in
+                     species distribution models can be used to estimate seasonal
+                     distributions, as described in
                      Conn et al. (In prep) and presented at the 2023 PSAW
                      conference. These models work similarly to fisheries
                      stock-assessment models with inference conducted using a
                      product log-likelihood, assuming that each data source is
                      attempting to “sample” the underlying species distribution.
-                     At present, only POP-derived surfaces are available,
-                     but more maps are expected to be added in the future.
-                     Notably, the POP estimates are produced using observations
+                     At present, POP-derived relative abundance surfaces are available
+                     for most species, with the exception of bearded seals and EBS belugas.
+                     We anticipate more maps are expected to be added in the future.
+                     Note that the POP estimates are produced using observations
                      obtained between May and September, so only represents
                      spatial distributions for the “ice free” period.",
                      style = "color: #005b96")
@@ -197,9 +202,9 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                      h5("$$Var(XY) = \\mu_x^2 Var(Y) + \\mu_y^2 Var(X) + Var(X) Var(Y)$$"),
                      p("where"),
                      tags$ul(
-                             tags$li("Mu(x): inputted user abundance;"),
+                             tags$li("\\(\\mu_x\\): inputted user abundance;"),
                              tags$li("Var(X): calculated by multiplying the user inputted abundance and the coefficient of variation and then squaring;"),
-                             tags$li("Mu(y): summed relative abundance over the area of interest (posterior mean);"),
+                             tags$li("\\(\\mu_y\\): summed relative abundance over the area of interest (posterior mean);"),
                              tags$li("Var(Y): variance of the sum of MCMC chains over the filtered area.")),
                      p("This will then provide the new variance that takes into
                        account both the uncertainty in the user inputted data
@@ -207,6 +212,65 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                        of variation value for interpretability. Note that if
                        a value is NOT provided, the CV will default to 0.2."),
                      p("A histogram is also displayed, conveying uncertainty in the small area abundance estimate. In particular, we assume a log normal sampling distribution."),
+                     style = "color: #005b96")
+
+methods_info3 <- div(h3("How Bearded Seal Estimates are Generated"),
+                     p("The estimates are generated using partially integrated models from Conn et al. (unpublished)."),
+                     p("Seasonal models (summer: June-November; winter: December-May) were
+                       fitted to data from aerial surveys, satellite tagged seals, and acoustic
+                       detections to produce absolute abundance predictions for 2004-2021. Estimates
+                       were generated via mimization of a joint likelihood function, with standard
+                       errors generated using the associated Hessian matrix. Note that Conn et al.
+                       recommend caution regarding uncertainty as estimates are almost assuredly too precise."),
+                     style = "color: #005b96")
+
+methods_info4 <- div(h3("How EBS Beluga Estimates are Generated"),
+                     withMathJax(
+                       p("The estimates are generated using spatially-explicit density surface models,
+                         as described in Ferguson et al. (2025) and Conn et al. (2026)."),
+                       p("Estimates represent equal-weight ensembles from multiple models fitted
+                          to data that have different spatial autocorrelation structures. Each individual
+                          model is fitted using maximum marginal likelihood, with standard errors generated
+                          using the associated Hessian matrix.  Standard errors for the ensemble estimate
+                          in a specific grid cell", em("s"), "is generated
+                          using the standard formula $$\\hat{SE}(\\hat{N}_s) = \\sum_m \\sqrt{\\textrm{Var}(\\hat{N}_{ms}|M_m)+(\\hat{N}_{ms}-\\hat{N}_{es})^2},$$
+                          where", em("m"), "indexes model and \\(\\hat{N}_{es}\\) is the model-averaged (i.e. ensemble) estimate.")),
+                       style = "color: #005b96")
+
+methods_info5 <- div(h3("Custom-area calculations"),
+                     withMathJax(
+                       p("We use different methods for custom-area calculations depending on 
+                          whether spatial predictions are made using Bayesian or likelihood-based
+                          inference.  For Bayesian predictions, MCMC chains are stored internally in
+                          the within our Shiny app, and we simply calculate posterior moments
+                          (e.g., mean, mode) and variance for the collection
+                          of cells that encompass the user-identified polygon."),
+                       p("Computation for likelihood-based estimates is somewhat more complicated.
+                          The total abundance estimate for a given polygon \\(\\mathcal{R}\\) is simply the sum of 
+                          cell-specific estimates, but variance and confidence intervals require
+                          summing over both variances and covariances:
+                          $$\\widehat{\\textrm{Var}}(\\hat{N}_\\mathcal{R}) = 
+                           \\sum_{s_i \\in \\mathcal{R}} \\widehat{\\textrm{Var}}(\\hat{N}_{s_i}) + 
+                           2 \\sum_{s_j \\in \\mathcal{R}, s_k \\in \\mathcal{R}, s_j<s_k} 
+                           \\widehat{\\textrm{Cov}}(\\hat{N}_{s_j},\\hat{N}_{s_k}).$$
+                           The issue is that for large surfaces it may be prohibitively difficult to 
+                           calculate \\(\\widehat{\\textrm{Cov}}(\\hat{N}_{s_j},\\hat{N}_{s_k})\\) for 
+                           all potential pairs \\(s_j\\) and \\(s_k\\), and even if possible, storing
+                           this matrix can potentially require multiple gigabytes of memory. Instead, 
+                           we rely on the following approximation, which takes advantage of a spatial 
+                           auto-correlation function \\(\\rho()\\): 
+                          $$\\widehat{\\textrm{Var}}(\\hat{N}_\\mathcal{R}) = 
+                           \\sum_{s_i \\in \\mathcal{R}} \\widehat{\\textrm{Var}}(\\hat{N}_{s_i}) + 
+                           2 \\sum_{s_j \\in \\mathcal{R}, s_k \\in \\mathcal{R}, s_j<s_k} 
+                           \\hat{\\sigma}_{s_j}\\hat{\\sigma}_{s_k}\\rho(d_{jk})).$$  In particular,
+                           we assume that an exponential correlation function is used, which expresses
+                           realized correlation as a function of \\(d_{jk}\\), the distance between the centroids
+                           of grid cell ",em("j")," and grid cell ",em("k")," as well as spatial range parameter.
+                           Each dataset has spatial range parameters uploaded (based on variogram analysis),
+                           and the distances between grid cells are computed by the Shiny app.  This computation 
+                           should be fast for small custom-area polygons but may take some time for large ones. 
+                           We then assume a lognormal sampling distribution to produce confidence intervals.")
+                     ),
                      style = "color: #005b96")
 
 # Reference tab
