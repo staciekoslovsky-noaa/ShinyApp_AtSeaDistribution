@@ -99,10 +99,10 @@ about_info4 <- div("The potential benefits of these analytical approaches are
 
 
 # ============== how to use tab ====================
-tool_info1 <- div("This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.", style = "color: #005b96")
-tool_info2 <- div("To access species density maps, use the Select Species sidebar panel. Use the Select Marine Mammal dropdown menu to select a species.", style = "color: #005b96")
+tool_info1 <- div("This tool was developed using Shiny, a package that facilitates web app development directly from coding languages, such as R.")
+tool_info2 <- div("To access species density maps, use the Select Species sidebar panel. Use the Select Marine Mammal dropdown menu to select a species.")
 
-tool_descript1 <- div(h3("Using the Draw Toolbar"),
+tool_descript1 <- div(
                       p("The toolbar on the left of the map contains various
                         tools to work with select data shown on the map
                         (for instance to perform small area calculations,
@@ -115,10 +115,10 @@ tool_descript1 <- div(h3("Using the Draw Toolbar"),
                         br(),
                         "The Custom Area Analysis sidebar panel allows users to download a shapefile
                         of the drawn polygons including summary statistics and upload a user's own shapefile
-                        for analysis."),
+                        for analysis."))
 
-                      h3("Customizing the Legend"),
-                      "The legend can be customized using the 'Select Legend'
+  tool_descript2 <- div(
+                      p("The legend can be customized using the 'Select Legend'
                       option in the sidebar. This can be useful in visualizing
                       changes in abundance across a map, particularly when
                       species are clustered in small areas. The options are:",
@@ -127,30 +127,47 @@ tool_descript1 <- div(h3("Using the Draw Toolbar"),
                               tags$li("'Low and High Density Emphasis 1' divides them into the following percentiles: 0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1"),
                               tags$li("'Low and High Density Emphasis 2' divides them into the following percentiles: 0, 0.05, 0.1, 0.5, 0.9, 0.95, 1"),
                               tags$li("'Low Density Emphasis' divides them into the following percentiles: 0, 0.01, 0.05, 0.6, 0.8, 1"),
-                              tags$li("'High Density Emphasis' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1")), 
-                      style = "color: #005b96")
+                              tags$li("'High Density Emphasis' divides them into the following percentiles: 0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1"))))
 
-tool_descript2 <- div(h3("Generating Analysis"),
-                      p("Within the panel 'Abundance Estimate', the user can
-                        input:",
-                        tags$ul(
-                          tags$li("a population-wide abundance estimate"),
-                          tags$li("a coefficient of variation value (CV)"),
-                        ),
-                        "to get an updated abundance estimate and legend. 
-                        If no CV value is input, the default value is 0.2."),
-                      br(),
-                      p("In addition to the draw toolbar, a user can:",
-                        tags$ul(
-                          tags$li("upload a custom shapefile"),
-                          tags$li("select from a list of preloaded shapefiles"),
-                          tags$li("remove any currently uploaded or selected shapefile")
-                        ),
-                        "to generate a custom area analysis."
+relative_description <- div(h4("Relative"),
+                            p("Some data sets in this application are based on relative abundance values.
+                              With these, the cells show the estimated relative abundance per the cell area, listed
+                              below the map.", br(),br(),
+                              "If you have an abundance estimate, you can enter this in the Abundance Estimate panel, which updates the map
+                              to show estimates per cell."
+                            ))
+
+absolute_description <- div(h4("Absolute"),
+                            p("Other data are absolute datasets, meaning that all cells represent the abundance estimates
+                            for the specified area.", br(), br(),br(),
+                            "Because the dataset is an abundance estimate, the Abundance Estimate panel is disabled when a species
+                            with this data type is selected."))
+
+spatial_description <- div(h4("Spatial"),
+                          p("The spatial data in these datasets represent either a calculated proportion of a
+                          species (relative), or an observation of the number of animals (absolute) in a certain physical location (cell)")
+                          )
+
+temporal_description <- div(h4("Temporal/Spatiotemporal"),
+                            "The temporal datasets show the changes in location over a specific amount of time (varies by species).
+                            The only dataset we currently have with this capability is the bearded seal dataset."
+                            )
+
+tool_descript3 <- div(
+                      p("Once a custom shape is drawn (using the draw toolbar), selected, or uploaded (in the Custom Area Analysis panel),
+                        the generate button at the top of the tab can be pressed, to calculate species specific distribution estimates for the given area.
+                        The results from these calculations can be seen in the Analysis Results tab."),
+                      
+                      p("The results will show either a relative abundance estimate (for relative datasets), or an abundance estimate (for absolute datasets)."),
+                      
+                      p("For a relative abundance data set, a user can specify:"),
+                      tags$ul(
+                        tags$li("A population-wide abundance estimate"),
+                        tags$li("A coefficient of variation value (CV)")
                       ),
-                      br(),
-                      p("Once a shape is uploaded, selected, or drawn, and the generate button pressed, the Analysis Results tab will output summary statistics."),
-                      style = "color: #005b96")
+                      
+                      p("to generate a histogram and more detailed results. If no CV value is input, the default value is 0.2.")
+                    )
 
 # ============== methods tab ==================
 methods_title <- div("Methods", style = "#011f4b")

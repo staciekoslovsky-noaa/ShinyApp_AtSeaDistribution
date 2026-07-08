@@ -449,3 +449,17 @@
 ###  For tomorrow
 - Keep making stress test fixes
 - Project Check-in with Paul
+
+## July 8th, 2026
+- Worked remotely but computer would not connect to the internet, so I had to call in from my personal computer
+### 8:30 - Computer Issues
+- Tried to get the computer to work. it didn't :/
+  - Texted Stacie
+### 9:00 - Alek Krautmann (NWS/NASA Spaceflight Met Group and Artemis Support)
+### 10:00 - Working on Panels and Markdown file
+- Markdown file took like two seconds (new_species.Rmd)
+  - Just copied and pasted from the blueprint document we already had.
+- Worked on the panels of the how-to page for a while
+  - Lots of missing commas caused a lot of app errors, but its working now
+  - A basic outline of how to use the application, with descriptions of how the data could be different.
+    - Still in the works, need to decide/workshop what to actually say in them.

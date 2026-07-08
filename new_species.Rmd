@@ -1,0 +1,50 @@
+---
+title: "New Data Additions"
+author: "Haley Faucher"
+date: "2026-07-08"
+---
+
+
+
+
+# New Species Data Steps
+1.  To add a new species, the species code, name, latin name, base grid, 
+    if it is relative or absolute, and if it has temporal data needs to be added to Species_codes.csv , 
+    as well as actual species-specific file to data folder.
+
+    a.  This new file needs to follow the naming scheme of XX_MCMC.RData, where XX is the two letter species code. 
+    b.  If it contains relative abundance, it is processed differently than absolute. **
+        i.  Relative data is a large matrix and we take the rowMeans for each cell (one row per cell)
+        ii. Absolute is a flat vector with one value for each cell (to change the format of the bearded seal data, the code I ran
+            is provided in the example code section)
+2.  Adding species specific features:
+    a.  When adding bearded seals, a new feature was needed to handle the changes in seasons (a slider.). 
+        If dealing with more types of data, adding other features to handle this will be necessary, 
+        and a flag to identify them will be needed in the csv file. 
+3.  If a new data type is added (extension of spatial and temporal), different custom area analysis may be needed. To do this: 
+    a. Figure out what is to be displayed
+    b. Add branch to if else block USING AS MUCH PREEXISTING CODE AS POSSIBLE (basically, don’t duplicate what is already there), adding needed logic. 
+
+
+
+## Example Code
+```{r}
+num_years <- dim(raw_array)[1] # where raw array is the original list I received from Paul Conn
+num_seasons <- dim(raw_array)[2] 
+num_cells <- dim(raw_array)[3]
+abundance_matrix <- matrix( 
+aperm(raw_array, c(3, 2, 1)), 
+nrow = num_cells, 
+ncol = num_seasons * num_years 
+) 
+grid <- expand.grid(Season = raw_list$seasons, Year = raw_list$years) 
+grid$Adjusted_Year <- ifelse(grid$Season == "summer", grid$Year - 1, grid$Year) 
+grid$Date_Suffix <- ifelse(grid$Season == "summer", "12-01", "06-01")
+colnames(abundance_matrix) <- paste0(grid$Adjusted_Year, "-", grid$Date_Suffix)
+chronological_order <- order(colnames(abundance_matrix)) 
+abundance <- abundance_matrix[, chronological_order] 
+save(abundance, file = new_file_name) 
+
+# this takes the long flat vector, and organizes it by row into 36 columns (one for each season and year), 
+# then names the columns each with a date, and sorted by date, then saves to new species file name and adds to data folder
+```
