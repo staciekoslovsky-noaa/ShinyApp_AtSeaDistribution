@@ -221,7 +221,7 @@ server <- function(input, output, session) {
   output$downloadData <- shiny::downloadHandler(
     filename = function() {
       # Set the title for the shapefile
-      paste0(selected_species_code(), "_drawn_shape_", Sys.Date(), ".zip")
+      paste0(selected_species_code(), "_drawn_shape_", Sys.time(), ".zip")
     },
     content = function(file) {
       export_dir <- file.path(tempdir(), "vscode_shape_export")
@@ -687,11 +687,11 @@ server <- function(input, output, session) {
         ggplot2::xlab("Total Abundance") +
         ggplot2::ylab("Frequency") +
         ggplot2::theme_minimal() +
-        ggplot2::theme(plot.title = element_text(size = 20, hjust = 0.5),
-                       axis.title.x = element_text(size = 16),
-                       axis.title.y = element_text(size = 16),
-                       axis.text.x = element_text(size = 12),
-                       axis.text.y = element_text(size = 12))
+        ggplot2::theme(plot.title = element_text(size = 12, hjust = 0.5),
+                       axis.title.x = element_text(size = 8),
+                       axis.title.y = element_text(size = 8),
+                       axis.text.x = element_text(size = 6),
+                       axis.text.y = element_text(size = 6))
                        
       output$small_area_hist <- shiny::renderPlot({ p })
       output$stat_result <- shiny::renderTable(transposed_data, colnames = FALSE, rownames = FALSE)
