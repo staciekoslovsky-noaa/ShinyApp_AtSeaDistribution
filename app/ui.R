@@ -212,12 +212,12 @@ ui <- shinydashboard::dashboardPage(
                       br(), hr(),
                       h5("Abundance Distribution", style = "font-weight: bold;"),
                       conditionalPanel(
-                      condition = "input.abs_abund !== ''",
+                      condition = "input.abs_abund !== '' || (typeof output.is_temporal !== 'undefined' && output.is_temporal == true)",
                       plotOutput("small_area_hist", height = "250px")
                     ),
 
                     conditionalPanel(
-                      condition = "input.abs_abund === ''",
+                      condition = "input.abs_abund === '' && (typeof output.is_temporal === 'undefined' || output.is_temporal == false)",
                       tags$div(
                         tags$em("Abundance distribution plot will be available once a Total Abundance value is entered in the Customize Map settings.")
                       )

@@ -91,51 +91,65 @@ server <- function(input, output, session) {
   })
 
   scaled_species_data <- shiny::reactive({
-    abundance <- species_data()
+    abundance_obj <- species_data()
+    shiny::req(abundance_obj)
 
-    if (!is_relative()) {
+    abundance <- if (is.list(abundance_obj)) abundance_obj$N else abundance_obj
+    shiny::req(abundance)
 
+    if (has_temporal()) {
       debounced_index <- debounced_index()
 
+      # Check if our active timeline index matches a column
       if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance))) {
-        spec_data <- abundance[, debounced_index]
+        spec_data <- abundance[, debounced_index, drop = FALSE]
       } else {
-        spec_data <- abundance[, ncol(abundance)]
+        # Fallback: Pick the last column (most recent time step)
+        last_col <- ncol(abundance)
+        spec_data <- abundance[, last_col, drop = FALSE]
       }
     } else {
       spec_data <- abundance
     }
 
-    if (is.matrix(spec_data) || is.array(spec_data)) {
-      final_data <- rowMeans(spec_data)
+    # Collapse columns if an MCMC draw matrix is present
+    if (is.matrix(spec_data) && ncol(spec_data) > 1) {
+      final_data <- rowMeans(spec_data, na.rm = TRUE)
     } else {
-      final_data <- spec_data
+      final_data <- as.vector(spec_data)
     }
 
+    # Ensure final_data isn't empty before scaling
+    shiny::req(final_data)
+    
     final_data * selected_abund()
   })
 
   quartiles <- shiny::reactive({ 
     s_data <- scaled_species_data() 
+    shiny::req(s_data)
     
+    # Crucial Fix 1: Pass na.rm = TRUE to drop spatial grid cells containing NA values
     raw_breaks <- switch(input$legendselect,
-                        "Quintiles" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)),
-                        "Low and High Density Emphasis 1" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1)),
-                        "Low and High Density Emphasis 2" = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1)),
-                        "Low Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1)),
-                        "High Density Emphasis" = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1)))
+                         "Quintiles"                        = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = TRUE),
+                         "Low and High Density Emphasis 1"  = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1), na.rm = TRUE),
+                         "Low and High Density Emphasis 2"  = raster::quantile(s_data, probs = c(0, 0.05, 0.1, 0.5, 0.9, 0.95, 1), na.rm = TRUE),
+                         "Low Density Emphasis"             = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1), na.rm = TRUE),
+                         "High Density Emphasis"            = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1), na.rm = TRUE))
 
+    # Crucial Fix 2: Handle tied/duplicated breaks safely
+    # This happens often if your data has massive regions of 0s or identical values
     if (any(duplicated(raw_breaks))) {
+      # Use unique() to drop duplicates, but make sure we preserve the true min and max boundary 
+      unique_breaks <- unique(raw_breaks)
       
-      sorted_breaks <- sort(raw_breaks)
-      
-      for (i in 2:length(sorted_breaks)) {
-        if (sorted_breaks[i] <= sorted_breaks[i - 1]) {
-          sorted_breaks[i] <- sorted_breaks[i - 1] + 0.1
-        }
+      # If dropping duplicates leaves us with too few breaks to build a legend, 
+      # we gently pad them with a tiny jitter that won't outpace the next break sequence
+      if (length(unique_breaks) < 2) {
+        return(c(min(s_data, na.rm = TRUE), max(s_data, na.rm = TRUE) + 0.0001))
       }
-      return(sorted_breaks)
       
+      return(sort(unique_breaks))
     } else {
       return(raw_breaks)
     }
@@ -307,7 +321,7 @@ server <- function(input, output, session) {
      s_data <- species_data()
   
     if (has_temporal()) {
-      column_names <- colnames(s_data)
+      column_names <- colnames(s_data$N)
 
       shinyWidgets::updateSliderTextInput(
         session = session,
@@ -315,7 +329,6 @@ server <- function(input, output, session) {
         choices = column_names,       
         selected = tail(column_names, 1)
       )
-    
     }
   })
 
@@ -510,7 +523,8 @@ server <- function(input, output, session) {
     # Transform the projection to EPSG 4326 in case it is different
     shapefile_data <- sf::st_transform(shapefile_data, 4326)
 
-    # shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 90)
+    # shifted_geometry <- (sf::st_geometry(shapefile_data) + c(360, 90)) %% c(360) - c(0, 9
+    # 0)
     shapefile_data <- sf::st_shift_longitude(shapefile_data)
 
     # Shifts the geometry taking the dateline into account
@@ -534,14 +548,14 @@ server <- function(input, output, session) {
     shinyjs::enable("generate_button")
   }
 
- generate_custom_analysis <- function(shape_data) {
+  generate_custom_analysis <- function(shape_data) {
 
     if (is.null(shape_data)) {
-      output$stat_result    <- shiny::renderTable(NULL)
-      output$small_area_hist <- shiny::renderPlot({ plot.new() })
-      output$small_area_abund <- shiny::renderText({ "" })
-      output$medmode         <- shiny::renderText({ "" })
-      output$overall_cv      <- shiny::renderText({ "" })
+      output$stat_result         <- shiny::renderTable(NULL)
+      output$small_area_hist     <- shiny::renderPlot({ NULL })
+      output$small_area_abund    <- shiny::renderText({ "" })
+      output$medmode             <- shiny::renderText({ "" })
+      output$overall_cv          <- shiny::renderText({ "" })
       output$overall_variance_sum <- shiny::renderText({ "" })
       return(NULL)
     }
@@ -555,21 +569,23 @@ server <- function(input, output, session) {
     
     raw_abundance <- species_data()
     
+    target_layer <- debounced_index()
+
     if (!is_relative()) {
-      target_layer <- debounced_index()
-      if (!is.null(target_layer) && (target_layer %in% colnames(raw_abundance))) {
-        active_data <- raw_abundance[, target_layer, drop = FALSE]
-      } else {
-        active_data <- raw_abundance[, 1, drop = FALSE]
-      }
-      row_variances <- rep(0, nrow(raw_abundance))
+      active_data <- raw_abundance$N[, target_layer, drop = FALSE]
+      
+      current_se    <- raw_abundance$SE[, target_layer]
+      spatial_range <- raw_abundance$Exp_range[target_layer]
+      
+      row_variances <- current_se 
     } else {
       active_data   <- raw_abundance
       row_variances <- apply(raw_abundance, 1, var)
     }
 
     bound_mcmc <- cbind(base_data(), active_data, row_variances)
-    centroids  <- sf::st_centroid(bound_mcmc)
+    
+    centroids <- suppressWarnings(sf::st_centroid(bound_mcmc))
 
     inside <- lengths(sf::st_intersects(centroids, shape_data)) > 0
     bound_mcmc <- bound_mcmc[inside, ]
@@ -584,118 +600,198 @@ server <- function(input, output, session) {
     last_data_idx  <- total_cols - 1 
     first_data_idx <- ncol(sf::st_drop_geometry(base_data())) + 1
 
-    relative_draws <- df_no_geom |> 
-      dplyr::select(all_of(first_data_idx:last_data_idx)) |>
-      dplyr::summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
-      as.numeric()
-
     if (!is_relative()) {
-      relative_mean <- relative_draws[1] 
-      relative_variance <- NA
+      absolute_estimate <- sum(df_no_geom[[first_data_idx]], na.rm = TRUE)
+      
+      centroids_inside <- centroids[inside, ]
+      dist_matrix <- units::drop_units(sf::st_distance(centroids_inside))
+      
+      cor_matrix <- exp(-dist_matrix / spatial_range)
+      diag(cor_matrix) <- 1
+      
+      se_subset  <- df_no_geom$row_variances
+      cov_matrix <- outer(se_subset, se_subset, FUN = "*") * cor_matrix
+      
+      absolute_variance <- sum(cov_matrix, na.rm = TRUE)
+      absolute_se       <- sqrt(absolute_variance)
+      absolute_cv       <- absolute_se / absolute_estimate
+      
+      c_multiplier <- exp(1.96 * sqrt(log(1 + (absolute_se / absolute_estimate)^2)))
+      ci_lower     <- absolute_estimate / c_multiplier
+      ci_upper     <- absolute_estimate * c_multiplier
+      
+      posterior_mean     <- absolute_estimate
+      posterior_median   <- absolute_estimate 
+      posterior_variance <- absolute_variance
+      posterior_cv       <- absolute_cv
+      
     } else {
+      relative_draws <- df_no_geom |> 
+        dplyr::select(all_of(first_data_idx:last_data_idx)) |>
+        dplyr::summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) |>
+        as.numeric()
+
       relative_mean     <- mean(relative_draws)
       relative_variance <- var(relative_draws)
-    }
-
-    if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
-      posterior_draws <- relative_draws
-    } else {
-      sigma2 <- log(1 + cv_input^2)
-      sigma <- sqrt(sigma2)
-      meanlog <- log(selected_abund()) - sigma2 / 2
-      abundance_draws <- rlnorm(n = length(relative_draws), meanlog = meanlog, sdlog = sigma)
-      posterior_draws <- relative_draws * abundance_draws
-    }
-
-    posterior_mean <- mean(posterior_draws)
-    posterior_median <- median(posterior_draws)
-    posterior_variance <- var(posterior_draws)
-    posterior_sd <- sqrt(posterior_variance)
-    posterior_cv <- posterior_sd / posterior_mean
-
-    if (selected_abund() == 1 || is.na(selected_abund()) || selected_abund() <= 0) {
-      if (!is.null(drawn_shape())) {
-        col_name <- if (is_relative()) "rel_abund" else "est_abund"
-        download_shape <<- drawn_shape() |>
-          dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
+      
+      if (selected_abund() == 1) {
+        posterior_draws    <- relative_draws
+        posterior_mean     <- relative_mean
+        posterior_median   <- median(relative_draws)
+        posterior_variance <- relative_variance
+        posterior_cv       <- sqrt(relative_variance) / relative_mean
       } else {
-        col_name <- if (is_relative()) "rel_abund" else "est_abund"
+        sigma2          <- log(1 + cv_input^2)
+        sigma           <- sqrt(sigma2)
+        meanlog         <- log(selected_abund()) - sigma2 / 2
+        abundance_draws <- rlnorm(n = length(relative_draws), meanlog = meanlog, sdlog = sigma)
+        posterior_draws <- relative_draws * abundance_draws
+        
+        posterior_mean     <- mean(posterior_draws)
+        posterior_median   <- median(posterior_draws)
+        posterior_variance <- var(posterior_draws)
+        posterior_cv       <- sqrt(posterior_variance) / posterior_mean
+      }
+    }
+
+    if (!is_relative()) {
+      if (!is.null(drawn_shape())) {
+        download_shape <<- drawn_shape() |>
+          dplyr::mutate(est_abund = absolute_estimate, variance = absolute_variance, cv = absolute_cv)
+      } else {
         download_shape <<- uploaded_shape() |>
-          dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
+          dplyr::mutate(est_abund = absolute_estimate, variance = absolute_variance, cv = absolute_cv)
       }
 
       output$small_area_abund <- shiny::renderText({
-        label_prefix <- if (is_relative()) "Relative Abundance Estimate" else "Absolute Abundance Sum"
-        paste0(label_prefix, " for Selected Area: ", format(round(relative_mean, 2), big.mark = ","))
+        paste0("Absolute Abundance Sum for Selected Area: ", format(round(absolute_estimate, 2), big.mark = ","))
       })
-      
       output$overall_variance_sum <- shiny::renderText({
-        if (is.na(relative_variance)) "" else paste0("Variance for Selected Area: ", round(relative_variance, digits = 5))
-      })
-      
-      output$medmode <- shiny::renderText({
-        if (!is_relative()) "" else paste0("Posterior Median Abundance Estimate: ", round(posterior_median, digits = 3))
-      })
-
-      summary_data <- data.frame(
-        Species = selected_species(),
-        "Abundance Value" = format(relative_mean, digits = 6, big.mark = ",", scientific = FALSE),
-        "Variance" = if (is.na(relative_variance)) "N/A" else format(round(relative_variance, digits = 7), scientific = TRUE),
-        check.names = FALSE
-      )
-      colnames(summary_data)[2] <- if (is_relative()) "Relative Abundance Estimate" else "Total Abundance (Sum)"
-
-      output$stat_result <- shiny::renderTable(summary_data)
-      output$small_area_hist <- shiny::renderPlot(NULL)
-      
-    } else {
-      # Log-normal scaled pipeline configuration blocks
-      if (!is.null(drawn_shape())) {
-        download_shape <<- drawn_shape() |>
-          dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
-      } else {
-        download_shape <<- uploaded_shape() |>
-          dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
-      }
-
-      output$small_area_abund <- shiny::renderText({
-        paste0("Posterior Mean Estimate for Selected Area: ", format(round(posterior_mean), big.mark = ","))
-      })
-      output$medmode <- shiny::renderText({
-        paste0("Posterior Median Abundance Estimate: ", format(round(posterior_median), big.mark = ","))
+        paste0("Spatially Corrected Variance: ", format(round(absolute_variance, 2), big.mark = ","))
       })
       output$overall_cv <- shiny::renderText({
-        paste0("Coefficient of Variation for Selected Area: ", round(posterior_cv, 3))
+        paste0("Spatial Coefficient of Variation (CV): ", round(absolute_cv, 3))
+      })
+      output$medmode <- shiny::renderText({
+        paste0("95% Log-Normal CI: [", format(round(ci_lower, 2), big.mark = ","), " , ", format(round(ci_upper, 2), big.mark = ","), "]")
       })
 
       summary_data <- data.frame(
-        Species = selected_species(),
-        "Selected Abundance" = format(round(selected_abund()), big.mark = ",", scientific = FALSE),
-        "Posterior Mean Estimate" = format(round(posterior_mean), big.mark = ",", scientific = FALSE),
-        "Posterior Median Abundance Estimate" = format(round(posterior_median), big.mark = ",", scientific = FALSE),
-        "Coefficient of Variation" = round(posterior_cv, digits = 2),
-        check.names = FALSE
+        "Metric" = c("Species", "Total Abundance (Sum)", "Spatial Variance", "Coefficient of Variation", "95% CI Lower Bound", "95% CI Upper Bound"),
+        "Value" = c(
+          selected_species(),
+          format(round(absolute_estimate, 2), big.mark = ","),
+          format(round(absolute_variance, 2), big.mark = ","),
+          as.character(round(absolute_cv, 3)),
+          format(round(ci_lower, 2), big.mark = ","),
+          format(round(ci_upper, 2), big.mark = ",")
+        ),
+        stringsAsFactors = FALSE
       )
-
-      transposed_data <- as.data.frame(t(summary_data))
-      transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
-      transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
-
-      p <- ggplot2::ggplot(data.frame(TotalAbundance = posterior_draws), ggplot2::aes(x = TotalAbundance)) +
-        ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
-        ggplot2::ggtitle("Histogram of Abundance Estimates") +
-        ggplot2::xlab("Total Abundance") +
-        ggplot2::ylab("Frequency") +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(plot.title = element_text(size = 12, hjust = 0.5),
-                       axis.title.x = element_text(size = 8),
-                       axis.title.y = element_text(size = 8),
-                       axis.text.x = element_text(size = 6),
-                       axis.text.y = element_text(size = 6))
-                       
+      
+      output$stat_result <- shiny::renderTable(summary_data, colnames = FALSE)
+      
+      cv2        <- (absolute_se / absolute_estimate)^2
+      plot_sigma <- sqrt(log(1 + cv2))
+      plot_mu    <- log(absolute_estimate) - (plot_sigma^2 / 2)
+      
+      x_min  <- qlnorm(0.001, meanlog = plot_mu, sdlog = plot_sigma)
+      x_max  <- qlnorm(0.999, meanlog = plot_mu, sdlog = plot_sigma)
+      x_vals <- seq(x_min, x_max, length.out = 500)
+      
+      plot_df <- data.frame(Value = x_vals, Density = dlnorm(x_vals, meanlog = plot_mu, sdlog = plot_sigma))
+      
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = Value, y = Density)) +
+        ggplot2::geom_line(color = "#2c3e50", linewidth = 1) +
+        ggplot2::geom_vline(xintercept = absolute_estimate, color = "#16a085", linetype = "dashed", linewidth = 0.8) +
+        ggplot2::labs(title = "Lognormal Distribution of Spatial Estimate", x = "Abundance Value", y = "Density") +
+        ggplot2::theme_minimal()
+        
       output$small_area_hist <- shiny::renderPlot({ p })
-      output$stat_result <- shiny::renderTable(transposed_data, colnames = FALSE, rownames = FALSE)
+
+    } else {
+      if (selected_abund() == 1) {
+        if (!is.null(drawn_shape())) {
+          col_name <- "rel_abund"
+          download_shape <<- drawn_shape() |>
+            dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
+        } else {
+          col_name <- "rel_abund"
+          download_shape <<- uploaded_shape() |>
+            dplyr::mutate(!!col_name := relative_mean, "variance" = relative_variance)
+        }
+
+        output$small_area_abund <- shiny::renderText({
+          paste0("Relative Abundance Estimate for Selected Area: ", format(round(relative_mean, 2), big.mark = ","))
+        })
+        
+        output$overall_variance_sum <- shiny::renderText({
+          paste0("Variance for Selected Area: ", round(relative_variance, digits = 5))
+        })
+        
+        output$medmode <- shiny::renderText({
+          paste0("Posterior Median Abundance Estimate: ", round(posterior_median, digits = 3))
+        })
+
+        summary_data <- data.frame(
+          Species = selected_species(),
+          "Relative Abundance Estimate" = format(relative_mean, digits = 6, big.mark = ",", scientific = FALSE),
+          "Variance" = format(round(relative_variance, digits = 7), scientific = TRUE),
+          check.names = FALSE
+        )
+
+        output$stat_result <- shiny::renderTable(summary_data)
+        output$small_area_hist <- shiny::renderPlot(NULL)
+        
+      } else {
+        if (!is.null(drawn_shape())) {
+          download_shape <<- drawn_shape() |>
+            dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
+        } else {
+          download_shape <<- uploaded_shape() |>
+            dplyr::mutate("post_mean" = posterior_mean, "post_med" = posterior_median, "cv" = posterior_cv)
+        }
+
+        output$small_area_abund <- shiny::renderText({
+          paste0("Posterior Mean Estimate for Selected Area: ", format(round(posterior_mean), big.mark = ","))
+        })
+        output$medmode <- shiny::renderText({
+          paste0("Posterior Median Abundance Estimate: ", format(round(posterior_median), big.mark = ","))
+        })
+        output$overall_cv <- shiny::renderText({
+          paste0("Coefficient of Variation for Selected Area: ", round(posterior_cv, 3))
+        })
+
+        summary_data <- data.frame(
+          Species = selected_species(),
+          "Selected Abundance" = format(round(selected_abund()), big.mark = ",", scientific = FALSE),
+          "Posterior Mean Estimate" = format(round(posterior_mean), big.mark = ",", scientific = FALSE),
+          "Posterior Median Abundance Estimate" = format(round(posterior_median), big.mark = ",", scientific = FALSE),
+          "Coefficient of Variation" = round(posterior_cv, digits = 2),
+          check.names = FALSE
+        )
+
+        transposed_data <- as.data.frame(t(summary_data))
+        transposed_data <- tibble::rownames_to_column(transposed_data, var = "Metrics")
+        transposed_data$V1 <- format(transposed_data$V1, scientific = FALSE)
+
+        p <- ggplot2::ggplot(data.frame(TotalAbundance = posterior_draws), ggplot2::aes(x = TotalAbundance)) +
+          ggplot2::geom_histogram(bins = 10, fill = "#69b3a2", color = "#e9ecef", alpha = 0.9) +
+          ggplot2::ggtitle("Histogram of Abundance Estimates") +
+          ggplot2::xlab("Total Abundance") +
+          ggplot2::ylab("Frequency") +
+          ggplot2::theme_minimal() +
+          ggplot2::theme(plot.title = element_text(size = 12, hjust = 0.5),
+                        axis.title.x = element_text(size = 8),
+                        axis.title.y = element_text(size = 8),
+                        axis.text.x = element_text(size = 6),
+                        axis.text.y = element_text(size = 6))
+                        
+        output$small_area_hist <- shiny::renderPlot({ p })
+        output$stat_result <- shiny::renderTable(transposed_data, colnames = FALSE, rownames = FALSE)
+      }
     }
+    
     shinyjs::enable("downloadData")
     shiny::showNotification("Custom Analysis Results shown in Analysis results tab.", type = "message", duration = 5)
   }
