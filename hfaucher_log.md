@@ -463,3 +463,21 @@
   - Lots of missing commas caused a lot of app errors, but its working now
   - A basic outline of how to use the application, with descriptions of how the data could be different.
     - Still in the works, need to decide/workshop what to actually say in them.
+
+## July 13th, 2026
+### 8:00 - Custom Area Analysis for Absolute Data
+- Paul set me some code for the custom area analysis for the new data
+  - Worked on integrating that with what we currently have
+  - Sent him an email to let him know I implemented
+    - He later said all looks good
+### 10:30 - Harbor Seal Abundance
+- Mostly working on getting the app to load, so I could see the main issues
+  - Was honestly struggling to get my mind around the whole thing, so I am going to chat with stacie tomorrow.
+### 12:00 - Technical Presentation Guidance (Megan Taylor, Brooke Bingaman)
+- Some good tips for my presentation
+  - Have 2-4 main takeaways for the audience
+    - Problem, solution, impact, future work
+### 1:30 - Presentation Work
+- After struggling through the Harbor Seal App, I decided to work on the presentation a bit, in the meantime
+  - Got through title slide and the outline, although this might change
+    - Want feedback from Stacie and Paul along the way
