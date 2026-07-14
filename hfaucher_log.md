@@ -481,3 +481,24 @@
 - After struggling through the Harbor Seal App, I decided to work on the presentation a bit, in the meantime
   - Got through title slide and the outline, although this might change
     - Want feedback from Stacie and Paul along the way
+
+## July 14th, 2026
+### 7:30 - Emails
+- Came in and read emails, got one from Lapenta about presentation
+  - Had to let them know that I will not be presenting on the 21st, but on the 5-7th.
+- Got word from Stacie that she won't be in, so I rearranged what I was going to work on
+### 8:00 - Harbor Seal Application
+- Redoing some redundant logic from global, server, and ui of harbor seal application
+### 9:00 - NESDIS - The Near Earth Orbit Network (NEON) Henry Hope
+### 10:00 - Harbor Seal Application
+- Continue redoing logic, and making UI look a little better
+  - Honestly should not have taken this long, but everytime I made a change and tested it the app took like 5 minutes to reload...
+### 12:00 - Fisheries Student Intern/Fellows - Federal Hiring Info Session
+- Some more information regarding USAJobs and other hiring information
+### 1:00 - Finishing up Harbor Seal App Changes
+- Testing and pushing commits
+### 2:00 - Presentation Work
+- Working on final presentation slides
+  - Have a good flow of slides, but if we want to present Harbor Seal App, we will need to figure out how to add it
+  - Also added some of the speaker notes of the things I definitely want to touch on
+- Want to give a trial presentation so others can ask questions and I can add slides to the end if I need visuals
