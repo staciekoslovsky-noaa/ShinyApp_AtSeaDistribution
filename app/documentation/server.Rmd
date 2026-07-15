@@ -1,0 +1,17 @@
+---
+title: "server best practices"
+author: "Haley Faucher"
+date: "2026-07-15"
+---
+
+# Best Practices
+- Use reactive variables to represent all information that will change when a species updates
+    - Species code, data, is_absolute, etc.
+    - As well as other variables that might change, latitude and longitude
+- Use observeEvents to handle user input
+    - Only allow a user to generate an analysis after pressing the generate button
+        - Any automatic updates cause a decrease in loading speed.
+- Use leafletProxy to update the map, do not render a new map
+    - Only use leafletOutput once, and update the polygons on top of it
+- Delegate computations to other functions
+    - generate_custom_analysis

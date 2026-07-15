@@ -1,0 +1,12 @@
+---
+title: "ui best practices"
+author: "Haley Faucher"
+date: "2026-07-08"
+---
+
+# Best Practices
+- Indent properly!! It makes reading through the UI to find specific items much easier
+    - Also make sure the parenthesis are easy to locate/keep track of.
+- Keep styling consistent
+    - "primary" for all dropdown tabs
+- Keep larger texts in global (like paragraphs about methods)

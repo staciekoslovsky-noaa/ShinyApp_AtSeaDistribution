@@ -1,0 +1,18 @@
+---
+title: "global documentation"
+author: "Haley Faucher"
+date: "2026-07-15"
+---
+
+# Best Practices for Global File
+- Only add load statements for packages here
+    - No load statements in any other app files
+    - No install.packages(), user should do this before usage of app
+- If other csv's are used, load them in here to a global variable, as these are referenced in other areas
+- Other variables can be used here, but only if they are large enough/worth being globally referenced.
+    - I keep the variables for the welcome, how-to-use, and methods pages here for this reason
+
+- DO NOT add variables that are only accessed within server to this file
+    - reactiveVars for logic, intermediate calculations, etc.
+- Do not do any processing in this file, all of this should be done within the server
+    - Environment set up should be done here, but likely is not/will not be necessary
