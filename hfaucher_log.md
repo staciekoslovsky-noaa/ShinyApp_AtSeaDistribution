@@ -502,3 +502,48 @@
   - Have a good flow of slides, but if we want to present Harbor Seal App, we will need to figure out how to add it
   - Also added some of the speaker notes of the things I definitely want to touch on
 - Want to give a trial presentation so others can ask questions and I can add slides to the end if I need visuals
+
+## July 15th, 2026
+### 8:00 - Presentation Work
+- Worked on making presentation look better
+  - Got notes started
+### 9:00 - Check-in
+- Talked about computer time issue
+  - Stacie submitted help ticket
+- Talked about work for the next couple weeks
+  - We may refocus on just the At-Sea Distribution app
+  - Work on presentation, talk to Paul about future plans
+    - Going to provide EBS Beluga data by EOB today to add tomorrow
+### 10:00 - Fix Computer
+- Went to OFIS to get computer fixed, all good now
+### 10:30 - Continue with Presentation Work
+- Kept editing slides and adding to notes
+### 12:00 - Aviation Weather Center (Debra Blondin)
+### 1:00 - Documentation
+- Added some file-specific documentation
+  - this likely needs to be expanded, but not sure what else we want to add
+### 2:00 - Presentation Work
+- Continue working on notes and edited slides as needed
+
+## July 16th, 2026
+### 7:30 - Emails
+- Reading emails
+  - Got one from Paul with EBS Beluga whale data
+### 8:00 - EBS Beluga Whale Data
+- Adding beluga whale data to the app, seems to be good
+  - Sent Paul an email to test
+### 10:00 - Project Meeting with Paul
+- Talked about new added data, potential standard error problems
+- Also talked about further directions for the project
+  - Adding link to methods regarding the type of data
+  - Tech memo publication work
+  - Presentation
+### 11:00 - Link to Methods
+- Added a link to the methods section for each type of data (POP, Integrated, Aerial Surveys)
+  - Sent email to Paul with this update
+    - Said it looked good
+      - Also cannot find Navy shapefile, so he will do some digging there
+      - Going to get a google Doc going for the memo
+      - Looking at standard errors for EBS beluga calculations
+### Presentation Work
+- Working on presentation notes

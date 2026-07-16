@@ -312,7 +312,6 @@ server <- function(input, output, session) {
         tags$div(
           style = "font-weight: bold; color: #555555; display: flex; justify-content: space-between; width: 100%;", 
           tags$span(paste0("Cell Area: ", formatted_area)), 
-  
           tags$span(
             paste0("Data Type: ", type),
             shiny::actionLink(
