@@ -14,3 +14,4 @@ PM,Sperm whale,Physeter macrocephalus,POPhexagons_sf.rda,relative,FALSE
 PP,Harbor porpoise,Phocoena phocoena,POPhexagons_sf.rda,relative,FALSE
 PV,Harbor seal,Phoca vitulina,POPhexagons_sf.rda,relative,FALSE
 EB,Bearded seal,Erignathus barbatus,grid_sf.RData,absolute,TRUE
+DL,Eastern Bering Sea beluga whale,Delphinapterus leucas,dl_grid_sf.RData,absolute,TRUE

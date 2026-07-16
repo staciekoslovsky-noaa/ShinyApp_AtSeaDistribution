@@ -163,7 +163,7 @@ server <- function(input, output, session) {
       domain = s_data,
       bins = quartiles(),
       pretty = FALSE,
-      na.color = "#FFFFFF80"
+      na.color = "transparent"
     )
   })
 
@@ -690,6 +690,19 @@ server <- function(input, output, session) {
       )
       
       output$stat_result <- shiny::renderTable(summary_data, colnames = FALSE)
+
+      # --- SAFETY CHECK ---
+      # Ensure estimate and SE are non-NA, finite, and strictly positive (since log() is used)
+      if (is.null(absolute_estimate) || is.null(absolute_se) ||
+          is.na(absolute_estimate)   || is.na(absolute_se)   ||
+          is.nan(absolute_estimate)  || is.nan(absolute_se)  ||
+          absolute_estimate <= 0) {
+        
+        # Return early to prevent the seq() crash
+        # (Optional: you can also show a notification to the user)
+        shiny::showNotification("No data cells found inside the selected area.", type = "warning")
+        return(NULL) 
+      }
       
       cv2        <- (absolute_se / absolute_estimate)^2
       plot_sigma <- sqrt(log(1 + cv2))
