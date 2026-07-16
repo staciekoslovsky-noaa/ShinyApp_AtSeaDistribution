@@ -23,6 +23,7 @@ ui <- shinydashboard::dashboardPage(
 
                    # Various tabs inclued in sidebar menu
                    sidebarMenu(
+                     id = "menu",
                      shinydashboard::menuItem("About This Tool",
                               tabName = "aboutpg",
                               icon = icon("info-circle")),
@@ -124,10 +125,7 @@ ui <- shinydashboard::dashboardPage(
                 });
               ")),
               br(),
-              tags$div(
-                uiOutput("area"),
-                style = "color: #2c3e50; font-size: 20px; font-weight: bold;"
-              )
+              uiOutput("area")
             ),
             
             column(4,
@@ -238,11 +236,17 @@ ui <- shinydashboard::dashboardPage(
           withMathJax(), # LaTex-like equation formatting
           p(methods_info1),
           br(),
-          p(methods_info2),
-          br(),
-          p(methods_info3),
-          br(),
-          p(methods_info4),
+          bsCollapse(id = "data_info", multiple = FALSE, open = "Platform of Opportunity (POP)",
+            bsCollapsePanel("How the POP Estimates are Generated", style = "primary", value = "Platform of Opportunity (POP)",
+              p(methods_info2)
+            ),
+            bsCollapsePanel("How Bearded Seal Estimates are Generated", style = "primary", value = "Integrated",
+              p(methods_info3)
+            ),
+            bsCollapsePanel("How EBS Beluga Estimates are Generated", style = "primary", value = "Aerial Survey",
+              p(methods_info4)
+            )
+          ),
           br(),
           p(methods_info5)
         )

@@ -305,17 +305,47 @@ server <- function(input, output, session) {
       output$area <- shiny::renderUI({
         formatted_area <- paste0(format(round(area[1], 2), big.mark = ","), " km²")
 
-        tags$span(
-          style = "font-weight: bold; color: #555555;", 
-          paste0("Cell Area: ", formatted_area)
-        )
+        code <- selected_species_code()
 
+        type <- species_codes$data_type[tolower(trimws(species_codes$code)) == tolower(trimws(code))]
+
+        tags$div(
+          style = "font-weight: bold; color: #555555; display: flex; justify-content: space-between; width: 100%;", 
+          tags$span(paste0("Cell Area: ", formatted_area)), 
+  
+          tags$span(
+            paste0("Data Type: ", type),
+            shiny::actionLink(
+              inputId = "go_to_info_page", 
+              label = "(Click for info)",
+              style = "color: #007bc2; text-decoration: underline; font-weight: bold; display: inline-block;"
+            )
+          )
+        )
       })
+  
 
       if (!is.null(uploaded_shape()) || !is.null(drawn_shape())) {
         shinyjs::enable("generate_button")
       } 
   })
+
+  shiny::observeEvent(input$go_to_info_page, {
+    code <- selected_species_code()  
+    to_open <- species_codes$data_type[tolower(trimws(species_codes$code)) == tolower(trimws(code))]
+
+      shinydashboard::updateTabItems(
+        session = session, 
+        inputId = "menu",
+        selected = "method"
+      )
+
+      shinyBS::updateCollapse(
+        session = session,
+        id = "data_info", 
+        open = to_open
+      )
+    })
 
   shiny::observeEvent(species_data(), {
      s_data <- species_data()

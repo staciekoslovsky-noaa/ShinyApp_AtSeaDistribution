@@ -199,7 +199,7 @@ methods_info1 <- div("The statistical approaches for different data integration
                      spatial distributions for the “ice free” period.",
                      style = "color: #005b96")
 
-methods_info2 <- div(h3("How the POP Estimates are Generated"),
+methods_info2 <- div(
                      p("The estimates are generated using platform-of-opportunity (POP) analyses from Jay Ver Hoef."),
                      p("Posterior means are taken from the resulting Bayesian
                        analysis for each hexagon. The sum of these cells within
@@ -231,7 +231,7 @@ methods_info2 <- div(h3("How the POP Estimates are Generated"),
                      p("A histogram is also displayed, conveying uncertainty in the small area abundance estimate. In particular, we assume a log normal sampling distribution."),
                      style = "color: #005b96")
 
-methods_info3 <- div(h3("How Bearded Seal Estimates are Generated"),
+methods_info3 <- div(
                      p("The estimates are generated using partially integrated models from Conn et al. (unpublished)."),
                      p("Seasonal models (summer: June-November; winter: December-May) were
                        fitted to data from aerial surveys, satellite tagged seals, and acoustic
@@ -241,7 +241,7 @@ methods_info3 <- div(h3("How Bearded Seal Estimates are Generated"),
                        recommend caution regarding uncertainty as estimates are almost assuredly too precise."),
                      style = "color: #005b96")
 
-methods_info4 <- div(h3("How EBS Beluga Estimates are Generated"),
+methods_info4 <- div(
                      withMathJax(
                        p("The estimates are generated using spatially-explicit density surface models,
                          as described in Ferguson et al. (2025) and Conn et al. (2026)."),
