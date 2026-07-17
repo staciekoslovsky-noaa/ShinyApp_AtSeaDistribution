@@ -42,6 +42,17 @@ ui <- shinydashboard::dashboardPage(
                    )),
 
   dashboardBody(
+    tags$head(
+      tags$style(HTML("
+        .dropdown-menu li:not(:last-child) {
+          border-bottom: 1px solid #e0e0e0; /* Light gray line between options */
+        }
+        .dropdown-menu li a {
+          padding-top: 8px !important;    /* Add a little breathing room */
+          padding-bottom: 8px !important;
+        }
+      "))
+    ),
     useShinyjs(),
     shinydashboard::tabItems(
       # About the tool tab
@@ -140,9 +151,12 @@ ui <- shinydashboard::dashboardPage(
                       bsCollapse(id = "species", open = "Select Species", multiple = FALSE,
                         bsCollapsePanel("Select Species",
                           wellPanel(
-                            selectizeInput("mapselect", "Select Marine Mammal",
-                                           choices = c("Select", as.list(sort(species_codes$species)))),
-                            selectizeInput("legendselect", "Select Legend",
+                            pickerInput("mapselect", "Select Marine Mammal",
+                                           choices = c("Select", as.list(sort(species_codes$species))),
+                                          options = list(
+                                            `size` = 7 # Limits visible options to 7, adding a scrollbar
+                                          )),
+                            pickerInput("legendselect", "Select Legend",
                                            choices = c(
                                              "Quintiles",
                                              "Low and High Density Emphasis 1",
@@ -181,7 +195,7 @@ ui <- shinydashboard::dashboardPage(
                         ), 
                         bsCollapsePanel("Custom Area Analysis",
                           fileInput("drawfile", "Upload Shapefile", accept = ".zip", multiple = TRUE),
-                          selectizeInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
+                          pickerInput("shapefile_select", "Select Shapefile", choices = c("Select", as.list(loaded_shapefiles$name))),
                           disabled(actionButton("remove_button", "Remove Shapefile")),
                           style = "info"
                         ),
