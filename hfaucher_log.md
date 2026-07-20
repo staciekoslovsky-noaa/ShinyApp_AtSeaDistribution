@@ -547,3 +547,37 @@
       - Looking at standard errors for EBS beluga calculations
 ### Presentation Work
 - Working on presentation notes
+
+## July 17th, 2026
+### 8:00 - Readding EBS Dataset
+- Original had issue with calculating CV for the local abundance
+  - Paul remade the matrix and sent to me
+  - Added to application, looks to be corrected
+### 9:00 - NOAA Corps Overview
+### 10:00 - Reading Over Tech Memo Example
+- Am feeling a bit stuck on where to begin, so I read the info that Paul sent with an example, as well as other similar applications
+### 11:30 - Strengthsfinder Session #2
+
+## July 20th, 2026
+### 7:30 - Emails
+- Reading through emails
+  - Paul sent another updated data set, as the other one had 2023 instead of 2022
+    - Instead of using this new data set, I just updated the column names of the current one
+### 8:00 - AtSeaDistribution Tech Memo
+- Working on abstract
+  - Not sure where to begin here.
+### 9:00 - National Sea Grant College Program 101
+### 9:45 - Writing Tech Memo
+- Got started on abstract, not loving the first draft
+### 10:30 - Monday Check-In
+- talked about plans for tomorrow
+  - coming in late to leave late
+- mentioned posit conference
+  - super interested in this, even if i cannot participate in it, perhaps 2027?
+### 11:15 - Writing Tech Memo
+- Redid the abstract, liked it a bit more
+- Left comments for Stacie to look over
+- Redid page numbers, gave me a bit of a hard time?
+### 12:30 - Looking into Conferences
+- Spent time looking into something like posit conference
+  - could not find anything that was still accepting abstracts
