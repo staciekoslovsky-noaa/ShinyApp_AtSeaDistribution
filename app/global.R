@@ -149,8 +149,7 @@ spatial_description <- div(h4("Spatial"),
                           )
 
 temporal_description <- div(h4("Temporal/Spatiotemporal"),
-                            "The temporal datasets show the changes in location over a specific amount of time (varies by species).
-                            The only dataset we currently have with this capability is the bearded seal dataset."
+                            "The temporal datasets show the changes in location over a specific amount of time (varies by species)."
                             )
 
 tool_descript3 <- div(
