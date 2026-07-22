@@ -581,3 +581,36 @@
 ### 12:30 - Looking into Conferences
 - Spent time looking into something like posit conference
   - could not find anything that was still accepting abstracts
+
+## July 21st, 2026
+### 9:00 - Overview of the Storm Prediction Center
+### 12:00 - Former OAR AA Craig McLean
+### 13:00 - GoTo - Your Path to NOAA: Federal Resume Writing and Hiring Process Insights as Alumni
+### 14:15 - USAJobs
+- Creating a USAJobs account to apply for jobs
+  - Working on updating resume a bit, to add to account
+
+## July 22nd, 2026
+### 8:45 - Emails
+- Responding to Josh's email about informational interview
+  - Scheduled with him
+- Sent Peter an email to schedule an interview
+  - Also sent him an invite for this
+### 9:00 - Increasing Research Impact thru Tech Transfer - NOAA TPO
+### 10:00 - Project Meeting with Paul
+- Talked about writing
+  - He will review my abstract soon
+- Went over presentation so far
+  - Got feedback to add an intro to what is Shiny/R (to do today)
+- Talked about conferences with Stacie
+  - Going to send an email to Dr. Roohr to ask to attend Posit virtually 
+    - Will still share presentation at UNH URC
+### 10:30 - Emails
+- Sent email to Dr. Roohr
+### 11:30 - Updating Presentation Notes to contain R/Shiny background
+- Added suggested background info to notes for presentation
+### 12:00 - Writing Tech Memo
+- Trying to get a feel for how this introduction should look
+  - Need more info on the exact problem that this application is solving
+- Paul made edits to the abstract, it looks pretty good now!
+  - Trying to decide on an acronym we could use
