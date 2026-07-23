@@ -614,3 +614,21 @@
   - Need more info on the exact problem that this application is solving
 - Paul made edits to the abstract, it looks pretty good now!
   - Trying to decide on an acronym we could use
+
+## July 23rd, 2026
+### 7:45 - Emails
+- Reading emails about grass fire? and situational telework
+### 8:00 - Tech Memo Writing
+- Began writing types of data products section
+  - Most came from the application information itself
+### 9:00 - NWS Sub-seasonal to Seasonal Prediction of the Climate System
+### 10:00 - Walk
+### 10:15 - Tech Memo Writing
+- Finished types of data products section
+- Had some back and forth with Paul about which sections to work on
+  - He is going to do the work for the different data product information
+  - I am moving onto the application features section
+- A bit stuck on the introductory paragraph for the Application Features section
+### 12:00 - R&D at NWS Weather Prediction Center
+### 13:00 - Tech Memo Writing
+- Looking for inspiration on the intro paragraph for Application Features
