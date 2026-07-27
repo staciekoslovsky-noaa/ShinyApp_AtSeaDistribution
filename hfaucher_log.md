@@ -632,3 +632,23 @@
 ### 12:00 - R&D at NWS Weather Prediction Center
 ### 13:00 - Tech Memo Writing
 - Looking for inspiration on the intro paragraph for Application Features
+
+## July 24th, 2026
+### 8:00 - Tech Memo Writing
+- Wrote the Application Features and Summary sections of the tech memo
+### 12:00 - Innovating for Tomorrow: Advancing Severe Weather Prediction at NSSL
+### Meeting with Daryl Kleist of OMD
+- Talking about what requirements there are for the office
+  - Grad school vs experience
+  - Specific skills
+
+## July 27th, 2026
+### 7:45 - Presentation Notes
+- Working on presentation notes for next week
+  - Sending Paul and Stacie an email for the title of the presentation
+## 9:00 - Sustaining Wellness
+### 10:00 - Presentation Notes
+- Filmed demo
+- Finished writing notes (not question slides)
+- Sent Dr. Roohr an email with the title of the presentation
+### 12:00 - RADM Gallaudet
