@@ -652,3 +652,13 @@
 - Finished writing notes (not question slides)
 - Sent Dr. Roohr an email with the title of the presentation
 ### 12:00 - RADM Gallaudet
+
+## July 28th, 2026
+### 8:00 - Emails
+- Final(ish) Lapenta presentation schedule was sent out
+  - My presentation is Thursday, August 6th at 11 PT/2pm ET
+### 8:15 - Information Interview Questions
+- Working on questions to ask Peter for informational interview tomorrow
+### 9:00 - Resume
+- Rewriting my resume on Google docs for easier updating and styling
+### 11:00 - MBTI Session
