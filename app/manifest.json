@@ -2795,9 +2795,9 @@
         "Package": "raster",
         "Type": "Package",
         "Title": "Geographic Data Analysis and Modeling",
-        "Version": "3.6-32",
-        "Date": "2025-03-27",
-        "Imports": "Rcpp, methods, terra (>= 1.8-5)",
+        "Version": "3.6-26",
+        "Date": "2023-10-12",
+        "Imports": "Rcpp, methods, terra (>= 1.7-29)",
         "LinkingTo": "Rcpp",
         "Depends": "sp (>= 1.4-5), R (>= 3.5.0)",
         "Suggests": "ncdf4, igraph, tcltk, parallel, rasterVis, MASS, sf,\ntinytest, gstat, fields, exactextractr",
@@ -2807,12 +2807,13 @@
         "BugReports": "https://github.com/rspatial/raster/issues/",
         "Authors@R": "c(\n\tperson(\"Robert J.\", \"Hijmans\", role = c(\"cre\", \"aut\"),  \n\t\t\temail = \"r.hijmans@gmail.com\", \n\t\t\tcomment = c(ORCID = \"0000-0001-5872-2872\")),\n\tperson(\"Jacob\", \"van Etten\", role = \"ctb\"),\n\tperson(\"Michael\", \"Sumner\", role = \"ctb\"),\n\tperson(\"Joe\", \"Cheng\", role = \"ctb\"),\n\tperson(\"Dan\", \"Baston\", role = \"ctb\"),\n\tperson(\"Andrew\", \"Bevan\", role = \"ctb\"),\n\tperson(\"Roger\", \"Bivand\", role = \"ctb\"),\n\tperson(\"Lorenzo\", \"Busetto\", role = \"ctb\"),\n\tperson(\"Mort\", \"Canty\", role = \"ctb\"),\n\tperson(\"Ben\", \"Fasoli\", role = \"ctb\"),\n\tperson(\"David\", \"Forrest\", role = \"ctb\"),\n\tperson(\"Aniruddha\", \"Ghosh\", role = \"ctb\"),\n\tperson(\"Duncan\", \"Golicher\", role = \"ctb\"),\n\tperson(\"Josh\", \"Gray\", role = \"ctb\"),\n\tperson(\"Jonathan A.\", \"Greenberg\", role = \"ctb\"),\n\tperson(\"Paul\", \"Hiemstra\", role = \"ctb\"),\n\tperson(\"Kassel\", \"Hingee\", role = \"ctb\"),\n\tperson(\"Alex\", \"Ilich\", role = \"ctb\"),\n\tperson(\"Institute for Mathematics Applied Geosciences\", role=\"cph\"),\n\tperson(\"Charles\", \"Karney\", role = \"ctb\"),\n\tperson(\"Matteo\", \"Mattiuzzi\", role = \"ctb\"),\n\tperson(\"Steven\", \"Mosher\", role = \"ctb\"),\n\tperson(\"Babak\", \"Naimi\", role = \"ctb\"),\t\n\tperson(\"Jakub\", \"Nowosad\", role = \"ctb\"),\n\tperson(\"Edzer\", \"Pebesma\", role = \"ctb\"),\n\tperson(\"Oscar\", \"Perpinan Lamigueiro\", role = \"ctb\"),\n\tperson(\"Etienne B.\", \"Racine\", role = \"ctb\"),\n\tperson(\"Barry\", \"Rowlingson\", role = \"ctb\"),\n\tperson(\"Ashton\", \"Shortridge\", role = \"ctb\"),\n\tperson(\"Bill\", \"Venables\", role = \"ctb\"),\n\tperson(\"Rafael\", \"Wueest\", role = \"ctb\")\n\t)",
         "NeedsCompilation": "yes",
-        "Packaged": "2025-03-28 04:28:45 UTC; rhijm",
+        "Packaged": "2023-10-12 15:29:22 UTC; rhijm",
         "Author": "Robert J. Hijmans [cre, aut] (<https://orcid.org/0000-0001-5872-2872>),\n  Jacob van Etten [ctb],\n  Michael Sumner [ctb],\n  Joe Cheng [ctb],\n  Dan Baston [ctb],\n  Andrew Bevan [ctb],\n  Roger Bivand [ctb],\n  Lorenzo Busetto [ctb],\n  Mort Canty [ctb],\n  Ben Fasoli [ctb],\n  David Forrest [ctb],\n  Aniruddha Ghosh [ctb],\n  Duncan Golicher [ctb],\n  Josh Gray [ctb],\n  Jonathan A. Greenberg [ctb],\n  Paul Hiemstra [ctb],\n  Kassel Hingee [ctb],\n  Alex Ilich [ctb],\n  Institute for Mathematics Applied Geosciences [cph],\n  Charles Karney [ctb],\n  Matteo Mattiuzzi [ctb],\n  Steven Mosher [ctb],\n  Babak Naimi [ctb],\n  Jakub Nowosad [ctb],\n  Edzer Pebesma [ctb],\n  Oscar Perpinan Lamigueiro [ctb],\n  Etienne B. Racine [ctb],\n  Barry Rowlingson [ctb],\n  Ashton Shortridge [ctb],\n  Bill Venables [ctb],\n  Rafael Wueest [ctb]",
         "Maintainer": "Robert J. Hijmans <r.hijmans@gmail.com>",
-        "Repository": "CRAN",
-        "Date/Publication": "2025-03-28 08:10:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 15:35:18 UTC; windows",
+        "Repository": "RSPM",
+        "Date/Publication": "2023-10-14 13:40:12 UTC",
+        "Encoding": "UTF-8",
+        "Built": "R 4.3.0; x86_64-w64-mingw32; 2024-01-23 04:36:18 UTC; windows",
         "Archs": "x64"
       }
     },
@@ -3711,28 +3712,28 @@
         "Package": "terra",
         "Type": "Package",
         "Title": "Spatial Data Analysis",
-        "Version": "1.9-34",
-        "Date": "2026-06-18",
-        "Depends": "R (>= 3.5.0), methods",
-        "Suggests": "parallel, tinytest, ncdf4, sf (>= 0.9-8), igraph, deldir,\nXML, leaflet (>= 2.2.1), htmlwidgets, future, future.apply",
+        "Version": "1.7-71",
+        "Date": "2024-01-31",
+        "Depends": "R (>= 3.5.0)",
+        "Suggests": "parallel, tinytest, ncdf4, sf (>= 0.9-8), deldir, XML,\nleaflet (>= 2.2.1), htmlwidgets",
         "LinkingTo": "Rcpp",
-        "Imports": "Rcpp (>= 1.0-10)",
-        "SystemRequirements": "C++17, GDAL (>= 2.2.3), GEOS (>= 3.4.0), PROJ (>=\n4.9.3), TBB, sqlite3",
+        "Imports": "methods, Rcpp (>= 1.0-10)",
+        "SystemRequirements": "C++17, GDAL (>= 2.2.3), GEOS (>= 3.4.0), PROJ (>=\n4.9.3), sqlite3",
         "Encoding": "UTF-8",
         "Language": "en-US",
         "Maintainer": "Robert J. Hijmans <r.hijmans@gmail.com>",
-        "Description": "Methods for spatial data analysis with vector (points, lines, polygons) and raster (grid) data. Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction, including with satellite remote sensing data. Processing of very large files is supported. See the manual and tutorials on <https://rspatial.org/> to get started.",
+        "Description": "Methods for spatial data analysis with vector (points, lines, polygons) and raster (grid) data. Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction, including with satellite remote sensing data. Processing of very large files is supported. See the manual and tutorials on <https://rspatial.org/> to get started. 'terra' replaces the 'raster' package ('terra' can do more, and it is faster and easier to use).",
         "License": "GPL (>= 3)",
         "URL": "https://rspatial.org/, https://rspatial.github.io/terra/",
-        "BugReports": "https://github.com/rspatial/terra/issues",
+        "BugReports": "https://github.com/rspatial/terra/issues/",
         "LazyLoad": "yes",
-        "Authors@R": "c(\n\tperson(\"Robert J.\", \"Hijmans\", role=c(\"cre\", \"aut\"),  \n\t\t\temail=\"r.hijmans@gmail.com\", comment=c(ORCID=\"0000-0001-5872-2872\")),\t\t\t\n    person(\"Andrew\", \"Brown\", role=\"aut\", comment=c(ORCID=\"0000-0002-4565-533X\")),\n    person(\"Márcia\", \"Barbosa\", role=\"aut\", comment=c(ORCID=\"0000-0001-8972-7713\")),\n    person(\"Krzysztof\", \"Dyba\", role=\"ctb\", comment=c(ORCID=\"0000-0002-8614-3816\")),\n    person(\"Roger\", \"Bivand\", role=\"ctb\", comment=c(ORCID=\"0000-0003-2392-6140\")),\n    person(\"Michael\", \"Chirico\", role=\"ctb\", comment=c(ORCID=\"0000-0003-0787-087X\")),\n    person(\"Emanuele\", \"Cordano\", role=\"ctb\",comment=c(ORCID=\"0000-0002-3508-5898\")),\n    person(\"Edzer\", \"Pebesma\", role=\"ctb\", comment=c(ORCID=\"0000-0001-8049-7069\")),\n    person(\"Barry\", \"Rowlingson\", role=\"ctb\", comment=c(ORCID=\"0000-0002-8586-6625\")),\n    person(\"Michael D.\", \"Sumner\", role=\"ctb\", comment=c(ORCID=\"0000-0002-2471-7511\")))",
+        "Authors@R": "c(\n\tperson(\"Robert J.\", \"Hijmans\", role = c(\"cre\", \"aut\"),  \n\t\t\temail = \"r.hijmans@gmail.com\", comment = c(ORCID = \"0000-0001-5872-2872\")),\n    person(\"Roger\", \"Bivand\",  role = \"ctb\", comment = c(ORCID = \"0000-0003-2392-6140\")),\n    person(\"Edzer\", \"Pebesma\", role = \"ctb\", comment = c(ORCID = \"0000-0001-8049-7069\")),\n    person(\"Michael D.\", \"Sumner\", role = \"ctb\"))",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-06-19 03:43:47 UTC; rhijm",
-        "Author": "Robert J. Hijmans [cre, aut] (ORCID:\n    <https://orcid.org/0000-0001-5872-2872>),\n  Andrew Brown [aut] (ORCID: <https://orcid.org/0000-0002-4565-533X>),\n  Márcia Barbosa [aut] (ORCID: <https://orcid.org/0000-0001-8972-7713>),\n  Krzysztof Dyba [ctb] (ORCID: <https://orcid.org/0000-0002-8614-3816>),\n  Roger Bivand [ctb] (ORCID: <https://orcid.org/0000-0003-2392-6140>),\n  Michael Chirico [ctb] (ORCID: <https://orcid.org/0000-0003-0787-087X>),\n  Emanuele Cordano [ctb] (ORCID: <https://orcid.org/0000-0002-3508-5898>),\n  Edzer Pebesma [ctb] (ORCID: <https://orcid.org/0000-0001-8049-7069>),\n  Barry Rowlingson [ctb] (ORCID: <https://orcid.org/0000-0002-8586-6625>),\n  Michael D. Sumner [ctb] (ORCID:\n    <https://orcid.org/0000-0002-2471-7511>)",
-        "Repository": "CRAN",
-        "Date/Publication": "2026-06-19 15:10:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-21 23:51:24 UTC; windows",
+        "Packaged": "2024-01-31 07:01:10 UTC; rhijm",
+        "Author": "Robert J. Hijmans [cre, aut] (<https://orcid.org/0000-0001-5872-2872>),\n  Roger Bivand [ctb] (<https://orcid.org/0000-0003-2392-6140>),\n  Edzer Pebesma [ctb] (<https://orcid.org/0000-0001-8049-7069>),\n  Michael D. Sumner [ctb]",
+        "Repository": "RSPM",
+        "Date/Publication": "2024-01-31 16:20:02 UTC",
+        "Built": "R 4.3.0; x86_64-w64-mingw32; 2024-02-01 11:58:31 UTC; windows",
         "Archs": "x64"
       }
     },
@@ -4397,7 +4398,7 @@
   },
   "files": {
     ".Rprofile": {
-      "checksum": "b94ee56d7cfc956fdc69c5a2f602176e"
+      "checksum": "29ed46b0cdba615bbd5a354f7b756a0f"
     },
     "data/BA_MCMC.RData": {
       "checksum": "211b06a6ceffe52b001b4d676beda651"
@@ -4478,7 +4479,7 @@
       "checksum": "8e01fb8d17c48c0539fe33908413f438"
     },
     "renv.lock": {
-      "checksum": "e46e4402b8a06ace2afafbbcdd6b3137"
+      "checksum": "80a8c2b7ca8810d796dc1e8e054ca6b0"
     },
     "server.R": {
       "checksum": "c58bc822a146e38a3ce3cae7d9a7c50d"
