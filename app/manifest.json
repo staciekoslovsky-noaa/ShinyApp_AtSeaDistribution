@@ -377,6 +377,31 @@
         "Built": "R 4.5.3; ; 2026-06-18 16:05:43 UTC; windows"
       }
     },
+    "brew": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Type": "Package",
+        "Package": "brew",
+        "Title": "Templating Framework for Report Generation",
+        "Version": "1.0-10",
+        "Authors@R": "c(\n    person(\"Jeffrey\", \"Horner\", role = c(\"aut\", \"cph\")),\n    person(\"Greg\", \"Hunt\", , \"greg@firmansyah.com\", role = c(\"aut\", \"cre\", \"cph\"))\n  )",
+        "Description": "Implements a templating framework for mixing text and R code\n    for report generation. brew template syntax is similar to PHP, Ruby's\n    erb module, Java Server Pages, and Python's psp module.",
+        "License": "GPL (>= 2)",
+        "URL": "https://github.com/gregfrog/brew",
+        "BugReports": "https://github.com/gregfrog/brew/issues",
+        "Suggests": "testthat (>= 3.0.0)",
+        "Config/testthat/edition": "3",
+        "Encoding": "UTF-8",
+        "Repository": "CRAN",
+        "NeedsCompilation": "no",
+        "Packaged": "2023-12-16 07:21:30 UTC; greg",
+        "Author": "Jeffrey Horner [aut, cph],\n  Greg Hunt [aut, cre, cph]",
+        "Maintainer": "Greg Hunt <greg@firmansyah.com>",
+        "Date/Publication": "2023-12-16 08:30:02 UTC",
+        "Built": "R 4.5.3; ; 2026-06-18 14:16:49 UTC; windows"
+      }
+    },
     "broom": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1215,6 +1240,68 @@
         "Built": "R 4.5.3; ; 2026-06-18 14:16:26 UTC; windows"
       }
     },
+    "geojsonsf": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "geojsonsf",
+        "Type": "Package",
+        "Title": "GeoJSON to Simple Feature Converter",
+        "Version": "2.0.5",
+        "Date": "2025-11-25",
+        "Authors@R": "c(\n    person(\"David\", \"Cooley\", ,\"dcooley@symbolix.com.au\", role = c(\"aut\", \"cre\")),\n    person(\"Andy\", \"Teucher\", ,\"andy.teucher@gmail.com\", role = \"ctb\")\n    )",
+        "Description": "Converts Between GeoJSON and simple feature objects. ",
+        "License": "MIT + file LICENSE",
+        "URL": "https://github.com/SymbolixAU/geojsonsf",
+        "BugReports": "https://github.com/SymbolixAU/geojsonsf/issues",
+        "Encoding": "UTF-8",
+        "LazyData": "true",
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "Rcpp (>= 1.1.0)",
+        "LinkingTo": "geometries (>= 0.2.5), jsonify (>= 1.2.3), rapidjsonr (>=\n1.2.1), Rcpp, sfheaders (>= 0.4.5)",
+        "RoxygenNote": "7.3.3",
+        "Suggests": "covr, jsonify, knitr, rmarkdown, tinytest",
+        "VignetteBuilder": "knitr",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-11-26 08:50:31 UTC; david",
+        "Author": "David Cooley [aut, cre],\n  Andy Teucher [ctb]",
+        "Maintainer": "David Cooley <dcooley@symbolix.com.au>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-11-26 10:00:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 15:38:05 UTC; windows",
+        "Archs": "x64"
+      }
+    },
+    "geometries": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "geometries",
+        "Type": "Package",
+        "Title": "Convert Between R Objects and Geometric Structures",
+        "Date": "2025-11-23",
+        "Version": "0.2.5",
+        "Authors@R": "c(\n    person(\"David\", \"Cooley\", ,\"david.cooley.au@gmail.com\", role = c(\"aut\", \"cre\"))\n    )",
+        "Description": "Geometry shapes in 'R' are typically represented by matrices (points, lines), with more complex \n  shapes being lists of matrices (polygons). 'Geometries' will convert various 'R' objects into these shapes. \n  Conversion functions are available at both the 'R' level, and through 'Rcpp'.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://dcooley.github.io/geometries/",
+        "BugReports": "https://github.com/dcooley/geometries/issues",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.2.3",
+        "LinkingTo": "Rcpp",
+        "Imports": "Rcpp (>= 1.1.0)",
+        "Suggests": "covr, knitr, rmarkdown, tinytest",
+        "VignetteBuilder": "knitr",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-11-23 16:09:52 UTC; david",
+        "Author": "David Cooley [aut, cre]",
+        "Maintainer": "David Cooley <david.cooley.au@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-11-23 16:30:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 14:19:31 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "ggplot2": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1685,6 +1772,36 @@
         "Built": "R 4.5.3; ; 2026-06-18 15:35:03 UTC; windows"
       }
     },
+    "jsonify": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "jsonify",
+        "Type": "Package",
+        "Title": "Convert Between 'R' Objects and Javascript Object Notation\n(JSON)",
+        "Version": "1.2.3",
+        "Date": "2025-11-24",
+        "Authors@R": "c(\n    person(\"David\", \"Cooley\", ,\"dcooley@symbolix.com.au\", role = c(\"aut\", \"cre\")),\n    person(\"Chris\", \"Muir\", role = \"ctb\"),\n    person(\"Brendan\", \"Knapp\", role = \"ctb\", comment = c(ORCID = \"0000-0003-3284-4972\"))\n    )",
+        "Description": "Conversions between 'R' objects and Javascript Object Notation (JSON) using \n    the 'rapidjsonr' library <https://CRAN.R-project.org/package=rapidjsonr>. ",
+        "License": "MIT + file LICENSE",
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "Rcpp (>= 1.1.0)",
+        "LinkingTo": "rapidjsonr (>= 1.2.1), Rcpp",
+        "RoxygenNote": "7.3.2",
+        "Suggests": "covr, testthat, knitr, rmarkdown",
+        "Encoding": "UTF-8",
+        "URL": "https://symbolixau.github.io/jsonify/,\nhttps://github.com/SymbolixAU/jsonify",
+        "BugReports": "https://github.com/SymbolixAU/jsonify/issues",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-11-24 13:03:46 UTC; david",
+        "Author": "David Cooley [aut, cre],\n  Chris Muir [ctb],\n  Brendan Knapp [ctb] (ORCID: <https://orcid.org/0000-0003-3284-4972>)",
+        "Maintainer": "David Cooley <dcooley@symbolix.com.au>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-11-25 19:22:12 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 14:19:31 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "jsonlite": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1854,6 +1971,32 @@
         "Archs": "x64"
       }
     },
+    "leafem": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "leafem",
+        "Title": "'leaflet' Extensions for 'mapview'",
+        "Version": "0.2.5",
+        "Authors@R": "\n    c(person(given = \"Tim\",\n             family = \"Appelhans\",\n             role = c(\"cre\", \"aut\"),\n             email = \"tim.appelhans@gmail.com\"),\n      person(given = \"Christoph\",\n             family = \"Reudenbach\",\n             role = \"ctb\",\n             email = \"reudenbach@geo.uni-marburg.de\"),\n      person(given = \"Kenton\",\n             family = \"Russell\",\n             role = \"ctb\"),\n      person(given = \"Jochen\",\n             family = \"Darley\",\n             role = \"ctb\",\n             email = \"Debugger@jedimasters.de\"),\n      person(given = \"Daniel\",\n             family = \"Montague\",\n             role = c(\"ctb\", \"cph\"), \n             comment = \"Leaflet.EasyButton plugin\"),\n      person(given = \"Lorenzo\",\n             family = \"Busetto\",\n             role = c(\"ctb\"), \n             email = \"lbusett@gmail.com\"),\n      person(given = \"Luigi\",\n             family = \"Ranghetti\",\n             role = c(\"ctb\")),\n      person(given = \"Miles\",\n             family = \"McBain\",\n             role = c(\"ctb\")),\n      person(given = \"Sebastian\",\n             family = \"Gatscha\",\n             role = \"ctb\",\n             email = \"sebastian_gatscha@gmx.at\"),\n      person(given = \"Björn\",\n             family = \"Harrtell\",\n             role = c(\"ctb\", \"cph\"),\n             comment = \"FlatGeobuf plugin\"),\n      person(given = \"Daniel\",\n             family = \"Dufour\",\n             role = c(\"ctb\", \"cph\"),\n             comment = \"georaster-layer-for-leaflet\"),\n      person(given = \"Yeedle\",\n             family = \"Neuwirth\",\n             role = \"ctb\"),\n      person(given = \"Derek\",\n             family = \"Friend\",\n             role = \"ctb\",\n             email = \"dafriend.r@gmail.com\"),\n      person(given = \"Kevin\",  \n             family = \"Cazelles\", \n             role = \"ctb\",\n             email = \"kevin.cazelles@gmail.com\", \n             comment = c(ORCID = \"0000-0001-6619-9874\")))",
+        "Maintainer": "Tim Appelhans <tim.appelhans@gmail.com>",
+        "Description": "Provides extensions for packages 'leaflet' & 'mapdeck', \n    many of which are used by package 'mapview'. \n    Focus is on functionality readily available in \n    Geographic Information Systems such as 'Quantum GIS'. Includes functions\n    to display coordinates of mouse pointer position, query image values via \n    mouse pointer and zoom-to-layer buttons. Additionally, provides a feature \n    type agnostic function to add points, lines, polygons to a map.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://github.com/r-spatial/leafem,\nhttps://r-spatial.github.io/leafem/",
+        "BugReports": "https://github.com/r-spatial/leafem/issues",
+        "Depends": "R (>= 3.1.0)",
+        "Imports": "base64enc, geojsonsf, htmltools (>= 0.3), htmlwidgets,\njsonlite, leaflet (>= 2.0.1), methods, raster, sf, png",
+        "Suggests": "clipr, fontawesome, leafgl, lwgeom, mapdeck, plainview,\nstars, terra, tools",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-08-28 09:00:52 UTC; tim",
+        "Author": "Tim Appelhans [cre, aut],\n  Christoph Reudenbach [ctb],\n  Kenton Russell [ctb],\n  Jochen Darley [ctb],\n  Daniel Montague [ctb, cph] (Leaflet.EasyButton plugin),\n  Lorenzo Busetto [ctb],\n  Luigi Ranghetti [ctb],\n  Miles McBain [ctb],\n  Sebastian Gatscha [ctb],\n  Björn Harrtell [ctb, cph] (FlatGeobuf plugin),\n  Daniel Dufour [ctb, cph] (georaster-layer-for-leaflet),\n  Yeedle Neuwirth [ctb],\n  Derek Friend [ctb],\n  Kevin Cazelles [ctb] (ORCID: <https://orcid.org/0000-0001-6619-9874>)",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-08-28 12:30:02 UTC",
+        "Built": "R 4.5.3; ; 2026-06-18 17:26:34 UTC; windows"
+      }
+    },
     "leaflet": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1941,6 +2084,33 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-03-18 21:50:08 UTC",
         "Built": "R 4.5.3; ; 2026-06-18 15:35:28 UTC; windows"
+      }
+    },
+    "leafpop": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "leafpop",
+        "Type": "Package",
+        "Title": "Include Tables, Images and Graphs in Leaflet Pop-Ups",
+        "Version": "0.1.0",
+        "Date": "2021-05-22",
+        "Authors@R": "\n    c(person(given = \"Tim\",\n             family = \"Appelhans\",\n             role = c(\"cre\", \"aut\"),\n             email = \"tim.appelhans@gmail.com\"),\n      person(given = \"Florian\",\n             family = \"Detsch\",\n             role = \"aut\",\n             email = \"fdetsch@web.de\"))",
+        "Maintainer": "Tim Appelhans <tim.appelhans@gmail.com>",
+        "Description": "Creates 'HTML' strings to embed tables, images or graphs in pop-ups\n  of interactive maps created with packages like 'leaflet' or 'mapview'. Handles\n  local images located on the file system or via remote URL. Handles graphs created \n  with 'lattice' or 'ggplot2' as well as interactive plots created with 'htmlwidgets'.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://github.com/r-spatial/leafpop",
+        "BugReports": "https://github.com/r-spatial/leafpop/issues",
+        "Encoding": "UTF-8",
+        "Imports": "base64enc, brew, htmltools, htmlwidgets, sf, svglite, uuid",
+        "Suggests": "lattice, leaflet (>= 2.0.0), sp",
+        "RoxygenNote": "7.1.1",
+        "NeedsCompilation": "no",
+        "Packaged": "2021-05-22 09:14:01 UTC; timpanse",
+        "Author": "Tim Appelhans [cre, aut],\n  Florian Detsch [aut]",
+        "Repository": "CRAN",
+        "Date/Publication": "2021-05-22 10:10:03 UTC",
+        "Built": "R 4.5.3; ; 2026-06-18 16:59:49 UTC; windows"
       }
     },
     "lifecycle": {
@@ -2035,6 +2205,35 @@
         "Date/Publication": "2026-04-04 08:00:02 UTC",
         "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 14:16:27 UTC; windows",
         "Archs": "x64"
+      }
+    },
+    "mapview": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "mapview",
+        "Title": "Interactive Viewing of Spatial Data in R",
+        "Version": "2.11.4",
+        "Authors@R": "\n    c(person(given = \"Tim\",\n             family = \"Appelhans\",\n             role = c(\"cre\", \"aut\"),\n             email = \"tim.appelhans@gmail.com\"),\n      person(given = \"Florian\",\n             family = \"Detsch\",\n             role = \"aut\",\n             email = \"fdetsch@web.de\"),\n      person(given = \"Christoph\",\n             family = \"Reudenbach\",\n             role = \"aut\",\n             email = \"reudenbach@geo.uni-marburg.de\"),\n      person(given = \"Stefan\",\n             family = \"Woellauer\",\n             role = \"aut\",\n             email = \"stephan.woellauer@geo.uni-marburg.de\"),\n      person(given = \"Spaska\",\n             family = \"Forteva\",\n             role = \"ctb\",\n             email = \"spaska.forteva@geo.uni-marburg.de\"),\n      person(given = \"Thomas\",\n             family = \"Nauss\",\n             role = \"ctb\",\n             email = \"nauss@staff.uni-marburg.de\"),\n      person(given = \"Edzer\",\n             family = \"Pebesma\",\n             role = \"ctb\"),\n      person(given = \"Kenton\",\n             family = \"Russell\",\n             role = \"ctb\"),\n      person(given = \"Michael\",\n             family = \"Sumner\",\n             role = \"ctb\"),\n      person(given = \"Jochen\",\n             family = \"Darley\",\n             role = \"ctb\",\n             email = \"Debugger@jedimasters.de\"),\n      person(given = \"Pierre\",\n             family = \"Roudier\",\n             role = \"ctb\"),\n      person(given = \"Patrick\",\n             family = \"Schratz\",\n             role = \"ctb\"),\n      person(given = \"Environmental Informatics Marburg\",\n             role = \"ctb\"),\n      person(given = \"Lorenzo\",\n             family = \"Busetto\",\n             role = \"ctb\"))",
+        "Maintainer": "Tim Appelhans <tim.appelhans@gmail.com>",
+        "Description": "Quickly and conveniently create interactive\n    visualisations of spatial data with or without background maps.\n    Attributes of displayed features are fully queryable via pop-up\n    windows. Additional functionality includes methods to visualise true-\n    and false-color raster images and bounding boxes.",
+        "License": "GPL (>= 3) | file LICENSE",
+        "URL": "https://github.com/r-spatial/mapview,\nhttps://r-spatial.github.io/mapview/",
+        "BugReports": "https://github.com/r-spatial/mapview/issues",
+        "Depends": "methods, R (>= 3.6.0)",
+        "Imports": "base64enc, htmltools, htmlwidgets, lattice, leafem, leaflet\n(>= 2.0.0), leafpop, png, raster (>= 3.6.3), satellite, scales\n(>= 0.2.5), servr, sf, sp",
+        "Suggests": "knitr, later, leaflet.extras2, leafsync, lwgeom, mapdeck,\nplainview, poorman, rmarkdown, rstudioapi, s2, stars, tinytest,\nwebshot, webshot2",
+        "ByteCompile": "yes",
+        "Encoding": "UTF-8",
+        "LazyData": "TRUE",
+        "RoxygenNote": "7.3.2",
+        "SystemRequirements": "GNU make",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-09-05 08:14:37 UTC; tim",
+        "Author": "Tim Appelhans [cre, aut],\n  Florian Detsch [aut],\n  Christoph Reudenbach [aut],\n  Stefan Woellauer [aut],\n  Spaska Forteva [ctb],\n  Thomas Nauss [ctb],\n  Edzer Pebesma [ctb],\n  Kenton Russell [ctb],\n  Michael Sumner [ctb],\n  Jochen Darley [ctb],\n  Pierre Roudier [ctb],\n  Patrick Schratz [ctb],\n  Environmental Informatics Marburg [ctb],\n  Lorenzo Busetto [ctb]",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-09-08 07:00:18 UTC",
+        "Built": "R 4.5.3; ; 2026-06-18 17:54:00 UTC; windows"
       }
     },
     "memoise": {
@@ -2229,6 +2428,35 @@
         "Repository": "CRAN",
         "Date/Publication": "2019-09-22 09:20:02 UTC",
         "Built": "R 4.5.3; ; 2026-06-18 14:16:29 UTC; windows"
+      }
+    },
+    "plyr": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "plyr",
+        "Title": "Tools for Splitting, Applying and Combining Data",
+        "Version": "1.8.9",
+        "Authors@R": "\n    person(\"Hadley\", \"Wickham\", , \"hadley@rstudio.com\", role = c(\"aut\", \"cre\"))",
+        "Description": "A set of tools that solves a common set of problems: you need\n    to break a big problem down into manageable pieces, operate on each\n    piece and then put all the pieces back together.  For example, you\n    might want to fit a model to each spatial location or time point in\n    your study, summarise data by panels or collapse high-dimensional\n    arrays to simpler summary statistics. The development of 'plyr' has\n    been generously supported by 'Becton Dickinson'.",
+        "License": "MIT + file LICENSE",
+        "URL": "http://had.co.nz/plyr, https://github.com/hadley/plyr",
+        "BugReports": "https://github.com/hadley/plyr/issues",
+        "Depends": "R (>= 3.1.0)",
+        "Imports": "Rcpp (>= 0.11.0)",
+        "Suggests": "abind, covr, doParallel, foreach, iterators, itertools,\ntcltk, testthat",
+        "LinkingTo": "Rcpp",
+        "Encoding": "UTF-8",
+        "LazyData": "true",
+        "RoxygenNote": "7.2.3",
+        "NeedsCompilation": "yes",
+        "Packaged": "2023-09-27 13:58:04 UTC; hadleywickham",
+        "Author": "Hadley Wickham [aut, cre]",
+        "Maintainer": "Hadley Wickham <hadley@rstudio.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2023-10-02 06:50:08 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 15:10:40 UTC; windows",
+        "Archs": "x64"
       }
     },
     "png": {
@@ -2491,6 +2719,30 @@
         "Date/Publication": "2026-03-23 08:50:08 UTC",
         "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 16:05:50 UTC; windows",
         "Archs": "x64"
+      }
+    },
+    "rapidjsonr": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "rapidjsonr",
+        "Type": "Package",
+        "Title": "'Rapidjson' C++ Header Files",
+        "Version": "1.2.1",
+        "Date": "2025-11-23",
+        "Authors@R": "c(\n    person(\"David\", \"Cooley\", ,\"dcooley@symbolix.com.au\", role = c(\"aut\", \"cre\")),\n    person(\"Milo\", \"Yip\", , role = \"ctb\", comment = \"Author of c++ rapidjson library, provided through THL A29 Limited, a Tencent company\"),\n    person(\"Alexander\", \"Chemeris\", role = \"ctb\", comment = \"Author of c++ msinttypes library\")\n    )",
+        "Description": "Provides JSON parsing capability through the 'Rapidjson' 'C++' header-only library. ",
+        "License": "MIT + file LICENSE",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.1",
+        "SystemRequirements": "GNU make",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-11-23 16:12:43 UTC; david",
+        "Author": "David Cooley [aut, cre],\n  Milo Yip [ctb] (Author of c++ rapidjson library, provided through THL\n    A29 Limited, a Tencent company),\n  Alexander Chemeris [ctb] (Author of c++ msinttypes library)",
+        "Maintainer": "David Cooley <dcooley@symbolix.com.au>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-11-24 08:50:07 UTC",
+        "Built": "R 4.5.2; ; 2025-12-03 00:54:34 UTC; windows"
       }
     },
     "rappdirs": {
@@ -2882,6 +3134,36 @@
         "Archs": "x64"
       }
     },
+    "satellite": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "satellite",
+        "Title": "Handling and Manipulating Remote Sensing Data",
+        "Version": "1.0.6",
+        "Authors@R": "c(\n        person(given = \"Thomas\",\n               family = \"Nauss\",\n               role = \"aut\"),\n        person(given = \"Hanna\",\n               family = \"Meyer\",\n               role = \"aut\"),\n        person(given = \"Tim\",\n               family = \"Appelhans\",\n               role = \"aut\"),\n        person(given = \"Florian\",\n               family = \"Detsch\",\n               role = c(\"aut\", \"cre\"),\n               email = \"fdetsch@web.de\"))",
+        "Description": "Herein, we provide a broad variety of functions which are useful\n    for handling, manipulating, and visualizing satellite-based remote sensing \n    data. These operations range from mere data import and layer handling (eg \n    subsetting), over Raster* typical data wrangling (eg crop, extend), to more \n    sophisticated (pre-)processing tasks typically applied to satellite imagery \n    (eg atmospheric and topographic correction). This functionality is \n    complemented by a full access to the satellite layers' metadata at any \n    stage and the documentation of performed actions in a separate log file. \n    Currently available sensors include Landsat 4-5 (TM), 7 (ETM+), and 8 \n    (OLI/TIRS Combined), and additional compatibility is ensured for the Landsat \n    Global Land Survey data set. ",
+        "URL": "https://github.com/environmentalinformatics-marburg/satellite",
+        "BugReports": "https://github.com/environmentalinformatics-marburg/satellite/issues",
+        "Depends": "R (>= 2.10), raster, methods, utils, stats, grDevices,\ngraphics",
+        "Imports": "plyr, Rcpp (>= 0.10.3), terra, tools, stats4",
+        "License": "MIT + file LICENSE",
+        "Suggests": "devtools, knitr, testthat, rmarkdown",
+        "LazyData": "true",
+        "VignetteBuilder": "knitr",
+        "LinkingTo": "Rcpp",
+        "RoxygenNote": "7.3.2",
+        "Encoding": "UTF-8",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-08-21 05:21:11 UTC; flowd",
+        "Author": "Thomas Nauss [aut],\n  Hanna Meyer [aut],\n  Tim Appelhans [aut],\n  Florian Detsch [aut, cre]",
+        "Maintainer": "Florian Detsch <fdetsch@web.de>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-08-21 06:10:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 16:07:04 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "scales": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -2937,12 +3219,39 @@
         "Built": "R 4.5.3; ; 2026-06-18 16:35:11 UTC; windows"
       }
     },
+    "servr": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "servr",
+        "Type": "Package",
+        "Title": "A Simple HTTP Server to Serve Static Files or Dynamic Documents",
+        "Version": "0.33",
+        "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\", URL = \"https://yihui.org\")),\n  person(\"Carson\", \"Sievert\", role = \"ctb\"),\n  person(\"Jesse\", \"Anderson\", role = \"ctb\"),\n  person(\"Ramnath\", \"Vaidyanathan\", role = \"ctb\"),\n  person(\"Romain\", \"Lesur\", role = \"ctb\"),\n  person(given = \"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n  person()\n  )",
+        "Description": "Start an HTTP server in R to serve static files, or dynamic\n    documents that can be converted to HTML files (e.g., R Markdown) under a\n    given directory.",
+        "Depends": "R (>= 3.0.0)",
+        "Imports": "mime (>= 0.2), httpuv (>= 1.5.2), xfun (>= 0.58), jsonlite",
+        "Suggests": "tools, later, rstudioapi, knitr (>= 1.9), rmarkdown",
+        "License": "GPL",
+        "URL": "https://github.com/yihui/servr",
+        "BugReports": "https://github.com/yihui/servr/issues",
+        "Encoding": "UTF-8",
+        "Config/roxygen2/version": "8.0.0",
+        "NeedsCompilation": "no",
+        "Packaged": "2026-06-15 20:28:53 UTC; yihui",
+        "Author": "Yihui Xie [aut, cre] (ORCID: <https://orcid.org/0000-0003-0645-5666>,\n    URL: https://yihui.org),\n  Carson Sievert [ctb],\n  Jesse Anderson [ctb],\n  Ramnath Vaidyanathan [ctb],\n  Romain Lesur [ctb],\n  Posit Software, PBC [cph, fnd]",
+        "Maintainer": "Yihui Xie <xie@yihui.name>",
+        "Repository": "CRAN",
+        "Date/Publication": "2026-06-16 05:10:07 UTC",
+        "Built": "R 4.5.3; ; 2026-06-18 16:35:45 UTC; windows"
+      }
+    },
     "sf": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
       "description": {
         "Package": "sf",
-        "Version": "1.1-2",
+        "Version": "1.1-1",
         "Title": "Simple Features for R",
         "Authors@R": "\n    c(person(given = \"Edzer\",\n             family = \"Pebesma\",\n             role = c(\"aut\", \"cre\"),\n             email = \"edzer.pebesma@uni-muenster.de\",\n             comment = c(ORCID = \"0000-0001-8049-7069\")),\n      person(given = \"Roger\",\n             family = \"Bivand\",\n             role = \"ctb\",\n             comment = c(ORCID = \"0000-0003-2392-6140\")),\n      person(given = \"Etienne\",\n             family = \"Racine\",\n             role = \"ctb\"),\n      person(given = \"Michael\",\n             family = \"Sumner\",\n             role = \"ctb\"),\n      person(given = \"Ian\",\n             family = \"Cook\",\n             role = \"ctb\"),\n      person(given = \"Tim\",\n             family = \"Keitt\",\n             role = \"ctb\"),\n      person(given = \"Robin\",\n             family = \"Lovelace\",\n             role = \"ctb\"),\n      person(given = \"Hadley\",\n             family = \"Wickham\",\n             role = \"ctb\"),\n      person(given = \"Jeroen\",\n             family = \"Ooms\",\n             role = \"ctb\",\n             comment = c(ORCID = \"0000-0002-4035-0289\")),\n      person(given = \"Kirill\",\n             family = \"M\\u00fcller\",\n             role = \"ctb\"),\n      person(given = \"Thomas Lin\",\n             family = \"Pedersen\",\n             role = \"ctb\"),\n      person(given = \"Dan\",\n             family = \"Baston\",\n             role = \"ctb\"),\n      person(given = \"Dewey\",\n             family = \"Dunnington\",\n             role = \"ctb\",\n             comment = c(ORCID = \"0000-0002-9415-4582\")),\n      person(given = \"Alexandre\",\n             family = \"Courtiol\",\n             role = \"ctb\",\n             comment = c(ORCID = \"0000-0003-0637-2959\"))\n\t\t\t )",
         "Description": "Support for simple feature access, a standardized way to\n    encode and analyze spatial vector data. Binds to 'GDAL' \n\t<doi:10.5281/zenodo.5884351> for reading and writing data, to 'GEOS'\n    <doi:10.5281/zenodo.11396894> for geometrical operations,\n    and to 'PROJ' <doi:10.5281/zenodo.5884394> for projection\n    conversions and datum transformations. Uses by default the 's2'\n    package for geometry operations on geodetic (long/lat degree)\n\tcoordinates.",
@@ -2961,12 +3270,42 @@
         "Collate": "'RcppExports.R' 'init.R' 'import-standalone-s3-register.R'\n'crs.R' 'bbox.R' 'read.R' 'db.R' 'sfc.R' 'sfg.R' 'sf.R'\n'bind.R' 'wkb.R' 'wkt.R' 'plot.R' 'geom-measures.R'\n'geom-predicates.R' 'geom-transformers.R' 'transform.R'\n'proj.R' 'sp.R' 'grid.R' 'arith.R' 'tidyverse.R'\n'tidyverse-vctrs.R' 'cast_sfg.R' 'cast_sfc.R' 'graticule.R'\n'datasets.R' 'aggregate.R' 'agr.R' 'maps.R' 'join.R' 'sample.R'\n'valid.R' 'collection_extract.R' 'jitter.R' 'sgbp.R'\n'spatstat.R' 'stars.R' 'crop.R' 'gdal_utils.R' 'nearest.R'\n'normalize.R' 'sf-package.R' 'defunct.R' 'z_range.R'\n'm_range.R' 'shift_longitude.R' 'make_grid.R' 's2.R' 'terra.R'\n'geos-overlayng.R' 'break_antimeridian.R'",
         "Config/roxygen2/version": "8.0.0",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-07-22 10:27:49 UTC; edzer",
+        "Packaged": "2026-05-05 13:13:39 UTC; edzer",
         "Author": "Edzer Pebesma [aut, cre] (ORCID:\n    <https://orcid.org/0000-0001-8049-7069>),\n  Roger Bivand [ctb] (ORCID: <https://orcid.org/0000-0003-2392-6140>),\n  Etienne Racine [ctb],\n  Michael Sumner [ctb],\n  Ian Cook [ctb],\n  Tim Keitt [ctb],\n  Robin Lovelace [ctb],\n  Hadley Wickham [ctb],\n  Jeroen Ooms [ctb] (ORCID: <https://orcid.org/0000-0002-4035-0289>),\n  Kirill Müller [ctb],\n  Thomas Lin Pedersen [ctb],\n  Dan Baston [ctb],\n  Dewey Dunnington [ctb] (ORCID: <https://orcid.org/0000-0002-9415-4582>),\n  Alexandre Courtiol [ctb] (ORCID:\n    <https://orcid.org/0000-0003-0637-2959>)",
         "Maintainer": "Edzer Pebesma <edzer.pebesma@uni-muenster.de>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-07-23 05:30:03 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-07-28 15:51:59 UTC; windows",
+        "Date/Publication": "2026-05-06 11:10:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 16:35:02 UTC; windows",
+        "Archs": "x64"
+      }
+    },
+    "sfheaders": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "sfheaders",
+        "Type": "Package",
+        "Title": "Converts Between R Objects and Simple Feature Objects",
+        "Date": "2025-11-24",
+        "Version": "0.4.5",
+        "Authors@R": "c(\n    person(\"David\", \"Cooley\", ,\"david.cooley.au@gmail.com\", role = c(\"aut\", \"cre\")),\n    person(given = \"Michael\", family = \"Sumner\", role = \"ctb\")\n    )",
+        "Description": "Converts between R and Simple Feature 'sf' objects, without depending\n  on the Simple Feature library. Conversion functions are available at both the R level, \n  and through 'Rcpp'.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://dcooley.github.io/sfheaders/",
+        "BugReports": "https://github.com/dcooley/sfheaders/issues",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "Depends": "R (>= 3.0.2)",
+        "LinkingTo": "geometries (>= 0.2.5), Rcpp",
+        "Imports": "Rcpp (>= 1.1.0)",
+        "Suggests": "covr, knitr, testthat",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-11-24 13:15:04 UTC; david",
+        "Author": "David Cooley [aut, cre],\n  Michael Sumner [ctb]",
+        "Maintainer": "David Cooley <david.cooley.au@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-11-25 19:20:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 15:11:37 UTC; windows",
         "Archs": "x64"
       }
     },
@@ -3218,6 +3557,40 @@
         "Repository": "CRAN",
         "Date/Publication": "2025-11-04 14:00:02 UTC",
         "Built": "R 4.5.3; ; 2026-06-18 16:05:43 UTC; windows"
+      }
+    },
+    "svglite": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "svglite",
+        "Title": "An 'SVG' Graphics Device",
+        "Version": "2.2.2",
+        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\"),\n    person(\"Lionel\", \"Henry\", , \"lionel@posit.co\", role = \"aut\"),\n    person(\"Thomas Lin\", \"Pedersen\", , \"thomas.pedersen@posit.co\", role = c(\"cre\", \"aut\"),\n           comment = c(ORCID = \"0000-0002-5147-4711\")),\n    person(\"T Jake\", \"Luciani\", , \"jake@apache.org\", role = \"aut\"),\n    person(\"Matthieu\", \"Decorde\", , \"matthieu.decorde@ens-lyon.fr\", role = \"aut\"),\n    person(\"Vaudor\", \"Lise\", , \"lise.vaudor@ens-lyon.fr\", role = \"aut\"),\n    person(\"Tony\", \"Plate\", role = \"ctb\",\n           comment = \"Early line dashing code\"),\n    person(\"David\", \"Gohel\", role = \"ctb\",\n           comment = \"Line dashing code and early raster code\"),\n    person(\"Yixuan\", \"Qiu\", role = \"ctb\",\n           comment = \"Improved styles; polypath implementation\"),\n    person(\"Håkon\", \"Malmedal\", role = \"ctb\",\n           comment = \"Opacity code\"),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = c(ROR = \"03wc8by49\"))\n  )",
+        "Description": "A graphics device for R that produces 'Scalable Vector\n    Graphics'. 'svglite' is a fork of the older 'RSvgDevice' package.",
+        "License": "GPL (>= 2)",
+        "URL": "https://svglite.r-lib.org, https://github.com/r-lib/svglite",
+        "BugReports": "https://github.com/r-lib/svglite/issues",
+        "Depends": "R (>= 4.1)",
+        "Imports": "base64enc, cli, lifecycle, rlang (>= 1.1.0), systemfonts (>=\n1.3.0), textshaping (>= 0.3.0)",
+        "Suggests": "covr, fontquiver (>= 0.2.0), htmltools, knitr, rmarkdown,\ntestthat (>= 3.0.0), xml2 (>= 1.0.0)",
+        "LinkingTo": "cpp11, systemfonts, textshaping",
+        "VignetteBuilder": "knitr",
+        "Config/build/compilation-database": "true",
+        "Config/Needs/website": "tidyverse/tidytemplate",
+        "Config/testthat/edition": "3",
+        "Config/usethis/last-upkeep": "2025-04-25",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "SystemRequirements": "libpng",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-10-20 15:57:25 UTC; thomas",
+        "Author": "Hadley Wickham [aut],\n  Lionel Henry [aut],\n  Thomas Lin Pedersen [cre, aut] (ORCID:\n    <https://orcid.org/0000-0002-5147-4711>),\n  T Jake Luciani [aut],\n  Matthieu Decorde [aut],\n  Vaudor Lise [aut],\n  Tony Plate [ctb] (Early line dashing code),\n  David Gohel [ctb] (Line dashing code and early raster code),\n  Yixuan Qiu [ctb] (Improved styles; polypath implementation),\n  Håkon Malmedal [ctb] (Opacity code),\n  Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)",
+        "Maintainer": "Thomas Lin Pedersen <thomas.pedersen@posit.co>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-10-21 16:10:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-18 16:05:57 UTC; windows",
+        "Archs": "x64"
       }
     },
     "sys": {
@@ -4049,7 +4422,7 @@
       "checksum": "1d1b95e2a1e59fdf737719b827a8ca46"
     },
     "global.R": {
-      "checksum": "628b7b74bac02469fa1aacc42c55a5fc"
+      "checksum": "8e01fb8d17c48c0539fe33908413f438"
     },
     "server.R": {
       "checksum": "c58bc822a146e38a3ce3cae7d9a7c50d"
