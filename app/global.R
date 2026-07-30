@@ -8,7 +8,7 @@ library(shinyWidgets)
 # packages for spatial visualization on map
 library(leaflet)
 library(leaflet.extras)
-library(mapview)
+
 
 # tools for data processing
 library(sf)
