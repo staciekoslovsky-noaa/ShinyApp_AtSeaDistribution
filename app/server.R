@@ -27,7 +27,6 @@ server <- function(input, output, session) {
   selected_abund <- shiny::reactive({
     selected_abund <- as.numeric(input$abs_abund)
 
-    # If not inputted, set it to 1
     if (is.na(selected_abund) || selected_abund <= 0) {
       selected_abund <- 1
     } else {
@@ -77,7 +76,6 @@ server <- function(input, output, session) {
     
     code <- selected_species_code()
 
-    # File read fallback if not cached yet
     filename <- paste0("data/", code, "_MCMC.RData")
     
     if (!file.exists(filename)) {
@@ -100,11 +98,9 @@ server <- function(input, output, session) {
     if (has_temporal()) {
       debounced_index <- debounced_index()
 
-      # Check if our active timeline index matches a column
       if (!is.null(debounced_index) && (debounced_index %in% colnames(abundance))) {
         spec_data <- abundance[, debounced_index, drop = FALSE]
       } else {
-        # Fallback: Pick the last column (most recent time step)
         last_col <- ncol(abundance)
         spec_data <- abundance[, last_col, drop = FALSE]
       }
@@ -112,14 +108,12 @@ server <- function(input, output, session) {
       spec_data <- abundance
     }
 
-    # Collapse columns if an MCMC draw matrix is present
     if (is.matrix(spec_data) && ncol(spec_data) > 1) {
       final_data <- rowMeans(spec_data, na.rm = TRUE)
     } else {
       final_data <- as.vector(spec_data)
     }
 
-    # Ensure final_data isn't empty before scaling
     shiny::req(final_data)
     
     final_data * selected_abund()
@@ -129,7 +123,6 @@ server <- function(input, output, session) {
     s_data <- scaled_species_data() 
     shiny::req(s_data)
     
-    # Crucial Fix 1: Pass na.rm = TRUE to drop spatial grid cells containing NA values
     raw_breaks <- switch(input$legendselect,
                          "Quintiles"                        = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = TRUE),
                          "Low and High Density Emphasis 1"  = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.1, 0.2, 0.8, 0.9, 0.95, 0.99, 1), na.rm = TRUE),
@@ -137,14 +130,9 @@ server <- function(input, output, session) {
                          "Low Density Emphasis"             = raster::quantile(s_data, probs = c(0, 0.01, 0.05, 0.6, 0.8, 1), na.rm = TRUE),
                          "High Density Emphasis"            = raster::quantile(s_data, probs = c(0, 0.2, 0.4, 0.6, 0.8, 0.95, 0.99, 1), na.rm = TRUE))
 
-    # Crucial Fix 2: Handle tied/duplicated breaks safely
-    # This happens often if your data has massive regions of 0s or identical values
     if (any(duplicated(raw_breaks))) {
-      # Use unique() to drop duplicates, but make sure we preserve the true min and max boundary 
       unique_breaks <- unique(raw_breaks)
       
-      # If dropping duplicates leaves us with too few breaks to build a legend, 
-      # we gently pad them with a tiny jitter that won't outpace the next break sequence
       if (length(unique_breaks) < 2) {
         return(c(min(s_data, na.rm = TRUE), max(s_data, na.rm = TRUE) + 0.0001))
       }

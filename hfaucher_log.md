@@ -662,3 +662,23 @@
 ### 9:00 - Resume
 - Rewriting my resume on Google docs for easier updating and styling
 ### 11:00 - MBTI Session
+
+## July 29th, 2026
+### 9:00 - Informational Interview with Peter
+- super insightful with career options and pathways
+  - helped solidify the pathway I would like to take
+### 10:00 - Project Meeting with Paul
+- Shared my resume with Paul and Stacie to look over
+- Talked about paper, going to work on tomorrow
+### 12:00 - Leadership Panel with Fisheries Student Interns/Fellows
+
+## July 30th, 2026
+### 7:45 - posit::conf(2026)
+- Looking into process for buying pass
+  - Also found another conference that someone is sharing at, so sent a chat to Stacie to see what would be better
+### 8:00 - Resume
+- Making changes Paul and Stacie recommended
+### 8:15 - Tech Memo
+- Adding figures to paper to outline process for generating custom analysis and using application.
+  - Sent Paul an email updating him on the figures
+    - Looks pretty good, need to reword a section.
