@@ -682,3 +682,22 @@
 - Adding figures to paper to outline process for generating custom analysis and using application.
   - Sent Paul an email updating him on the figures
     - Looks pretty good, need to reword a section.
+### 10:00 - App Deployment
+- Working on getting app deployed. 
+  - Had to lock versions of sf and leaflet to earlier versions, as terra (used in both packages) was incomplatible with server version of GDAL
+  - made manifest.json
+  - finally got app to deploy fully, but application was failing to run
+    - to solve tomorrows
+
+## July 31st, 2026
+### 6:55 - Presentation Start
+- Watching Miami and Boulder student presentations!
+### 8:40 - App Deployment
+- Got logs from Stacie and found cause of error
+  - Changed file reference for Species_Codes in global
+    - WORKED!!
+  - App is deployed and running: [text](https://chat.google.com/dm/g9ZdQKAAAAE/XoSDfNoOlLM/XoSDfNoOlLM?cls=10)
+- Need to make documentation for app on Mondays
+### 9:00 - Talk By Dr. Jacobs
+### 10:00 - Presentations Continue
+- More Miami and Boulder student presentations!s
