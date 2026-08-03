@@ -700,4 +700,8 @@
 - Need to make documentation for app on Mondays
 ### 9:00 - Talk By Dr. Jacobs
 ### 10:00 - Presentations Continue
-- More Miami and Boulder student presentations!s
+- More Miami and Boulder student presentations!
+
+## August 3rd, 2026
+### 8:45 - Adding Deployment Documentation
+- Adding commands used to deploy application with some background info

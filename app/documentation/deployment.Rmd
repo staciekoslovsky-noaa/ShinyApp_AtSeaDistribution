@@ -1,0 +1,50 @@
+---
+title: "deployment documentation"
+author: "Haley Faucher"
+date: "2026-08-03"
+---
+
+# Documentation for Deployment Process
+
+```{r}
+renv::init()
+
+lib_dir <- renv::paths$library()
+
+# downgrade raster version for GDAL version matching on server
+url_raster <- "https://packagemanager.posit.co/cran/2024-03-01/bin/windows/contrib/4.3/raster_3.6-26.zip"
+zip_raster <- tempfile(fileext = ".zip")
+download.file(url_raster, zip_raster, mode = "wb")
+unzip(zip_raster, exdir = lib_dir)
+file.remove(zip_raster)
+
+# same as above for terra
+url_terra <- "https://packagemanager.posit.co/cran/2024-03-01/bin/windows/contrib/4.3/terra_1.7-71.zip"
+zip_terra <- tempfile(fileext = ".zip")
+download.file(url_terra, zip_terra, mode = "wb")
+unzip(zip_terra, exdir = lib_dir)
+file.remove(zip_terra)
+
+# same as above for sf
+lib_dir <- renv::paths$library()
+binary_url <- "https://packagemanager.posit.co/cran/2024-03-01/bin/windows/contrib/4.3/sf_1.0-15.zip"
+temp_zip <- tempfile(fileext = ".zip")
+download.file(binary_url, temp_zip, mode = "wb")
+unzip(temp_zip, exdir = lib_dir)
+file.remove(temp_zip)
+
+
+renv::snapshot()
+
+# add following line to top of .Rprofile file
+options(repos = c(CRAN = "https://packagemanager.posit.co/cran/latest"))
+
+rsconnect::writeManifest() # to write manifest.json file needed for Posit deployment
+
+```
+
+## Errors Encountered
+After deployment, the Shiny application was failing to run, due to Linux being case-sensitive, but not Windows? Species_codes.csv was called as Species_Codes.csv. Once these matched, app deployed and ran as expected.
+
+## After Code Cell
+After running provided code cell, commit and push changes to main branch. Deploy using Git Connect of Posit GUI.
